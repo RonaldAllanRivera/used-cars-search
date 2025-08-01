@@ -1,5 +1,5 @@
 // compare.js
-// Handles the logic for the new compare feature.
+// Handles the logic for the new compare feature in Used Cars Search.
 
 document.addEventListener('DOMContentLoaded', () => {
     const MAX_COMPARE_ITEMS = 4;
@@ -7,36 +7,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Create the compare bar container
     const compareBar = document.createElement('div');
-    compareBar.id = 'pais-compare-bar';
-    compareBar.className = 'pais-compare-bar-hidden';
+    compareBar.id = 'ucs-compare-bar';
+    compareBar.className = 'ucs-compare-bar-hidden';
     document.body.appendChild(compareBar);
 
     function updateCompareBar() {
         if (compareItems.length === 0) {
-            compareBar.classList.add('pais-compare-bar-hidden');
+            compareBar.classList.add('ucs-compare-bar-hidden');
             return;
         }
 
         const itemsHtml = compareItems.map(item => 
-            `<span class="pais-compare-item">${item.title} <button class="pais-remove-from-compare" data-post-id="${item.id}">×</button></span>`
+            `<span class="ucs-compare-item">${item.title} <button class="ucs-remove-from-compare" data-post-id="${item.id}">×</button></span>`
         ).join('');
 
         compareBar.innerHTML = `
-            <div class="pais-compare-bar-content">
-                <span class="pais-compare-title">Compare Items:</span>
-                <div class="pais-compare-items-list">${itemsHtml}</div>
-                <div class="pais-compare-actions">
-                    <button id="pais-compare-action-btn" class="pais-button">Compare (${compareItems.length})</button>
-                    <button id="pais-clear-compare-btn" class="pais-button">Clear</button>
+            <div class="ucs-compare-bar-content">
+                <span class="ucs-compare-title">Compare Vehicles:</span>
+                <div class="ucs-compare-items-list">${itemsHtml}</div>
+                <div class="ucs-compare-actions">
+                    <button id="ucs-compare-action-btn" class="ucs-button">Compare (${compareItems.length})</button>
+                    <button id="ucs-clear-compare-btn" class="ucs-button">Clear</button>
                 </div>
             </div>
         `;
-        compareBar.classList.remove('pais-compare-bar-hidden');
+        compareBar.classList.remove('ucs-compare-bar-hidden');
 
         // Add event listeners for new buttons in the bar
-        document.getElementById('pais-clear-compare-btn').addEventListener('click', clearCompareList);
-        document.getElementById('pais-compare-action-btn').addEventListener('click', redirectToComparePage);
-        document.querySelectorAll('.pais-remove-from-compare').forEach(button => {
+        document.getElementById('ucs-clear-compare-btn').addEventListener('click', clearCompareList);
+        document.getElementById('ucs-compare-action-btn').addEventListener('click', redirectToComparePage);
+        document.querySelectorAll('.ucs-remove-from-compare').forEach(button => {
             button.addEventListener('click', (e) => {
                 const postId = e.target.getAttribute('data-post-id');
                 handleCompareClick(postId, null, e.target);
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function redirectToComparePage() {
         if (compareItems.length > 0) {
-            const baseUrl = window.pais_vars.compare_page_url || '/compare/';
+            const baseUrl = window.ucs_vars.compare_page_url || '/compare-vehicles/';
             const compareUrl = new URL(baseUrl);
             compareUrl.searchParams.set('compare_ids', compareItems.map(item => item.id).join(','));
             window.location.href = compareUrl.href;
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Update all buttons for this post ID
-        document.querySelectorAll(`.pais-compare-btn[data-post-id="${postId}"]`).forEach(btn => {
+        document.querySelectorAll(`.ucs-compare-btn[data-post-id="${postId}"]`).forEach(btn => {
             btn.textContent = existingIndex > -1 ? 'Compare' : 'Remove';
         });
 
@@ -80,17 +80,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function clearCompareList() {
         compareItems = [];
-        document.querySelectorAll('.pais-compare-btn').forEach(button => {
+        document.querySelectorAll('.ucs-compare-btn').forEach(button => {
             button.textContent = 'Compare';
         });
         updateCompareBar();
     }
 
     // Use event delegation on the results container
-    const resultsContainer = document.getElementById('pais-results');
+    const resultsContainer = document.getElementById('ucs-results');
     if (resultsContainer) {
         resultsContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('pais-compare-btn')) {
+            if (e.target.classList.contains('ucs-compare-btn')) {
                 const postId = e.target.getAttribute('data-post-id');
                 const postTitle = e.target.getAttribute('data-post-title');
                 handleCompareClick(postId, postTitle, e.target);

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [1.3.0] - 2025-07-15
 
 ### Added
-- **Software Comparison Feature**: Users can now select up to four software items from the search results and compare them side-by-side on a dedicated page.
+- **Used Cars Comparison Feature**: Users can now select up to four Used Cars Search items from the search results and compare them side-by-side on a dedicated page.
 - **Configurable Compare Page**: A new setting in the admin panel allows administrators to select any existing WordPress page to serve as the compare page.
 - **Floating Compare Bar**: A responsive, floating bar appears at the bottom of the screen when items are selected, showing the current selections and providing a "Compare" button.
 
@@ -21,13 +21,13 @@ All notable changes to this project will be documented in this file.
 ## [1.1.0] - 2025-07-15
 
 ### Added
-- **Compare Feature**: Users can now select up to four software items to compare on a dedicated page.
+- **Compare Feature**: Users can now select up to four Used Cars Search items to compare on a dedicated page.
 - A floating compare bar for easy access to selected items and the comparison page.
-- New shortcode `[pais_compare_page]` to render the comparison table.
+- New shortcode `[ucs_compare_page]` to render the comparison table.
 - Responsive styles for the new comparison table.
 
 ### Changed
-- Updated the admin dashboard and dashboard widget to include information about the new `[pais_compare_page]` shortcode.
+- Updated the admin dashboard and dashboard widget to include information about the new `[ucs_compare_page]` shortcode.
 
 ## [1.0.0] - Initial Release
 
@@ -124,7 +124,7 @@ All notable changes to this project will be documented here.
 ### Added
 - Dashboard Summary Widget: Now visible on both the WordPress Dashboard and the plugin’s admin page.
   - Shows total published posts, total star ratings, average rating, and total approved comments.
-  - Includes a usage tip for displaying the search UI with the `[popular_ai_software_search]` shortcode.
+  - Includes a usage tip for displaying the search UI with the `[used_cars_search]` shortcode.
 - Refactored admin code into a dedicated `admin.php` file for better maintainability.
 
 ## [0.1.3] - 2025-07-01
@@ -140,7 +140,7 @@ All notable changes to this project will be documented here.
 - Visual polish for ratings table and single post UX.
 
 ### Technical
-- Uses `pais_vars.rest_url` (localized via PHP) in all frontend JS for reliable API routing.
+- Uses `ucs_vars.rest_url` (localized via PHP) in all frontend JS for reliable API routing.
 
 ## [0.1.2] - 2025-06-25
 

@@ -12,7 +12,7 @@ function render_compare_page() {
     $compare_ids = array_filter(array_map('intval', explode(',', $compare_ids_str)));
 
     if (empty($compare_ids)) {
-        echo '<div class="pais-compare-page"><p>No items selected for comparison. Please go back and select up to 4 items.</p></div>';
+        echo '<div class="ucs-compare-page"><p>No items selected for comparison. Please go back and select up to 4 items.</p></div>';
         return ob_get_clean();
     }
 
@@ -30,7 +30,7 @@ function render_compare_page() {
         while ($query->have_posts()) {
             $query->the_post();
             $post_id = get_the_ID();
-            $rating = pais_get_rating_for_post($post_id);
+            $rating = ucs_get_rating_for_post($post_id);
             $posts_data[$post_id] = [
                 'title' => get_the_title(),
                 'permalink' => get_permalink(),
@@ -46,27 +46,27 @@ function render_compare_page() {
     }
 
     ?>
-    <div class="pais-compare-page">
-        <h1>Compare AI Software</h1>
+    <div class="ucs-compare-page">
+        <h1>Compare Used Cars</h1>
         <?php if (!empty($posts_data)): ?>
-            <div class="pais-results-grid pais-compare-grid">
+            <div class="ucs-results-grid ucs-compare-grid">
                 <?php foreach ($posts_data as $post): ?>
-                    <div class="pais-result-item">
+                    <div class="ucs-result-item">
                         <h3><a href="<?php echo esc_url($post['permalink']); ?>" target="_blank"><?php echo esc_html($post['title']); ?></a></h3>
-                        <p class="pais-excerpt"><?php echo esc_html($post['excerpt']); ?></p>
-                        <div class="pais-result-meta">
-                             <div class="pais-category"><?php echo $post['category']; ?></div>
-                             <div class="pais-rating">
+                        <p class="ucs-excerpt"><?php echo esc_html($post['excerpt']); ?></p>
+                        <div class="ucs-result-meta">
+                            <div class="ucs-category"><?php echo $post['category']; ?></div>
+                            <div class="ucs-rating">
                                 <?php if ($post['votes'] > 0): ?>
                                     <span class="star-rating">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
                                             <span class="dashicons dashicons-star-<?php echo ($i <= round($post['rating'])) ? 'filled' : 'empty'; ?>"></span>
                                         <?php endfor; ?>
                                     </span>
-                                    <span class="pais-votes">(<?php echo esc_html($post['votes']); ?>)</span>
+                                    <span class="ucs-votes">(<?php echo esc_html($post['votes']); ?>)</span>
                                 <?php endif; ?>
                             </div>
-                            <div class="pais-comments"><span class="dashicons dashicons-admin-comments"></span> <?php echo esc_html($post['comments']); ?></div>
+                            <div class="ucs-comments"><span class="dashicons dashicons-admin-comments"></span> <?php echo esc_html($post['comments']); ?></div>
                         </div>
                     </div>
                 <?php endforeach; ?>

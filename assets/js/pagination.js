@@ -7,19 +7,19 @@ export function setupPagination(container, state, onPageChange) {
     // Create pagination elements if they don't exist
     if (!pagination) {
         pagination = document.createElement('div');
-        pagination.id = 'pais-pagination';
+        pagination.id = 'ucs-pagination';
         container.appendChild(pagination);
     }
     // Always update the inner HTML to ensure we have the latest state
     pagination.innerHTML = `
-        <div class="pais-pagination-inner">
-            <button id="pais-prev" class="pais-pagination-btn" disabled aria-label="Previous page" title="Previous page">
+        <div class="ucs-pagination-inner">
+            <button id="ucs-prev" class="ucs-pagination-btn" disabled aria-label="Previous page" title="Previous page">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
                 </svg>
             </button>
-            <span id="pais-page-info" class="pais-page-info">Page ${state.currentPage} of ${state.maxPages}</span>
-            <button id="pais-next" class="pais-pagination-btn" disabled aria-label="Next page" title="Next page">
+            <span id="ucs-page-info" class="ucs-page-info">Page ${state.currentPage} of ${state.maxPages}</span>
+            <button id="ucs-next" class="ucs-pagination-btn" disabled aria-label="Next page" title="Next page">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
                 </svg>
@@ -27,9 +27,9 @@ export function setupPagination(container, state, onPageChange) {
         </div>
     `;
     // Cache elements
-    pageInfo = document.getElementById('pais-page-info');
-    prevBtn = document.getElementById('pais-prev');
-    nextBtn = document.getElementById('pais-next');
+    pageInfo = document.getElementById('ucs-page-info');
+    prevBtn = document.getElementById('ucs-prev');
+    nextBtn = document.getElementById('ucs-next');
     // Add event listeners if elements exist
     if (prevBtn) {
         prevBtn.onclick = function(e) {

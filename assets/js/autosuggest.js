@@ -12,7 +12,7 @@ export function setupAutosuggest(keywordInput, autosuggestDiv, fetchResults, res
         autosuggestDiv.innerHTML = '';
         if (value.length < 2) return;
         autosuggestTimeout = setTimeout(() => {
-            fetch(`${restUrl}popularai/v1/autosuggest?q=${encodeURIComponent(value)}`)
+            fetch(`${restUrl}usedcars/v1/autosuggest?q=${encodeURIComponent(value)}`)
                 .then(res => res.json())
                 .then(words => {
                     if (!words.length) return;

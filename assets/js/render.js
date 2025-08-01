@@ -1,5 +1,5 @@
 // render.js
-// Handles rendering of search results (list, grid)
+// Handles rendering of used cars search results (list, grid)
 
 // Helper function to sort posts
 function sortPosts(posts, sortBy, sortOrder = 'asc') {
@@ -58,13 +58,13 @@ export function renderResults(container, data, state) {
     const postsToRender = (data?.posts && data.posts.length > 0) ? data.posts : [];
     
     if (!postsToRender.length) {
-        container.innerHTML = '<div class="pais-no-results">No results found. Try adjusting your search criteria.</div>';
+        container.innerHTML = '<div class="ucs-no-results">No results found. Try adjusting your search criteria.</div>';
         return;
     }
     
     // Get current sort state
-    const sortBy = window.paisLastSortBy || currentSortState.sortBy;
-    const sortOrder = window.paisLastSortOrder || currentSortState.sortOrder;
+    const sortBy = window.ucsLastSortBy || currentSortState.sortBy;
+    const sortOrder = window.ucsLastSortOrder || currentSortState.sortOrder;
     
     // Update current sort state
     currentSortState = { sortBy, sortOrder };
@@ -77,35 +77,35 @@ export function renderResults(container, data, state) {
     
     if (state.selectedView === 'list') {
         if (isMobile) {
-            let html = '<div class="pais-results-list">';
+            let html = '<div class="ucs-results-list">';
             sortedPosts.forEach(post => {
                 const categories = post.category ? post.category.split(',').map(cat => cat.trim()) : [];
                 let rating = '';
                 if (post.rating > 0) {
                     const filledStars = '★'.repeat(Math.round(post.rating));
                     const emptyStars = '☆'.repeat(5 - Math.round(post.rating));
-                    rating = `<div class=\"pais-rating\"><span class=\"pais-rating-stars\" title=\"${post.rating} out of 5\">${filledStars}${emptyStars}</span><span class=\"pais-rating-count\">(${post.votes || 0})</span></div>`;
+                    rating = `<div class="ucs-rating"><span class="ucs-rating-stars" title="${post.rating} out of 5">${filledStars}${emptyStars}</span><span class="ucs-rating-count">(${post.votes || 0})</span></div>`;
                 } else {
-                    rating = '<div class="pais-rating">No ratings</div>';
+                    rating = '<div class="ucs-rating">No ratings</div>';
                 }
-                html += `<div class=\"pais-mobile-list-item\"><h4><a href=\"${post.permalink}\" target=\"_blank\" rel=\"noopener\">${post.title}</a></h4><p>${post.excerpt || 'No description available'}</p>${rating}${categories.length ? `<div class=\"pais-categories\">${categories.map(cat => `<span class=\"pais-category-tag\">${cat}</span>`).join('')}</div>` : ''}<div class=\"pais-actions\"><a href=\"${post.permalink}\" class=\"pais-button\" target=\"_blank\" rel=\"noopener\">View</a>${post.website ? `<a href=\"${post.website}\" class=\"pais-button\" target=\"_blank\" rel=\"noopener nofollow\">Website</a>` : ''}<button class=\"pais-compare-btn pais-button\" data-post-id=\"${post.ID}\" data-post-title=\"${post.title}\">Compare</button>${post.comments > 0 ? `<a href=\"${post.permalink}#comments\" class=\"pais-comment-link\" target=\"_blank\" rel=\"noopener\">💬 ${post.comments}</a>` : ''}</div></div>`;
+                html += `<div class="ucs-mobile-list-item"><h4><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h4><p>${post.excerpt || 'No description available'}</p>${rating}${categories.length ? `<div class="ucs-categories">${categories.map(cat => `<span class="ucs-category-tag">${cat}</span>`).join('')}</div>` : ''}<div class="ucs-actions"><a href="${post.permalink}" class="ucs-button" target="_blank" rel="noopener">View</a>${post.website ? `<a href="${post.website}" class="ucs-button" target="_blank" rel="noopener nofollow">Website</a>` : ''}<button class="ucs-compare-btn ucs-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>${post.comments > 0 ? `<a href="${post.permalink}#comments" class="ucs-comment-link" target="_blank" rel="noopener">💬 ${post.comments}</a>` : ''}</div></div>`;
             });
             html += '</div>';
             container.innerHTML = html;
         } else {
-            let html = `<table class="pais-results-table"><thead><tr><th class="pais-sort-th" data-sort="title">TITLE <span class="pais-sort-icon">${sortBy === 'title' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th>SUMMARY</th><th class="pais-sort-th" data-sort="category">CATEGORIES <span class="pais-sort-icon">${sortBy === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th class="pais-sort-th" data-sort="date">DATE <span class="pais-sort-icon">${sortBy === 'date' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="pais-sort-th" data-sort="rating">RATING <span class="pais-sort-icon">${sortBy === 'rating' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="pais-sort-th" data-sort="comments">COMMENTS <span class="pais-sort-icon">${sortBy === 'comments' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th>ACTIONS</th></tr></thead><tbody>`;
+            let html = `<table class="ucs-results-table"><thead><tr><th class="ucs-sort-th" data-sort="title">TITLE <span class="ucs-sort-icon">${sortBy === 'title' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th>SUMMARY</th><th class="ucs-sort-th" data-sort="category">CATEGORIES <span class="ucs-sort-icon">${sortBy === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th class="ucs-sort-th" data-sort="date">DATE <span class="ucs-sort-icon">${sortBy === 'date' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="rating">RATING <span class="ucs-sort-icon">${sortBy === 'rating' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="comments">COMMENTS <span class="ucs-sort-icon">${sortBy === 'comments' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th>ACTIONS</th></tr></thead><tbody>`;
             sortedPosts.forEach(post => {
                 const categories = post.category ? 
                     post.category.split(',').map(cat => {
                         const trimmedCat = cat.trim();
-                        return `<span class="pais-category-tag" data-category="${encodeURIComponent(trimmedCat)}">${trimmedCat}</span>`;
+                        return `<span class="ucs-category-tag" data-category="${encodeURIComponent(trimmedCat)}">${trimmedCat}</span>`;
                     }).join('') : '—';
                 
                 let rating = '—';
                 if (post.rating > 0) {
                     const filledStars = '★'.repeat(Math.round(post.rating));
                     const emptyStars = '☆'.repeat(5 - Math.round(post.rating));
-                    rating = `<div class="pais-rating"><span class="pais-rating-stars" title="${post.rating} out of 5">${filledStars}${emptyStars}</span><span class="pais-rating-count">(${post.votes || 0})</span></div>`;
+                    rating = `<div class="ucs-rating"><span class="ucs-rating-stars" title="${post.rating} out of 5">${filledStars}${emptyStars}</span><span class="ucs-rating-count">(${post.votes || 0})</span></div>`;
                 }
                 const date = post.date ? new Date(post.date).toLocaleDateString() : '—';
                 html += `
@@ -115,11 +115,11 @@ export function renderResults(container, data, state) {
                         <td data-label="Categories">${categories || '—'}</td>
                         <td data-label="Date">${date}</td>
                         <td data-label="Rating">${rating}</td>
-                        <td data-label="Comments" class="pais-nowrap">${post.comments > 0 ? `<a href="${post.permalink}#comments" class="pais-comment-link" target="_blank" rel="noopener">${post.comments}</a>` : '—'}</td>
-                        <td data-label="Actions" class="pais-nowrap">
-                            <a href="${post.permalink}" class="pais-button" target="_blank" rel="noopener">View</a>
-                            ${post.website ? `<a href="${post.website}" class="pais-button" target="_blank" rel="noopener nofollow">Website</a>` : ''}
-                            <button class="pais-compare-btn pais-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>
+                        <td data-label="Comments" class="ucs-nowrap">${post.comments > 0 ? `<a href="${post.permalink}#comments" class="ucs-comment-link" target="_blank" rel="noopener">${post.comments}</a>` : '—'}</td>
+                        <td data-label="Actions" class="ucs-nowrap">
+                            <a href="${post.permalink}" class="ucs-button" target="_blank" rel="noopener">View</a>
+                            ${post.website ? `<a href="${post.website}" class="ucs-button" target="_blank" rel="noopener nofollow">Website</a>` : ''}
+                            <button class="ucs-compare-btn ucs-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>
                         </td>
                     </tr>`;
             });
@@ -127,7 +127,7 @@ export function renderResults(container, data, state) {
             container.innerHTML = html;
 
             // Add sort event listeners
-            document.querySelectorAll('.pais-sort-th').forEach(th => {
+            document.querySelectorAll('.ucs-sort-th').forEach(th => {
                 th.style.cursor = 'pointer';
                 th.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -137,13 +137,13 @@ export function renderResults(container, data, state) {
                     let sortOrder = 'asc';
                     
                     // Toggle sort order if clicking the same column
-                    if (window.paisLastSortBy === sortBy) {
-                        sortOrder = window.paisLastSortOrder === 'asc' ? 'desc' : 'asc';
+                    if (window.ucsLastSortBy === sortBy) {
+                        sortOrder = window.ucsLastSortOrder === 'asc' ? 'desc' : 'asc';
                     }
                     
                     // Update sort state
-                    window.paisLastSortBy = sortBy;
-                    window.paisLastSortOrder = sortOrder;
+                    window.ucsLastSortBy = sortBy;
+                    window.ucsLastSortOrder = sortOrder;
                     
                     // Re-render the results with the new sort order
                     renderResults(container, data, state);
@@ -151,12 +151,12 @@ export function renderResults(container, data, state) {
             });
 
             // Add click handler for category tags
-            document.querySelectorAll('.pais-category-tag').forEach(tag => {
+            document.querySelectorAll('.ucs-category-tag').forEach(tag => {
                 tag.addEventListener('click', function(e) {
                     e.preventDefault();
                     const category = this.getAttribute('data-category');
                     if (category) {
-                        const categorySelect = document.getElementById('pais-category');
+                        const categorySelect = document.getElementById('ucs-category');
                         if (categorySelect) {
                             categorySelect.value = category;
                             const event = new Event('change');
@@ -166,12 +166,12 @@ export function renderResults(container, data, state) {
                 });
             });
 
-            if (window.paisLastSortBy) {
-                const th = container.querySelector(`.pais-sort-th[data-sort=\"${window.paisLastSortBy}\"]`);
+            if (window.ucsLastSortBy) {
+                const th = container.querySelector(`.ucs-sort-th[data-sort=\"${window.ucsLastSortBy}\"]`);
                 if (th) {
-                    const icon = th.querySelector('.pais-sort-icon');
+                    const icon = th.querySelector('.ucs-sort-icon');
                     if (icon) {
-                        icon.textContent = window.paisLastSortOrder === 'asc' ? '↑' : '↓';
+                        icon.textContent = window.ucsLastSortOrder === 'asc' ? '↑' : '↓';
                     }
                 }
             }
@@ -183,11 +183,11 @@ export function renderResults(container, data, state) {
             if (post.rating > 0) {
                 const fullStars = '★'.repeat(Math.round(post.rating));
                 const emptyStars = '☆'.repeat(5 - Math.round(post.rating));
-                ratingStars = `<div class=\"pais-rating\"><span class=\"pais-rating-stars\" title=\"${post.rating} out of 5\">${fullStars}${emptyStars}</span><span class=\"pais-rating-count\">(${post.votes || 0})</span></div>`;
+                ratingStars = `<div class="ucs-rating"><span class="ucs-rating-stars" title="${post.rating} out of 5">${fullStars}${emptyStars}</span><span class="ucs-rating-count">(${post.votes || 0})</span></div>`;
             }
-            const categories = post.category ? post.category.split(',').map(cat => `<span class=\"pais-category-tag\">${cat.trim()}</span>`).join('') : '—';
-            return `<div class=\"pais-result-item\"><h3><a href=\"${post.permalink}\" target=\"_blank\" rel=\"noopener\">${post.title}</a></h3><p>${post.excerpt || 'No description available'}</p><div class=\"pais-result-meta\"><span>${categories}</span>${ratingStars}${post.comments > 0 ? `<span class=\"pais-comment-count\">💬 ${post.comments}</span>` : ''}</div></div>`;
+            const categories = post.category ? post.category.split(',').map(cat => `<span class="ucs-category-tag">${cat.trim()}</span>`).join('') : '—';
+            return `<div class="ucs-result-item"><h3><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h3><p>${post.excerpt || 'No description available'}</p><div class="ucs-result-meta"><span>${categories}</span>${ratingStars}${post.comments > 0 ? `<span class="ucs-comment-count">💬 ${post.comments}</span>` : ''}</div></div>`;
         }).join('');
-        container.innerHTML = `<div class=\"pais-results-grid\">${gridItems}</div>`;
+        container.innerHTML = `<div class="ucs-results-grid">${gridItems}</div>`;
     }
 }

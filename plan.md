@@ -1,7 +1,7 @@
-# Compare Feature Plan for Popular AI Software Search Plugin
+# Compare Feature Plan for Used Cars Search Plugin
 
 ## Objective
-Add a "compare" feature to the plugin, allowing users to select multiple AI software entries from the list view and compare them on a dedicated page. The design must use the current CSS and be implemented with vanilla JS and PHP only. Each new file should be under 200 lines.
+Add a "compare" feature to the plugin, allowing users to select multiple used cars search entries from the list view and compare them on a dedicated page. The design must use the current CSS and be implemented with vanilla JS and PHP only. Each new file should be under 200 lines.
 
 ## Steps
 
@@ -25,7 +25,6 @@ If possible, do not edit any working scripts now, create a new files.
    - Add a "Remove from Compare" button to each row's action column in the grid view.
    - Add a "Clear Compare" button to the compare page.
    - Add a "Compare" button to the compare page that opens a new tab with the compare page.
-   - Add a "Compare" button to the compare page that opens a new tab with the compare page.
    - Compare page should have similar layout with the search grid view
 
 4. **JS Logic**
@@ -34,7 +33,7 @@ If possible, do not edit any working scripts now, create a new files.
    - Only allow 4 items to be compared at a time.
    - If more than 4 items are added to the compare list, show a message to the user.
    - If less than 4 items are added to the compare list, show a message to the user.
-   - 4 becuase you are following the 4 column layout of the search grid view
+   - 4 because you are following the 4 column layout of the search grid view
 
 5. **Testing & Docs**
    - Ensure everything works on desktop and mobile.

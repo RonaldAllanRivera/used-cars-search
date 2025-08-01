@@ -19,18 +19,18 @@ export function setupViewToggle(root, state, onViewChange) {
     console.log('Setting up view toggle');
     
     // Create container for view toggle if it doesn't exist
-    let viewToggle = document.querySelector('.pais-view-toggle');
+    let viewToggle = document.querySelector('.ucs-view-toggle');
     
     if (!viewToggle) {
         viewToggle = document.createElement('div');
-        viewToggle.className = 'pais-view-toggle';
+        viewToggle.className = 'ucs-view-toggle';
         viewToggle.style.display = 'flex';
         viewToggle.style.gap = '0.5rem';
         viewToggle.style.margin = '0.5rem 0';
         
         // Try to find the search form or results div to insert after
-        const searchForm = document.getElementById('pais-search-form');
-        const resultsDiv = document.getElementById('pais-results');
+        const searchForm = document.getElementById('ucs-search-form');
+        const resultsDiv = document.getElementById('ucs-results');
         
         // Insert the toggle after the search form if it exists, otherwise before the results
         if (searchForm) {
@@ -51,20 +51,20 @@ export function setupViewToggle(root, state, onViewChange) {
     
     // Set the inner HTML for the view toggle buttons
     viewToggle.innerHTML = `
-        <button id="pais-view-grid" class="pais-view-btn ${state.selectedView === 'grid' ? 'active' : ''}" aria-label="Grid view" title="Grid view">
+        <button id="ucs-view-grid" class="ucs-view-btn ${state.selectedView === 'grid' ? 'active' : ''}" aria-label="Grid view" title="Grid view">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z"/>
             </svg>
         </button>
-        <button id="pais-view-list" class="pais-view-btn ${state.selectedView === 'list' ? 'active' : ''}" aria-label="List view" title="List view">
+        <button id="ucs-view-list" class="ucs-view-btn ${state.selectedView === 'list' ? 'active' : ''}" aria-label="List view" title="List view">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
             </svg>
         </button>
     `;
     
-    const gridBtn = viewToggle.querySelector('#pais-view-grid');
-    const listBtn = viewToggle.querySelector('#pais-view-list');
+    const gridBtn = viewToggle.querySelector('#ucs-view-grid');
+    const listBtn = viewToggle.querySelector('#ucs-view-list');
     
     // Only add event listeners if not on mobile
     if (!initialIsMobile) {
@@ -107,8 +107,8 @@ window.addEventListener('resize', function() {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(function() {
         if (window.paisSearchState && window.paisSearchState.lastData) {
-            const gridBtn = document.getElementById('pais-view-grid');
-            const listBtn = document.getElementById('pais-view-list');
+            const gridBtn = document.getElementById('ucs-view-grid');
+            const listBtn = document.getElementById('ucs-view-list');
             updateViewForMobile(window.paisSearchState, gridBtn, listBtn);
             if (window.paisSearchResultsDiv && window.renderResults) {
                 window.renderResults(window.paisSearchResultsDiv, window.paisSearchState.lastData, window.paisSearchState);

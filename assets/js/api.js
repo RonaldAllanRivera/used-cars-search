@@ -38,7 +38,7 @@ export async function fetchResults({
         params.append('category', category);
     }
     
-    const url = `${restUrl}popularai/v1/search?${params.toString()}`;
+    const url = `${restUrl}usedcars/v1/search?${params.toString()}`;
     console.log('Fetching from URL:', url);
     console.log('Query parameters:', params.toString());
 
@@ -66,7 +66,7 @@ export async function fetchResults({
 }
 
 export async function loadCategories(restUrl) {
-    const url = `${restUrl}popularai/v1/categories`;
+    const url = `${restUrl}usedcars/v1/categories`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('Failed to fetch categories');
     return res.json();

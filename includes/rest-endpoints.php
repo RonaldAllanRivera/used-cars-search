@@ -4,9 +4,9 @@ if (!defined('ABSPATH')) exit;
 add_action('rest_api_init', function() {
 
     // --- Search Endpoint ---
-    register_rest_route('popularai/v1', '/search', [
+    register_rest_route('usedcars/v1', '/search', [
         'methods' => 'GET',
-        'callback' => 'pais_rest_search',
+        'callback' => 'ucs_rest_search',
         'permission_callback' => '__return_true',
         'args' => [
             'keyword' => ['required' => false],
@@ -19,9 +19,9 @@ add_action('rest_api_init', function() {
     ]);
 
     // --- Autosuggest Endpoint ---
-    register_rest_route('popularai/v1', '/autosuggest', [
+    register_rest_route('usedcars/v1', '/autosuggest', [
         'methods' => 'GET',
-        'callback' => 'pais_rest_autosuggest',
+        'callback' => 'ucs_rest_autosuggest',
         'permission_callback' => '__return_true',
         'args' => [
             'q' => ['required' => false],
@@ -30,7 +30,7 @@ add_action('rest_api_init', function() {
 });
 
 // --- Search Callback ---
-function pais_rest_search($request) {
+function ucs_rest_search($request) {
         // 1. Setup WP_Query arguments for efficient, paginated search
     $args = [
         'post_type'      => 'post',
@@ -39,7 +39,7 @@ function pais_rest_search($request) {
         'orderby'        => sanitize_text_field($request['orderby']),
         'order'          => sanitize_text_field($request['order']),
         'post_status'    => 'publish',
-        'pais_safe_search' => true, // Custom flag to activate our new safe performance filter
+        'ucs_safe_search' => true, // Custom flag to activate our new safe performance filter
     ];
 
     // 2. Add category and keyword filters if they exist
@@ -60,7 +60,7 @@ function pais_rest_search($request) {
 
     // 5. Format the results
     $posts = array_map(function($post) {
-        $rating = pais_get_rating_for_post($post->ID);
+        $rating = ucs_get_rating_for_post($post->ID);
         return [
             'ID'        => $post->ID,
             'title'     => get_the_title($post),
@@ -86,9 +86,9 @@ function pais_rest_search($request) {
 
 
 // --- Autosuggest Callback ---
-function pais_rest_autosuggest($request) {
+function ucs_rest_autosuggest($request) {
     $q = strtolower(sanitize_text_field($request['q']));
-    $stopwords = pais_get_stopwords();
+    $stopwords = ucs_get_stopwords();
     global $wpdb;
     $sql = $wpdb->prepare("SELECT post_title FROM $wpdb->posts WHERE post_status = 'publish' AND post_type = 'post' LIMIT 3000");
     $results = $wpdb->get_results($sql);
@@ -108,15 +108,15 @@ function pais_rest_autosuggest($request) {
 }
 
 // --- Helper: Get stopwords as array ---
-function pais_get_stopwords() {
-    $raw = get_option('pais_stopwords', 'the,an,and,or,but,if,then,so,for,of,on,at,by,with,a');
+function ucs_get_stopwords() {
+    $raw = get_option('ucs_stopwords', 'the,an,and,or,but,if,then,so,for,of,on,at,by,with,a');
     $stopwords = array_map('trim', explode(',', strtolower($raw)));
     return array_filter($stopwords);
 }
 
 
 add_action('rest_api_init', function() {
-    register_rest_route('popularai/v1', '/rate', array(
+    register_rest_route('usedcars/v1', '/rate', array(
         'methods' => 'POST',
         'callback' => function($request) {
             global $wpdb;
@@ -128,7 +128,7 @@ add_action('rest_api_init', function() {
                 return new WP_Error('invalid', 'Invalid rating or post.', ['status' => 400]);
             }
 
-            $table = $wpdb->prefix . 'pais_ratings';
+            $table = $wpdb->prefix . 'ucs_ratings';
             // Optionally: prevent duplicate voting by IP for this post
             $existing = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE post_id=%d AND ip=%s", $post_id, $ip));
             if ($existing) {
@@ -147,9 +147,9 @@ add_action('rest_api_init', function() {
 });
 
 
-function pais_get_rating_for_post($post_id) {
+function ucs_get_rating_for_post($post_id) {
     global $wpdb;
-    $table = $wpdb->prefix . 'pais_ratings';
+    $table = $wpdb->prefix . 'ucs_ratings';
     $result = $wpdb->get_row($wpdb->prepare(
         "SELECT AVG(rating) as avg_rating, COUNT(*) as rating_count FROM $table WHERE post_id = %d",
         $post_id
@@ -166,7 +166,7 @@ function pais_get_rating_for_post($post_id) {
 }
 
 // Get categories with post count
-function pais_get_categories_with_count() {
+function ucs_get_categories_with_count() {
     $categories = get_categories([
         'hide_empty' => true, // Only show categories with posts
         'orderby' => 'name',
@@ -188,19 +188,19 @@ function pais_get_categories_with_count() {
 
 // Add categories with post count endpoint
 add_action('rest_api_init', function() {
-    register_rest_route('popularai/v1', '/categories', [
+    register_rest_route('usedcars/v1', '/categories', [
         'methods' => 'GET',
-        'callback' => 'pais_get_categories_with_count',
+        'callback' => 'ucs_get_categories_with_count',
         'permission_callback' => '__return_true',
     ]);
 });
 
 add_action('rest_api_init', function() {
-    register_rest_route('popularai/v1', '/rating', array(
+    register_rest_route('usedcars/v1', '/rating', array(
         'methods' => 'GET',
         'callback' => function($request) {
             $post_id = intval($request->get_param('post_id'));
-            return pais_get_rating_for_post($post_id);
+            return ucs_get_rating_for_post($post_id);
         },
         'permission_callback' => '__return_true'
     ));
@@ -214,9 +214,9 @@ add_action('rest_api_init', function() {
  * @param WP_Query $wp_query The current query object.
  * @return string The modified search SQL.
  */
-function pais_safe_whole_word_filter($search, $wp_query) {
+function ucs_safe_whole_word_filter($search, $wp_query) {
     // Only apply this filter if our custom query var is set
-    if (!empty($wp_query->get('pais_safe_search')) && !empty($wp_query->get('s'))) {
+    if (!empty($wp_query->get('ucs_safe_search')) && !empty($wp_query->get('s'))) {
         global $wpdb;
         $term = $wp_query->get('s');
 
@@ -241,6 +241,6 @@ function pais_safe_whole_word_filter($search, $wp_query) {
     }
     return $search;
 }
-add_filter('posts_search', 'pais_safe_whole_word_filter', 10, 2);
+add_filter('posts_search', 'ucs_safe_whole_word_filter', 10, 2);
 
 

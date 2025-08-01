@@ -2,7 +2,7 @@
 // Entry point: wires up modules and initializes the search UI
 
 console.log('main.js is running!');
-console.log('pais_vars:', window.pais_vars);
+console.log('ucs_vars:', window.ucs_vars);
 
 // Debug: Check if modules can be imported
 try {
@@ -20,22 +20,22 @@ import { setupViewToggle, renderResults, setupPagination } from './ui.js';
 console.log('All imports successful');
 
 document.addEventListener('DOMContentLoaded', async function() {
-    const root = document.getElementById('pais-search-root');
+    const root = document.getElementById('ucs-search-root');
     if (!root) return;
 
-    const searchForm = document.getElementById('pais-search-form');
-    const keywordInput = document.getElementById('pais-keyword');
-    const categorySelect = document.getElementById('pais-category');
-    const searchBtn = document.getElementById('pais-search-btn');
-    const resultsDiv = document.getElementById('pais-results');
-    let paginationDiv = document.getElementById('pais-pagination');
-    const autosuggestDiv = document.getElementById('pais-autosuggest');
-    const viewToggle = document.getElementById('pais-view-toggle');
+    const searchForm = document.getElementById('ucs-search-form');
+    const keywordInput = document.getElementById('ucs-keyword');
+    const categorySelect = document.getElementById('ucs-category');
+    const searchBtn = document.getElementById('ucs-search-btn');
+    const resultsDiv = document.getElementById('ucs-results');
+    let paginationDiv = document.getElementById('ucs-pagination');
+    const autosuggestDiv = document.getElementById('ucs-autosuggest');
+    const viewToggle = document.getElementById('ucs-view-toggle');
     
     // Create pagination container if it doesn't exist
     if (!paginationDiv) {
         paginationDiv = document.createElement('div');
-        paginationDiv.id = 'pais-pagination';
+        paginationDiv.id = 'ucs-pagination';
         if (resultsDiv && resultsDiv.parentNode) {
             resultsDiv.parentNode.insertBefore(paginationDiv, resultsDiv.nextSibling);
         }
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 
     // Setup modules
-    setupAutosuggest(keywordInput, autosuggestDiv, fetchAndRender, window.pais_vars.rest_url);
+    setupAutosuggest(keywordInput, autosuggestDiv, fetchAndRender, window.ucs_vars.rest_url);
     setupViewToggle(root, state, view => {
         renderResults(resultsDiv, state.lastData, state);
     });
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 sortOrder: effectiveSortOrder,
                 keyword,
                 category,
-                restUrl: window.pais_vars.rest_url
+                restUrl: window.ucs_vars.rest_url
             });
             
             console.log('Fetched data:', data);
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             state.lastData = data;
             
             // Only update URL with sort parameters if they were explicitly provided
-            // or if we're not on the first page or have search terms
+            // or if we're not on the first Used Cars Search terms
             const shouldUpdateURL = (sortBy !== null || sortOrder !== null || 
                                   page > 1 || keyword || category);
             
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.error('Failed to fetch results:', error);
             if (resultsDiv) {
                 resultsDiv.innerHTML = `
-                    <div class="pais-error">
+                    <div class="ucs-error">
                         Failed to fetch results. Please try again later.
                         <br><small>${error.message || ''}</small>
                     </div>
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     function loadCategories() {
         if (!categorySelect) return;
         
-        fetch(`${window.pais_vars.rest_url}popularai/v1/categories`)
+        fetch(`${window.ucs_vars.rest_url}usedcars/v1/categories`)
             .then(res => res.json())
             .then(categories => {
                 const defaultOption = document.createElement('option');
@@ -217,15 +217,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Update sort indicators in the UI
     function updateSortIndicators(sortBy, sortOrder) {
         // Reset all sort icons
-        document.querySelectorAll('.pais-sort-icon').forEach(icon => {
+        document.querySelectorAll('.ucs-sort-icon').forEach(icon => {
             icon.textContent = '↕';
         });
         
         // Update the active sort indicator
         if (sortBy) {
-            const activeTh = document.querySelector(`.pais-sort-th[data-sort="${sortBy}"]`);
+            const activeTh = document.querySelector(`.ucs-sort-th[data-sort="${sortBy}"]`);
             if (activeTh) {
-                const icon = activeTh.querySelector('.pais-sort-icon');
+                const icon = activeTh.querySelector('.ucs-sort-icon');
                 if (icon) {
                     icon.textContent = sortOrder === 'asc' ? '↑' : '↓';
                 }
@@ -297,8 +297,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Set initial view for mobile
         try {
-            const gridBtn = document.getElementById('pais-view-grid');
-            const listBtn = document.getElementById('pais-view-list');
+            const gridBtn = document.getElementById('ucs-view-grid');
+            const listBtn = document.getElementById('ucs-view-list');
             if (window.updateViewForMobile) {
                 window.updateViewForMobile(state, gridBtn, listBtn);
             } else if (typeof updateViewForMobile === 'function') {
@@ -332,13 +332,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             window.paisLastSortOrder = sortOrder;
             
             // Update sort indicators in the UI
-            document.querySelectorAll('.pais-sort-icon').forEach(icon => {
+            document.querySelectorAll('.ucs-sort-icon').forEach(icon => {
                 icon.textContent = '↕';
             });
             
-            const activeTh = document.querySelector(`.pais-sort-th[data-sort="${sortBy}"]`);
+            const activeTh = document.querySelector(`.ucs-sort-th[data-sort="${sortBy}"]`);
             if (activeTh) {
-                const icon = activeTh.querySelector('.pais-sort-icon');
+                const icon = activeTh.querySelector('.ucs-sort-icon');
                 if (icon) {
                     icon.textContent = sortOrder === 'asc' ? '↑' : '↓';
                 }
@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Load categories
     try {
-        const cats = await loadCategories(pais_vars.rest_url);
+        const cats = await loadCategories(ucs_vars.rest_url);
         categorySelect.innerHTML = '<option value="">All</option>' +
             cats.map(cat => `<option value="${cat.slug}">${cat.name}</option>`).join('');
     } catch (e) {

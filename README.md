@@ -1,4 +1,4 @@
-# Popular AI Software Search
+# Used Cars Search
 
 A **modern, AJAX-powered WordPress plugin** for advanced post searching.
 Built for scale, with fast keyword autosuggest, category filtering, sortable results, and robust admin controls.
@@ -26,9 +26,9 @@ Built for scale, with fast keyword autosuggest, category filtering, sortable res
 ## 🛠️ Installation & Usage
 
 1. Upload the plugin folder to `wp-content/plugins/`.
-2. Activate **Popular AI Software Search** in WP Admin.
-3. Add `[popular_ai_software_search]` to any post or page.
-4. To enable the compare feature, create a new page (e.g., named "Compare"), add the `[pais_compare_page]` shortcode to it, and then select this page from the dropdown in the plugin's settings page (**Popular AI Search -> Settings**).
+2. Activate **Used Cars Search** in WP Admin.
+3. Add `[used_cars_search]` to any post or page.
+4. To enable the compare feature, create a new page (e.g., named "Compare"), add the `[ucs_compare_page]` shortcode to it, and then select this page from the dropdown in the plugin's settings page (**Popular AI Search -> Settings**).
 
 ---
 

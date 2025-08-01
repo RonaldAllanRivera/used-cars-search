@@ -1,5 +1,5 @@
 /* Search Container */
-#pais-search-root {
+#ucs-search-root {
     background: #fff;
     border-radius: 1rem;
     padding: 2.5rem;
@@ -9,7 +9,7 @@
 }
 
 /* Search Form */
-#pais-search-form {
+#ucs-search-form {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
@@ -21,7 +21,7 @@
     border: 1px solid #e2e8f0;
 }
 
-#pais-keyword {
+#ucs-keyword {
     flex: 1;
     min-width: 200px;
     padding: 0.75rem 1rem;
@@ -31,13 +31,13 @@
     transition: all 0.2s ease;
 }
 
-#pais-keyword:focus {
+#ucs-keyword:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-#pais-category {
+#ucs-category {
     padding: 0.75rem 1rem;
     border: 2px solid #e2e8f0;
     border-radius: 0.5rem;
@@ -46,7 +46,7 @@
     cursor: pointer;
 }
 
-#pais-search-btn {
+#ucs-search-btn {
     background: #3b82f6;
     color: white;
     border: none;
@@ -58,20 +58,20 @@
     transition: all 0.2s ease;
 }
 
-#pais-search-btn:hover {
+#ucs-search-btn:hover {
     background: #2563eb;
     color: #ffbb00;
     transform: translateY(-1px);
 }
 
 /* Autosuggest */
-#pais-autosuggest {
+#ucs-autosuggest {
     position: relative;
     flex-basis: 100%;
     margin-top: -0.5rem;
 }
 
-#pais-autosuggest ul {
+#ucs-autosuggest ul {
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
@@ -84,25 +84,25 @@
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-#pais-autosuggest li {
+#ucs-autosuggest li {
     padding: 0.5rem 1rem;
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
 
-#pais-autosuggest li:hover {
+#ucs-autosuggest li:hover {
     background: #f1f5f9;
 }
 
 /* Grid Layout */
-.pais-results-grid {
+.ucs-results-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
     padding: 0.5rem;
 }
 
-.pais-result-item {
+.ucs-result-item {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 1rem;
@@ -115,29 +115,29 @@
     box-sizing: border-box;
 }
 
-.pais-result-item:hover {
+.ucs-result-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.pais-result-item h3 {
+.ucs-result-item h3 {
     margin: 0 0 1rem 0;
     font-size: 1.1rem;
     line-height: 1.4;
 }
 
-.pais-result-item h3 a {
+.ucs-result-item h3 a {
     color: #1e40af;
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
-.pais-result-item h3 a:hover {
+.ucs-result-item h3 a:hover {
     color: #1e3a8a;
     text-decoration: underline;
 }
 
-.pais-result-meta {
+.ucs-result-meta {
     margin-top: auto;
     padding-top: 1rem;
     border-top: 1px solid #f3f4f6;
@@ -148,7 +148,7 @@
     align-items: center;
 }
 
-.pais-button {
+.ucs-button {
     display: inline-block;
     background: #3b82f6;
     color: white !important;
@@ -163,7 +163,7 @@
     cursor: pointer;
 }
 
-.pais-button:hover {
+.ucs-button:hover {
     background: #2563eb;
     color: #ffbb00 !important;
     transform: translateY(-1px);
@@ -172,23 +172,23 @@
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
-    .pais-results-grid {
+    .ucs-results-grid {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     }
 }
 
 @media (max-width: 768px) {
-    .pais-results-grid {
+    .ucs-results-grid {
         grid-template-columns: 1fr;
     }
 }
 
-.pais-rating-widget {
+.ucs-rating-widget {
     text-align: center;
     margin: 32px 0 24px 0;
 }
 
-.pais-rating-header {
+.ucs-rating-header {
     font-size: 1.35em;
     font-weight: bold;
     color: #1a237e;
@@ -196,37 +196,37 @@
     letter-spacing: 0.03em;
 }
 
-.pais-star-row {
+.ucs-star-row {
     font-size: 2.1em;
     cursor: pointer;
     display: inline-block;
     margin-bottom: 6px;
 }
 
-.pais-star {
+.ucs-star {
     color: #ccc;
     transition: color 0.16s;
     margin: 0 2px;
     vertical-align: middle;
 }
 
-.pais-star.selected,
-.pais-star.highlighted {
+.ucs-star.selected,
+.ucs-star.highlighted {
     color: #ffc107;
     text-shadow: 0 1px 4px #f0e68c77;
 }
 
-.pais-rating-summary {
+.ucs-rating-summary {
     font-size: 0.98em;
     color: #777;
     margin-top: 1px;
 }
 
-.pais-nowrap {
+.ucs-nowrap {
     white-space: nowrap;
 }
 
-.pais-sort-th {
+.ucs-sort-th {
     color: #0074d9 !important;
     font-weight: bold !important;
     cursor: pointer;
@@ -235,11 +235,11 @@
     transition: color 0.15s;
 }
 
-.pais-sort-th:hover {
+.ucs-sort-th:hover {
     color: #ff9800;
 }
 
-.pais-sort-icon {
+.ucs-sort-icon {
     font-size: 0.89em;
     margin-left: 3px;
     vertical-align: middle;
@@ -247,14 +247,14 @@
 }
 
 /* View Toggle Buttons */
-.pais-view-toggle {
+.ucs-view-toggle {
     display: flex;
     gap: 0.5rem;
     margin: 1rem 0;
     justify-content: flex-end;
 }
 
-.pais-view-btn {
+.ucs-view-btn {
     background: #f5f5f5;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -268,30 +268,30 @@
     margin-bottom: 10px;
 }
 
-.pais-view-btn:hover {
+.ucs-view-btn:hover {
     background: #e9e9e9;
     color: #333;
 }
 
-.pais-view-btn.active {
+.ucs-view-btn.active {
     background: #0073aa;
     border-color: #006291;
     color: white;
 }
 
-.pais-view-btn svg {
+.ucs-view-btn svg {
     pointer-events: none;
 }
 
 /* Pagination */
-#pais-pagination {
+#ucs-pagination {
     display: flex;
     justify-content: center;
     margin: 2rem 0;
     align-items: center;
 }
 
-.pais-pagination-inner {
+.ucs-pagination-inner {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -301,7 +301,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.pais-pagination-btn {
+.ucs-pagination-btn {
     background: #f5f5f5;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -316,18 +316,18 @@
     color: #666;
 }
 
-.pais-pagination-btn:hover:not(:disabled) {
+.ucs-pagination-btn:hover:not(:disabled) {
     background: #e9e9e9;
     color: #333;
     border-color: #ccc;
 }
 
-.pais-pagination-btn:disabled {
+.ucs-pagination-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.pais-page-info {
+.ucs-page-info {
     font-size: 0.9em;
     color: #666;
     padding: 0 0.5rem;
@@ -337,19 +337,19 @@
 
 /* Make pagination responsive */
 @media (max-width: 480px) {
-    .pais-pagination-inner {
+    .ucs-pagination-inner {
         padding: 0.5rem;
         gap: 0.5rem;
     }
     
-    .pais-page-info {
+    .ucs-page-info {
         font-size: 0.8em;
         min-width: 80px;
     }
 }
 
 /* Table Styles */
-.pais-table-container {
+.ucs-table-container {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -358,20 +358,20 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.pais-results-table {
+.ucs-results-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95em;
     min-width: 800px; /* Ensure table has minimum width */
 }
 
-.pais-results-table thead {
+.ucs-results-table thead {
     background-color: #f8fafc;
     text-align: left;
     border-bottom: 2px solid #e2e8f0;
 }
 
-.pais-results-table th {
+.ucs-results-table th {
     padding: 1rem;
     font-weight: 600;
     color: #475569;
@@ -381,34 +381,34 @@
     white-space: nowrap;
 }
 
-.pais-results-table td {
+.ucs-results-table td {
     padding: 1rem;
     border-top: 1px solid #f1f5f9;
     vertical-align: middle;
     transition: background-color 0.15s ease;
 }
 
-.pais-results-table tbody tr:hover td {
+.ucs-results-table tbody tr:hover td {
     background-color: #f8fafc;
 }
 
-.pais-results-table a {
+.ucs-results-table a {
     color: #3b82f6;
     text-decoration: none;
     transition: color 0.15s ease;
 }
 
-.pais-results-table a:hover {
+.ucs-results-table a:hover {
     color: #2563eb;
     text-decoration: underline;
 }
 
-.pais-title-link {
+.ucs-title-link {
     font-weight: 500;
     color: #1e40af !important;
 }
 
-.pais-category-tag {
+.ucs-category-tag {
     display: inline-block;
     background-color: #e0f2fe;
     color: #0369a1;
@@ -419,15 +419,15 @@
     white-space: nowrap;
 }
 
-.pais-rating {
+.ucs-rating {
     display: flex;
     align-items: center;
     gap: 0.25rem;
 }
 
 /* Comment count styles */
-.pais-comment-count,
-.pais-comment-link {
+.ucs-comment-count,
+.ucs-comment-link {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -437,43 +437,43 @@
     margin-left: 8px;
 }
 
-.pais-comment-link {
+.ucs-comment-link {
     padding: 4px 8px;
     border-radius: 4px;
     background-color: #f0f0f0;
     transition: background-color 0.2s;
 }
 
-.pais-comment-link:hover {
+.ucs-comment-link:hover {
     background-color: #e0e0e0;
     color: #333;
 }
 
 /* Grid view specific */
-.pais-result-item .pais-comment-count {
+.ucs-result-item .ucs-comment-count {
     margin-left: 0;
     margin-top: 4px;
     display: block;
 }
 
 /* Mobile list view specific */
-.pais-mobile-list-item .pais-comment-link {
+.ucs-mobile-list-item .ucs-comment-link {
     margin-left: 0;
     margin-top: 8px;
     display: inline-flex;
 }
 
-.pais-rating-stars {
+.ucs-rating-stars {
     color: #f59e0b;
     letter-spacing: 0.1em;
 }
 
-.pais-rating-count {
+.ucs-rating-count {
     color: #6b7280;
     font-size: 0.85em;
 }
 
-.pais-excerpt {
+.ucs-excerpt {
     color: #4b5563;
     line-height: 1.5;
     display: -webkit-box;
@@ -486,11 +486,11 @@
 }
 
 /* Card Layout for Mobile (Table Fallback) */
-.pais-mobile-cards {
+.ucs-mobile-cards {
     display: none; /* Hidden by default, shown on mobile */
 }
 
-.pais-card {
+.ucs-card {
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
@@ -500,12 +500,12 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.pais-card:hover {
+.ucs-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.pais-card-title {
+.ucs-card-title {
     color: #1e40af;
     font-size: 1.1em;
     font-weight: 600;
@@ -514,7 +514,7 @@
     border-bottom: 1px solid #f1f5f9;
 }
 
-.pais-card-content > div {
+.ucs-card-content > div {
     margin: 0.75rem 0;
     font-size: 0.95em;
     line-height: 1.5;
@@ -523,7 +523,7 @@
     gap: 0.25rem;
 }
 
-.pais-card-content > div::before {
+.ucs-card-content > div::before {
     content: attr(data-label);
     font-weight: 600;
     color: #4b5563;
@@ -531,14 +531,14 @@
     margin-bottom: 0.25rem;
 }
 
-.pais-card-actions {
+.ucs-card-actions {
     margin-top: 1rem;
     padding-top: 0.75rem;
     border-top: 1px solid #f1f5f9;
     text-align: right;
 }
 
-.pais-card .pais-button {
+.ucs-card .ucs-button {
     display: inline-block;
     background: #2563eb;
     color: #fff !important;
@@ -550,17 +550,17 @@
     transition: background-color 0.2s, transform 0.1s;
 }
 
-.pais-card .pais-button:hover {
+.ucs-card .ucs-button:hover {
     background: #1d4ed8;
     transform: translateY(-1px);
 }
 
-.pais-card .pais-button:active {
+.ucs-card .ucs-button:active {
     transform: translateY(0);
 }
 
 /* Responsive table styles */
-.pais-table-container {
+.ucs-table-container {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -571,21 +571,21 @@
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
-    .pais-results-table th, 
-    .pais-results-table td {
+    .ucs-results-table th, 
+    .ucs-results-table td {
         padding: 0.75rem 0.5rem;
         font-size: 0.9em;
     }
     
     /* Make sort icons smaller on tablets */
-    .pais-sort-icon {
+    .ucs-sort-icon {
         font-size: 0.8em;
     }
 }
 
 /* Mobile view - show scrollable table */
 @media (max-width: 800px) {
-    .pais-results-table {
+    .ucs-results-table {
         min-width: 100%;
         display: block;
         text-align: left;
@@ -595,16 +595,16 @@
         padding: 0;
     }
     
-    .pais-results-table thead {
+    .ucs-results-table thead {
         display: none;
     }
     
-    .pais-results-table tbody {
+    .ucs-results-table tbody {
         display: block;
         width: 100%;
     }
     
-    .pais-results-table tr {
+    .ucs-results-table tr {
         display: block;
         margin-bottom: 1rem;
         border: 1px solid #e2e8f0;
@@ -614,7 +614,7 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
-    .pais-results-table td {
+    .ucs-results-table td {
         display: flex;
         padding: 0.75rem;
         border: none;
@@ -627,11 +627,11 @@
         hyphens: auto;
     }
     
-    .pais-results-table td:last-child {
+    .ucs-results-table td:last-child {
         border-bottom: none;
     }
     
-    .pais-results-table td::before {
+    .ucs-results-table td::before {
         content: attr(data-label);
         font-weight: 600;
         color: #4b5563;
@@ -646,12 +646,12 @@
     }
     
     /* Hide the last border */
-    .pais-results-table tr:last-child td:last-child {
+    .ucs-results-table tr:last-child td:last-child {
         border-bottom: none;
     }
     
     /* Make buttons full width on mobile */
-    .pais-results-table .pais-button {
+    .ucs-results-table .ucs-button {
         width: 100%;
         margin: 0.25rem 0;
     }
@@ -659,37 +659,37 @@
 
 /* Desktop view - show table, hide cards */
 @media (min-width: 801px) {
-    .pais-mobile-cards {
+    .ucs-mobile-cards {
         display: none !important;
     }
     
-    .pais-results[data-view="grid"] .pais-table-container {
+    .ucs-results[data-view="grid"] .ucs-table-container {
         display: none !important;
     }
     
-    .pais-results[data-view="grid"] .pais-mobile-cards {
+    .ucs-results[data-view="grid"] .ucs-mobile-cards {
         display: block !important;
     }
     
-    .pais-results[data-view="grid"] .pais-results-grid {
+    .ucs-results[data-view="grid"] .ucs-results-grid {
         display: grid !important;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 1.5rem;
     }
     
-    .pais-results[data-view="list"] .pais-card {
+    .ucs-results[data-view="list"] .ucs-card {
         display: block !important;
         margin: 0;
     }
 }
 
-.pais-results[data-view="list"] {
+.ucs-results[data-view="list"] {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
 
-.pais-mobile-list-item {
+.ucs-mobile-list-item {
     background: white;
     border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
@@ -698,32 +698,32 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.pais-mobile-list-item h4 {
+.ucs-mobile-list-item h4 {
     margin: 0 0 0.5rem 0;
     font-size: 0.9rem;
     color: #1a365d;
 }
 
-.pais-mobile-list-item p {
+.ucs-mobile-list-item p {
     margin: 0.25rem 0;
     font-size: 0.8rem;
     color: #4a5568;
 }
 
-.pais-mobile-list-item .pais-rating {
+.ucs-mobile-list-item .ucs-rating {
     font-size: 0.8rem;
     color: #eab308;
     margin: 0.25rem 0;
 }
 
-.pais-mobile-list-item .pais-categories {
+.ucs-mobile-list-item .ucs-categories {
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem;
     margin: 0.25rem 0;
 }
 
-.pais-mobile-list-item .pais-category-tag {
+.ucs-mobile-list-item .ucs-category-tag {
     background: #ebf8ff;
     color: #2b6cb0;
     padding: 0.15rem 0.4rem;
@@ -731,36 +731,36 @@
     font-size: 0.7rem;
 }
 
-.pais-mobile-list-item .pais-actions {
+.ucs-mobile-list-item .ucs-actions {
     margin-top: 0.5rem;
     display: flex;
     gap: 0.5rem;
 }
 
-.pais-mobile-list-item .pais-button {
+.ucs-mobile-list-item .ucs-button {
     padding: 0.3rem 0.6rem;
     font-size: 0.8rem;
     border-radius: 0.25rem;
 }
 
 @media (min-width: 801px) {
-    .pais-mobile-list-item {
+    .ucs-mobile-list-item {
         display: none !important;
     }
     
-    .pais-results[data-view="grid"] .pais-results-table {
+    .ucs-results[data-view="grid"] .ucs-results-table {
         display: none !important;
     }
     
-    .pais-results[data-view="grid"] .pais-results-grid {
+    .ucs-results[data-view="grid"] .ucs-results-grid {
         display: grid !important;
     }
     
-    .pais-results[data-view="list"] .pais-results-grid {
+    .ucs-results[data-view="list"] .ucs-results-grid {
         display: none !important;
     }
     
-    .pais-results[data-view="list"] .pais-results-table {
+    .ucs-results[data-view="list"] .ucs-results-table {
         display: table !important;
     }
 }
