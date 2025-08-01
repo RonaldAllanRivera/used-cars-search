@@ -1,0 +1,31 @@
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE/editor files
+*.sublime-project
+*.sublime-workspace
+.vscode/
+.idea/
+*.swp
+
+# Node, Composer, and build tools
+node_modules/
+npm-debug.log
+yarn-error.log
+vendor/
+
+# Ignore test & log files
+*.log
+phpunit.xml
+
+# Composer
+composer.lock
+
+# Ignore your own settings/local configs
+.env
+.env.*
+
+# Backup files
+*.bak
+*.tmp

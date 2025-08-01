@@ -1,0 +1,104 @@
+/* compare.css */
+
+
+
+/* Compare Bar Styles */
+#pais-compare-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f9f9f9;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+#pais-compare-bar:not(.pais-compare-bar-hidden) {
+    transform: translateY(0);
+}
+
+.pais-compare-bar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.pais-compare-title {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-right: 15px;
+}
+
+.pais-compare-items-list {
+    display: flex;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.pais-compare-bar-items {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.pais-compare-item {
+    background-color: #e9e9e9;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+}
+
+.pais-remove-from-compare {
+    background: none;
+    border: none;
+    color: #ff0000;
+    cursor: pointer;
+    font-size: 1.2em;
+    margin-left: 8px;
+    padding: 0;
+    line-height: 1;
+}
+
+.pais-compare-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.pais-compare-bar-hidden {
+    transform: translateY(100%);
+}
+
+/* Compare Page Grid Layout */
+.pais-compare-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .pais-compare-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .pais-compare-bar-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .pais-compare-items-list {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pais-compare-actions {
+        justify-content: flex-end;
+    }
+}
