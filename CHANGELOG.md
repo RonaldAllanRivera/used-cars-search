@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.2] - 2025-08-06
+
+### Improved
+- Grid view now displays all car details (Year, Make, Model, Trim, Price, Mileage, Engine, Transmission) in a labeled vertical list.
+- Car details block is hidden if all fields are empty.
+- Improved formatting for price and mileage; conditional display of details block.
+
 ## [1.4.1] - 2025-08-06
 
 ### Added
