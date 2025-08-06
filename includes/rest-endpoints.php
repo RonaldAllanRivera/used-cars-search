@@ -82,14 +82,16 @@ function ucs_rest_search($request) {
             'comments'  => get_comments_number($post->ID),
             'rating'    => $rating['avg'],
             'votes'     => $rating['count'],
-            'year'      => $custom_fields['year'],
-            'make'      => $custom_fields['make'],
-            'model'     => $custom_fields['model'],
-            'trim'      => $custom_fields['trim'],
-            'price'     => $custom_fields['price'],
-            'mileage'   => $custom_fields['mileage'],
-            'engine'    => $custom_fields['engine'],
-            'transmission' => $custom_fields['transmission'],
+            'custom_fields' => [
+                'year' => $custom_fields['year'],
+                'make' => $custom_fields['make'],
+                'model' => $custom_fields['model'],
+                'trim' => $custom_fields['trim'],
+                'price' => $custom_fields['price'],
+                'mileage' => $custom_fields['mileage'],
+                'engine' => $custom_fields['engine'],
+                'transmission' => $custom_fields['transmission'],
+            ],
         ];
     }, $query->posts);
 

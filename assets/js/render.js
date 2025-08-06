@@ -51,6 +51,13 @@ let currentSortState = {
     sortOrder: 'desc'
 };
 
+function formatNumber(value, decimals = 0) {
+    if (value === null || value === undefined || value === '') return '';
+    let num = Number(value);
+    if (isNaN(num)) return value;
+    return num.toLocaleString(undefined, {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
+}
+
 export function renderResults(container, data, state) {
     console.log('Rendering results with data:', data);
     
@@ -124,8 +131,8 @@ export function renderResults(container, data, state) {
                     <tr>
                         <td data-label="Title"><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></td>
                         <td data-label="Summary">${post.excerpt || '—'}</td>
-                        <td data-label="Price">${price ? `$${price}` : '—'}</td>
-                        <td data-label="Mileage">${mileage ? `${mileage} miles` : '—'}</td>
+                        <td data-label="Price">${price ? `$${formatNumber(price, 2)}` : '\u2014'}</td>
+                        <td data-label="Mileage">${mileage ? `${formatNumber(mileage, 0)} miles` : '\u2014'}</td>
                         <td data-label="Engine">${engine || '—'}</td>
                         <td data-label="Transmission">${transmission || '—'}</td>
                         <td data-label="Categories">${categories || '—'}</td>
@@ -196,15 +203,18 @@ export function renderResults(container, data, state) {
         // Grid view implementation - original design
         const gridItems = sortedPosts.map(post => {
             const { year, make, model, trim, price, mileage, engine, transmission } = post.custom_fields || {};
-            const customFieldsHTML = `
-                <div class="ucs-custom-fields">
-                    ${price ? `<span class="ucs-price-tag">$${price}</span>` : ''}
-                    ${mileage ? `<span class="ucs-mileage-tag">${mileage} miles</span>` : ''}
-                    ${year && make && model ? `<span class="ucs-car-info">${year} ${make} ${model} ${trim || ''}</span>` : ''}
-                    ${engine ? `<span class="ucs-engine-tag">${engine}</span>` : ''}
-                    ${transmission ? `<span class="ucs-transmission-tag">${transmission}</span>` : ''}
-                </div>
-            `;
+            const hasAnyCarDetail = year || make || model || trim || price || mileage || engine || transmission;
+            const customFieldsHTML = hasAnyCarDetail ? `
+    <div class="ucs-custom-fields" style="margin-bottom:8px;">
+        <div><strong>YEAR:</strong> ${year || '—'}</div>
+        <div><strong>MAKE:</strong> ${make || '—'}</div>
+        <div><strong>MODEL:</strong> ${model || '—'}</div>
+        <div><strong>TRIM:</strong> ${trim || '—'}</div>
+        <div><strong>PRICE:</strong> ${price ? `$${formatNumber(price, 2)}` : '—'}</div>
+        <div><strong>MILEAGE:</strong> ${mileage ? `${formatNumber(mileage, 0)} miles` : '—'}</div>
+        <div><strong>ENGINE:</strong> ${engine || '—'}</div>
+        <div><strong>TRANSMISSION:</strong> ${transmission || '—'}</div>
+    </div>` : '';
 
             let ratingStars = '';
             if (post.rating > 0) {
@@ -213,7 +223,7 @@ export function renderResults(container, data, state) {
                 ratingStars = `<div class="ucs-rating"><span class="ucs-rating-stars" title="${post.rating} out of 5">${filledStars}${emptyStars}</span><span class="ucs-rating-count">(${post.votes || 0})</span></div>`;
             }
             const categories = post.category ? post.category.split(',').map(cat => `<span class="ucs-category-tag">${cat.trim()}</span>`).join('') : '—';
-            return `<div class="ucs-result-item"><h3><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h3><p>${post.excerpt || 'No description available'}</p><div class="ucs-result-meta"><span>${categories}</span>${ratingStars}${post.comments > 0 ? `<span class="ucs-comment-count">💬 ${post.comments}</span>` : ''}</div>${customFieldsHTML}</div>`;
+            return `<div class="ucs-result-item"><h3><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h3><p>${post.excerpt || 'No description available'}</p>${customFieldsHTML}<div class="ucs-result-meta"><span>${categories}</span>${ratingStars}${post.comments > 0 ? `<span class="ucs-comment-count">\ud83d\udcac ${post.comments}</span>` : ''}</div></div>`;
         }).join('');
         container.innerHTML = `<div class="ucs-results-grid">${gridItems}</div>`;
     }

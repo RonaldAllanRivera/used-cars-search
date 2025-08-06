@@ -8,6 +8,10 @@ Built for scale, with fast keyword autosuggest, category filtering, sortable res
 
 ## 🚀 Features
 
+* All car details (Year, Make, Model, Trim, Price, Mileage, Engine, Transmission) are now displayed in the grid view, each on a separate labeled line.
+* Car details block is hidden if all fields are empty.
+* Price and mileage are formatted for better readability.
+
 * **Software Comparison** - Users can select up to four items and compare them side-by-side on a dedicated, responsive page.
 * **Lightning-Fast Search** - Optimized database queries for instant results, even with thousands of posts
 * **Precise Whole-Word Matching** - Accurate search results that match your exact terms
