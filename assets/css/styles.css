@@ -224,6 +224,7 @@
 
 .ucs-nowrap {
     white-space: nowrap;
+    text-align: center;
 }
 
 .ucs-sort-th {
@@ -359,10 +360,36 @@
 }
 
 .ucs-results-table {
+    table-layout: fixed;
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95em;
     min-width: 800px; /* Ensure table has minimum width */
+}
+
+.ucs-results-table .summary {
+    width: 40%;
+}
+
+.ucs-results-table .title {
+    width: 20%;
+}
+
+.ucs-results-table .actions {
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.ucs-results-table .actions .btn {
+    width: 100px; /* Adjust width as needed */
+    margin-bottom: 5px;
+}
+
+.ucs-results-table .actions .btn:last-child {
+    margin-bottom: 0;
 }
 
 .ucs-results-table thead {
@@ -496,7 +523,7 @@
     border-radius: 0.5rem;
     margin-bottom: 1rem;
     padding: 1.25rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -527,8 +554,14 @@
     content: attr(data-label);
     font-weight: 600;
     color: #4b5563;
-    font-size: 0.9em;
     margin-bottom: 0.25rem;
+    flex: 0 0 100px;
+    max-width: 100px;
+    text-transform: none;
+    text-align: left;
+    white-space: normal;
+    font-size: 0.9em;
+    padding-top: 2px;
 }
 
 .ucs-card-actions {
@@ -667,26 +700,38 @@
         display: none !important;
     }
     
-    .ucs-results[data-view="grid"] .ucs-mobile-cards {
-        display: block !important;
-    }
-    
     .ucs-results[data-view="grid"] .ucs-results-grid {
         display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
     }
     
-    .ucs-results[data-view="list"] .ucs-card {
-        display: block !important;
-        margin: 0;
+    .ucs-results[data-view="list"] .ucs-results-grid {
+        display: none !important;
+    }
+    
+    .ucs-results[data-view="list"] .ucs-results-table {
+        display: table !important;
     }
 }
 
-.ucs-results[data-view="list"] {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+.ucs-mileage-tag, .ucs-car-info {
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.ucs-engine-tag, .ucs-transmission-tag {
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* List View Styles */
+.ucs-results-list {
+    display: flex;
 }
 
 .ucs-mobile-list-item {
@@ -763,4 +808,9 @@
     .ucs-results[data-view="list"] .ucs-results-table {
         display: table !important;
     }
+}
+
+.ucs-results[data-view="list"] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }

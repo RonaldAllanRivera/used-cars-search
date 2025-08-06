@@ -32,6 +32,25 @@ Built for scale, with fast keyword autosuggest, category filtering, sortable res
 
 ---
 
+## 🛠️ Enhanced Admin Dashboard (v1.4.1)
+
+* The admin dashboard/settings page has been restored and rebranded from the original plugin.
+* Now features a statistics widget showing:
+  * Published Posts
+  * Total Star Ratings
+  * Average Star Rating
+  * Approved Comments
+* Improved admin UX, with settings, compare page selection, and a "Danger Zone" for quick data resets.
+* The dashboard now mirrors the original plugin's admin interface, fully rebranded for Used Cars Search.
+
+## 🚗 Car Details Admin Dropdowns (v1.4.0)
+
+* The admin panel now features dropdowns for Year, Make, and Transmission when editing or adding a car post.
+* Year dropdown includes 2025–1980; Make dropdown includes all major car brands; Transmission dropdown includes all common types.
+* This ensures data consistency and faster entry for admins.
+
+---
+
 ## 🔧 Admin Features
 
 * **Settings Page**: Configure the compare page URL.

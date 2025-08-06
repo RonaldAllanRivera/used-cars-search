@@ -79,6 +79,17 @@ export function renderResults(container, data, state) {
         if (isMobile) {
             let html = '<div class="ucs-results-list">';
             sortedPosts.forEach(post => {
+                const { year, make, model, trim, price, mileage, engine, transmission } = post.custom_fields || {};
+                const customFieldsHTML = `
+                    <div class="ucs-custom-fields">
+                        ${price ? `<span class="ucs-price-tag">$${price}</span>` : ''}
+                        ${mileage ? `<span class="ucs-mileage-tag">${mileage} miles</span>` : ''}
+                        ${year && make && model ? `<span class="ucs-car-info">${year} ${make} ${model} ${trim || ''}</span>` : ''}
+                        ${engine ? `<span class="ucs-engine-tag">${engine}</span>` : ''}
+                        ${transmission ? `<span class="ucs-transmission-tag">${transmission}</span>` : ''}
+                    </div>
+                `;
+
                 const categories = post.category ? post.category.split(',').map(cat => cat.trim()) : [];
                 let rating = '';
                 if (post.rating > 0) {
@@ -88,13 +99,14 @@ export function renderResults(container, data, state) {
                 } else {
                     rating = '<div class="ucs-rating">No ratings</div>';
                 }
-                html += `<div class="ucs-mobile-list-item"><h4><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h4><p>${post.excerpt || 'No description available'}</p>${rating}${categories.length ? `<div class="ucs-categories">${categories.map(cat => `<span class="ucs-category-tag">${cat}</span>`).join('')}</div>` : ''}<div class="ucs-actions"><a href="${post.permalink}" class="ucs-button" target="_blank" rel="noopener">View</a>${post.website ? `<a href="${post.website}" class="ucs-button" target="_blank" rel="noopener nofollow">Website</a>` : ''}<button class="ucs-compare-btn ucs-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>${post.comments > 0 ? `<a href="${post.permalink}#comments" class="ucs-comment-link" target="_blank" rel="noopener">💬 ${post.comments}</a>` : ''}</div></div>`;
+                html += `<div class="ucs-mobile-list-item"><h4><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h4><p>${post.excerpt || 'No description available'}</p>${rating}${categories.length ? `<div class="ucs-categories">${categories.map(cat => `<span class="ucs-category-tag">${cat}</span>`).join('')}</div>` : ''}${customFieldsHTML}<div class="ucs-actions"><a href="${post.permalink}" class="ucs-button" target="_blank" rel="noopener">View</a>${post.website ? `<a href="${post.website}" class="ucs-button" target="_blank" rel="noopener nofollow">Website</a>` : ''}<button class="ucs-compare-btn ucs-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>${post.comments > 0 ? `<a href="${post.permalink}#comments" class="ucs-comment-link" target="_blank" rel="noopener">💬 ${post.comments}</a>` : ''}</div></div>`;
             });
             html += '</div>';
             container.innerHTML = html;
         } else {
-            let html = `<table class="ucs-results-table"><thead><tr><th class="ucs-sort-th" data-sort="title">TITLE <span class="ucs-sort-icon">${sortBy === 'title' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th>SUMMARY</th><th class="ucs-sort-th" data-sort="category">CATEGORIES <span class="ucs-sort-icon">${sortBy === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th class="ucs-sort-th" data-sort="date">DATE <span class="ucs-sort-icon">${sortBy === 'date' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="rating">RATING <span class="ucs-sort-icon">${sortBy === 'rating' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="comments">COMMENTS <span class="ucs-sort-icon">${sortBy === 'comments' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th>ACTIONS</th></tr></thead><tbody>`;
+            let html = `<table class="ucs-results-table"><thead><tr><th class="ucs-sort-th" data-sort="title">TITLE <span class="ucs-sort-icon">${sortBy === 'title' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th>SUMMARY</th><th>PRICE</th><th>MILEAGE</th><th>ENGINE</th><th>TRANSMISSION</th><th class="ucs-sort-th" data-sort="category">CATEGORIES <span class="ucs-sort-icon">${sortBy === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th class="ucs-sort-th" data-sort="date">DATE <span class="ucs-sort-icon">${sortBy === 'date' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="rating">RATING <span class="ucs-sort-icon">${sortBy === 'rating' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="comments">COMMENTS <span class="ucs-sort-icon">${sortBy === 'comments' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th>ACTIONS</th></tr></thead><tbody>`;
             sortedPosts.forEach(post => {
+                const { price, mileage, engine, transmission } = post.custom_fields || {};
                 const categories = post.category ? 
                     post.category.split(',').map(cat => {
                         const trimmedCat = cat.trim();
@@ -112,6 +124,10 @@ export function renderResults(container, data, state) {
                     <tr>
                         <td data-label="Title"><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></td>
                         <td data-label="Summary">${post.excerpt || '—'}</td>
+                        <td data-label="Price">${price ? `$${price}` : '—'}</td>
+                        <td data-label="Mileage">${mileage ? `${mileage} miles` : '—'}</td>
+                        <td data-label="Engine">${engine || '—'}</td>
+                        <td data-label="Transmission">${transmission || '—'}</td>
                         <td data-label="Categories">${categories || '—'}</td>
                         <td data-label="Date">${date}</td>
                         <td data-label="Rating">${rating}</td>
@@ -119,7 +135,7 @@ export function renderResults(container, data, state) {
                         <td data-label="Actions" class="ucs-nowrap">
                             <a href="${post.permalink}" class="ucs-button" target="_blank" rel="noopener">View</a>
                             ${post.website ? `<a href="${post.website}" class="ucs-button" target="_blank" rel="noopener nofollow">Website</a>` : ''}
-                            <button class="ucs-compare-btn ucs-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>
+                            <br><br><button class="ucs-compare-btn ucs-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>
                         </td>
                     </tr>`;
             });
@@ -179,14 +195,25 @@ export function renderResults(container, data, state) {
     } else {
         // Grid view implementation - original design
         const gridItems = sortedPosts.map(post => {
+            const { year, make, model, trim, price, mileage, engine, transmission } = post.custom_fields || {};
+            const customFieldsHTML = `
+                <div class="ucs-custom-fields">
+                    ${price ? `<span class="ucs-price-tag">$${price}</span>` : ''}
+                    ${mileage ? `<span class="ucs-mileage-tag">${mileage} miles</span>` : ''}
+                    ${year && make && model ? `<span class="ucs-car-info">${year} ${make} ${model} ${trim || ''}</span>` : ''}
+                    ${engine ? `<span class="ucs-engine-tag">${engine}</span>` : ''}
+                    ${transmission ? `<span class="ucs-transmission-tag">${transmission}</span>` : ''}
+                </div>
+            `;
+
             let ratingStars = '';
             if (post.rating > 0) {
-                const fullStars = '★'.repeat(Math.round(post.rating));
+                const filledStars = '★'.repeat(Math.round(post.rating));
                 const emptyStars = '☆'.repeat(5 - Math.round(post.rating));
-                ratingStars = `<div class="ucs-rating"><span class="ucs-rating-stars" title="${post.rating} out of 5">${fullStars}${emptyStars}</span><span class="ucs-rating-count">(${post.votes || 0})</span></div>`;
+                ratingStars = `<div class="ucs-rating"><span class="ucs-rating-stars" title="${post.rating} out of 5">${filledStars}${emptyStars}</span><span class="ucs-rating-count">(${post.votes || 0})</span></div>`;
             }
             const categories = post.category ? post.category.split(',').map(cat => `<span class="ucs-category-tag">${cat.trim()}</span>`).join('') : '—';
-            return `<div class="ucs-result-item"><h3><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h3><p>${post.excerpt || 'No description available'}</p><div class="ucs-result-meta"><span>${categories}</span>${ratingStars}${post.comments > 0 ? `<span class="ucs-comment-count">💬 ${post.comments}</span>` : ''}</div></div>`;
+            return `<div class="ucs-result-item"><h3><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h3><p>${post.excerpt || 'No description available'}</p><div class="ucs-result-meta"><span>${categories}</span>${ratingStars}${post.comments > 0 ? `<span class="ucs-comment-count">💬 ${post.comments}</span>` : ''}</div>${customFieldsHTML}</div>`;
         }).join('');
         container.innerHTML = `<div class="ucs-results-grid">${gridItems}</div>`;
     }

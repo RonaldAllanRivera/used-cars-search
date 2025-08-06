@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2025-08-06
+
+### Added
+- **Admin Dashboard Restored:** The admin dashboard/settings page has been restored and fully rebranded from the original plugin.
+- **Statistics Widget:** The dashboard now displays published posts, total star ratings, average star rating, and approved comments.
+- **Improved Admin UX:** Settings, compare page selection, and "Danger Zone" tools are all available in a unified dashboard interface.
+
+### Changed
+- The admin dashboard now mirrors the original plugin's admin interface, but is fully rebranded for Used Cars Search.
+
+## [1.4.0] - 2025-08-01
+
+### Added
+- **Admin Dropdown Fields:** Year, Make, and Transmission fields in the car details form are now dropdowns with comprehensive, standardized options for faster, more consistent data entry.
+
+### Improved
+- Data entry for car details is now more reliable and less error-prone due to standardized options.
+
 ## [1.3.0] - 2025-07-15
 
 ### Added
@@ -38,6 +56,8 @@ All notable changes to this project will be documented in this file.
 All notable changes to this project will be documented here.
 
 ---
+
+
 
 ## [1.2.0] - 2025-07-15
 

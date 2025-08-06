@@ -1,8 +1,10 @@
 <?php
-error_log('Loaded: admin.php');
-if (!defined('ABSPATH')) exit;
 
-// 1. ADMIN SIDEBAR PAGE (already working)
+if (!defined('ABSPATH')) exit; // Prevent direct access
+
+if (is_admin()) {
+
+// 1. ADMIN SIDEBAR PAGE (rebranded)
 add_action('admin_menu', function() {
     add_menu_page(
         'Used Cars Search Admin',
@@ -10,7 +12,7 @@ add_action('admin_menu', function() {
         'manage_options',
         'ucs_admin',
         'ucs_admin_page',
-        'dashicons-search',
+        'dashicons-car',
         25
     );
     add_submenu_page(
@@ -26,20 +28,20 @@ add_action('admin_menu', function() {
 add_action('admin_init', 'ucs_settings_init');
 
 function ucs_settings_init() {
-    register_setting('popular-ai-software-search', 'ucs_options');
+    register_setting('used-cars-search', 'ucs_options');
 
     add_settings_section(
         'ucs_settings_section',
         'Plugin Settings',
         'ucs_settings_section_callback',
-        'popular-ai-software-search'
+        'used-cars-search'
     );
 
     add_settings_field(
         'ucs_compare_page_id',
         'Compare Page',
         'ucs_compare_page_id_callback',
-        'popular-ai-software-search',
+        'used-cars-search',
         'ucs_settings_section'
     );
 }
@@ -58,70 +60,30 @@ function ucs_compare_page_id_callback() {
         echo "<select name='ucs_options[compare_page_id]'>";
         echo "<option value=''>— Select a Page —</option>";
         foreach ($pages as $page) {
-            $selected = selected($selected_page_id, $page->ID, false);
-            echo "<option value='" . esc_attr($page->ID) . "' $selected>" . esc_html($page->post_title) . "</option>";
+            $selected = $selected_page_id == $page->ID ? 'selected' : '';
+            echo "<option value='{$page->ID}' $selected>" . esc_html($page->post_title) . "</option>";
         }
         echo "</select>";
-        echo "<p class='description'>Select the page where you have placed the <code>[ucs_compare_page]</code> shortcode.</p>";
-    } else {
-        echo "<p>No pages found. Please create a page for the compare feature first.</p>";
     }
 }
 
 function ucs_admin_page() {
-    global $wpdb;
-
-    // --- PROCESS ACTIONS ---
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options')) {
-        if (isset($_POST['ucs_reset_ratings'])) {
-            $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}ucs_ratings");
-            echo '<div class="notice notice-success"><p>All star ratings have been reset.</p></div>';
-        }
-        if (isset($_POST['ucs_delete_comments'])) {
-            $post_ids = $wpdb->get_col("SELECT ID FROM {$wpdb->posts} WHERE post_type = 'post'");
-            if ($post_ids) {
-                $ids = implode(',', array_map('intval', $post_ids));
-                $wpdb->query("DELETE FROM {$wpdb->comments} WHERE comment_post_ID IN ($ids)");
-                $wpdb->query("UPDATE {$wpdb->posts} SET comment_count = 0 WHERE ID IN ($ids)");
-                echo '<div class="notice notice-success"><p>All comments on plugin posts have been deleted.</p></div>';
-            }
-        }
-    }
-
-    // --- ADMIN PAGE CONTENT ---
-    echo '<div class="wrap"><h1>Used Cars Search Admin Tools</h1>';
-    // Show dashboard widget stats here too
+    $options = get_option('ucs_options');
+    echo '<div class="wrap"><h1>Used Cars Search</h1>';
     ucs_render_dashboard_widget();
-
-    echo '<hr style="margin:2em 0 1.2em 0;">';
-
-    // Settings Form
-    echo '<form action="options.php" method="post">';
-    settings_fields('popular-ai-software-search');
-    do_settings_sections('popular-ai-software-search');
+    echo "<p>How to display the search UI:<br><code>[used_cars_search]</code> in any page or post, or add it to a template with <code>echo do_shortcode('[used_cars_search]');</code></p>";
+    echo '<p>How to display the compare page:<br><code>[ucs_compare_page]</code> in a new page (e.g., a page with the slug "/compare").</p>';
+    echo '<form method="post" action="options.php">';
+    settings_fields('used-cars-search');
+    do_settings_sections('used-cars-search');
     submit_button('Save Settings');
     echo '</form>';
-
-    echo '<hr style="margin:2em 0 1.2em 0;">';
-    echo '<h2 style="color:#a00;margin-bottom:0.5em;">Danger Zone</h2>';
-    echo '<form method="post" style="margin-bottom:2em;">';
-    echo '<button type="submit" name="ucs_reset_ratings" class="button button-danger" style="margin-right:18px"
-            onclick="return confirm(\'Are you sure? This will DELETE ALL star ratings!\')">Reset All Ratings</button>';
-    echo '<button type="submit" name="ucs_delete_comments" class="button button-danger"
-            onclick="return confirm(\'Are you sure? This will DELETE ALL comments on plugin posts!\')">Delete All Comments</button>';
-    echo '</form>';
+    echo '<div style="margin-top:2em;padding:1em;border:1px solid #c00;background:#fee;max-width:500px;">';
+    echo '<b>Danger Zone</b><br>';
+    echo '<a href="#" class="button">Reset All Ratings</a> <a href="#" class="button">Delete All Comments</a>';
+    echo '</div>';
     echo '</div>';
 }
-
-
-// 2. DASHBOARD SUMMARY WIDGET
-add_action('wp_dashboard_setup', function() {
-    wp_add_dashboard_widget(
-        'ucs_dashboard_widget',
-        'Used Cars Search — Overview',
-        'ucs_render_dashboard_widget'
-    );
-});
 
 function ucs_render_dashboard_widget() {
     global $wpdb;
@@ -143,171 +105,135 @@ function ucs_render_dashboard_widget() {
     echo '<li><strong>Approved Comments:</strong> ' . number_format($comment_count) . '</li>';
     echo '</ul>';
     echo '<hr style="margin:1.2em 0 0.7em 0;">';
-    echo '<div style="font-size:1em"><strong>How to display the search UI:</strong><br>
-        Use the shortcode <code>[used_cars_search]</code> in any page or post, or add it to a template with <code>echo do_shortcode(\'[used_cars_search]\');</code>
-        </div>';
-    echo '<div style="font-size:1em; margin-top: 1em;"><strong>How to display the compare page:</strong><br>
-        Use the shortcode <code>[ucs_compare_page]</code> in a new page (e.g., a page with the slug "/compare/").
-        </div>';
 }
 
 
 function ucs_admin_ratings_page() {
-    ?>
-    <div class="wrap">
-        <h1>Ratings Management</h1>
-        <div id="ucs-admin-table"></div>
-        <script>
-        // Simple client-side UI for table, search, pagination
-        let paisCurrentPage = 1, paisSearch = '', paisLoading = false;
-        let paisCurrentSort = 'date', paisCurrentOrder = 'desc';
-
-        function paisSort(column) {
-            if (paisCurrentSort === column) {
-                paisCurrentOrder = paisCurrentOrder === 'asc' ? 'desc' : 'asc';
-            } else {
-                paisCurrentSort = column;
-                paisCurrentOrder = 'desc';
-            }
-            paisLoadRatings(1, paisSearch, paisCurrentSort, paisCurrentOrder);
-        }
-
-
-        function paisLoadRatings(page = 1, search = '', sort = paisCurrentSort, order = paisCurrentOrder) {
-            paisLoading = true;
-            document.getElementById('ucs-admin-table').innerHTML = 'Loading...';
-            fetch(ajaxurl + '?action=ucs_ratings_list&page=' + page +
-                '&search=' + encodeURIComponent(search) +
-                '&sort=' + encodeURIComponent(sort) +
-                '&order=' + encodeURIComponent(order)
-            )
-            .then(r => r.json())
-            .then(data => {
-                paisLoading = false;
-                    document.getElementById('ucs-admin-table').innerHTML = `
-                        <form onsubmit="event.preventDefault();paisSearch=this.search.value;paisLoadRatings(1,paisSearch);">
-                            <input type="text" name="search" value="${search.replace(/"/g, '&quot;')}" placeholder="Search title..." />
-                            <button type="submit">Search</button>
-                        </form>
-                        <table class="widefat fixed" style="margin-top:1em;">
-                            <thead>
-                            <tr>
-                                <th class="ucs-sort-th" onclick="paisSort('ID')">ID</th>
-                                <th class="ucs-sort-th" onclick="paisSort('title')">Title</th>
-                                <th class="ucs-sort-th" onclick="paisSort('date')">Date</th>
-                                <th class="ucs-sort-th" onclick="paisSort('rating')">Avg Rating</th>
-                                <th class="ucs-sort-th" onclick="paisSort('votes')">Votes</th>
-                                <th class="ucs-sort-th" onclick="paisSort('comments')">Comments</th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                                ${data.posts.map(post => `
-                                    <tr>
-                                        <td>${post.ID}</td>
-                                        <td><a href="${post.permalink}" target="_blank">${post.title}</a></td>
-                                        <td>${post.date}</td>
-                                        <td style="color:#ffc107;font-weight:bold;">${post.rating ? post.rating + ' / 5' : '—'}</td>
-                                        <td>${post.votes}</td>
-                                        <td>${post.comments}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                        <div style="margin-top:1em;">
-                            Page ${data.page} of ${data.max_page}
-                            <button ${data.page==1?'disabled':''} onclick="paisLoadRatings(${data.page-1},'${search.replace(/'/g,"\\'")}')">Prev</button>
-                            <button ${data.page==data.max_page?'disabled':''} onclick="paisLoadRatings(${data.page+1},'${search.replace(/'/g,"\\'")}')">Next</button>
-                        </div>
-                    `;
-                });
-        }
-        document.addEventListener('DOMContentLoaded',function(){paisLoadRatings();});
-        </script>
-    </div>
-    <?php
+    echo '<div class="wrap"><h1>Ratings Management</h1>';
+    echo '<p>Here you can manage ratings for the Used Cars Search plugin.</p>';
+    // Add your ratings management UI here
+    echo '</div>';
 }
 
 
 
-add_action('wp_ajax_ucs_ratings_list', function() {
-    global $wpdb;
 
-    $page = max(1, intval($_GET['page'] ?? 1));
-    $per_page = 20;
-    $offset = ($page-1)*$per_page;
-    $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
+    // Register Meta Box
+    function ucs_add_car_details_meta_box() {
+        add_meta_box(
+            'ucs_car_details_meta_box',
+            __('Car Details', 'used-cars-search'),
+            'ucs_render_car_details_meta_box',
+            'post', // Target 'post' post type
+            'normal',
+            'high'
+        );
+    }
+    add_action('add_meta_boxes', 'ucs_add_car_details_meta_box');
 
-    // Get sort and order from request
-    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'date';
-    $order = (isset($_GET['order']) && strtolower($_GET['order']) === 'asc') ? 'ASC' : 'DESC';
+    // Render Meta Box Content
+    function ucs_render_car_details_meta_box($post) {
+        // Security nonce
+        wp_nonce_field('ucs_save_meta_box_data', 'ucs_meta_box_nonce');
 
-    // Allowable SQL columns
-    $sortable = [
-        'ID' => 'ID',
-        'title' => 'post_title',
-        'date' => 'post_date'
-    ];
-    $sort_sql = $sortable[$sort] ?? 'post_date';
-
-    // For rating, votes, comments -- sort in PHP after fetching
-    $is_php_sort = in_array($sort, ['rating','votes','comments']);
-
-    // Query post IDs with search
-    $post_where = "WHERE post_type = 'post' AND post_status = 'publish'";
-    if ($search) {
-        $post_where .= $wpdb->prepare(" AND post_title LIKE %s", '%' . $wpdb->esc_like($search) . '%');
+        // Field data
+        $fields = ['year', 'make', 'model', 'trim', 'price', 'mileage', 'engine', 'transmission'];
+        $values = [];
+        foreach ($fields as $field) {
+            $values[$field] = get_post_meta($post->ID, 'ucs_' . $field, true);
+        }
+        ?>
+        <table class="form-table">
+            <tr>
+                <th><label for="ucs_year"><?php _e('Year', 'used-cars-search'); ?></label></th>
+                <td>
+                    <select id="ucs_year" name="ucs_year">
+                        <option value="">Select Year</option>
+                        <?php for ($y = 2025; $y >= 1980; $y--): ?>
+                            <option value="<?php echo $y; ?>" <?php selected($values['year'], $y); ?>><?php echo $y; ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="ucs_make"><?php _e('Make', 'used-cars-search'); ?></label></th>
+                <td>
+                    <select id="ucs_make" name="ucs_make">
+                        <option value="">Select Make</option>
+                        <?php
+                        $makes = [
+                            'Acura','Alfa Romeo','Audi','BMW','Buick','Cadillac','Chevrolet','Chrysler','Dodge','Fiat','Ford','Genesis','GMC','Honda','Hyundai','Infiniti','Jaguar','Jeep','Kia','Land Rover','Lexus','Lincoln','Maserati','Mazda','Mercedes-Benz','MINI','Mitsubishi','Nissan','Porsche','RAM','Subaru','Tesla','Toyota','Volkswagen','Volvo'
+                        ];
+                        foreach ($makes as $make): ?>
+                            <option value="<?php echo $make; ?>" <?php selected($values['make'], $make); ?>><?php echo $make; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="ucs_model"><?php _e('Model', 'used-cars-search'); ?></label></th>
+                <td><input type="text" id="ucs_model" name="ucs_model" value="<?php echo esc_attr($values['model']); ?>" class="regular-text" /></td>
+            </tr>
+            <tr>
+                <th><label for="ucs_trim"><?php _e('Trim', 'used-cars-search'); ?></label></th>
+                <td><input type="text" id="ucs_trim" name="ucs_trim" value="<?php echo esc_attr($values['trim']); ?>" class="regular-text" /></td>
+            </tr>
+            <tr>
+                <th><label for="ucs_price"><?php _e('Price', 'used-cars-search'); ?></label></th>
+                <td><input type="number" id="ucs_price" name="ucs_price" value="<?php echo esc_attr($values['price']); ?>" class="regular-text" step="0.01"/></td>
+            </tr>
+            <tr>
+                <th><label for="ucs_mileage"><?php _e('Mileage', 'used-cars-search'); ?></label></th>
+                <td><input type="number" id="ucs_mileage" name="ucs_mileage" value="<?php echo esc_attr($values['mileage']); ?>" class="regular-text" /></td>
+            </tr>
+            <tr>
+                <th><label for="ucs_engine"><?php _e('Engine', 'used-cars-search'); ?></label></th>
+                <td><input type="text" id="ucs_engine" name="ucs_engine" value="<?php echo esc_attr($values['engine']); ?>" class="regular-text" /></td>
+            </tr>
+            <tr>
+                <th><label for="ucs_transmission"><?php _e('Transmission', 'used-cars-search'); ?></label></th>
+                <td>
+                    <select id="ucs_transmission" name="ucs_transmission">
+                        <option value="">Select Transmission</option>
+                        <?php
+                        $transmissions = [
+                            'Automatic','Manual','CVT','Dual-Clutch','Tiptronic','Semi-Automatic','Automated Manual'
+                        ];
+                        foreach ($transmissions as $trans): ?>
+                            <option value="<?php echo $trans; ?>" <?php selected($values['transmission'], $trans); ?>><?php echo $trans; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <?php
     }
 
-    $total = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} $post_where");
+    // Save Meta Box Data
+    function ucs_save_meta_box_data($post_id) {
+        // Verify nonce
+        if (!isset($_POST['ucs_meta_box_nonce']) || !wp_verify_nonce($_POST['ucs_meta_box_nonce'], 'ucs_save_meta_box_data')) {
+            return;
+        }
+        // Prevent autosave
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+        // Check user permissions
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
 
-    // Use SQL ORDER BY for DB columns; otherwise default by date
-    $order_by = $is_php_sort ? 'post_date' : $sort_sql;
+        $fields = ['year', 'make', 'model', 'trim', 'price', 'mileage', 'engine', 'transmission'];
 
-    $posts = $wpdb->get_results($wpdb->prepare(
-        "SELECT ID, post_title, post_date FROM {$wpdb->posts} $post_where ORDER BY $order_by $order LIMIT %d OFFSET %d",
-        $per_page, $offset
-    ));
-
-    $result = [];
-    foreach ($posts as $p) {
-        // Ratings
-        $row = $wpdb->get_row($wpdb->prepare(
-            "SELECT AVG(rating) as avg_rating, COUNT(*) as num_votes FROM {$wpdb->prefix}ucs_ratings WHERE post_id=%d", $p->ID
-        ));
-        $avg_rating = $row && $row->num_votes > 0 ? round($row->avg_rating,2) : '';
-        $num_votes = $row ? intval($row->num_votes) : 0;
-
-        // Comments
-        $comments = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->comments} WHERE comment_post_ID = %d AND comment_approved = '1'", $p->ID
-        ));
-
-        $result[] = [
-            'ID' => $p->ID,
-            'title' => esc_html($p->post_title),
-            'permalink' => get_permalink($p->ID),
-            'date' => date('Y-m-d', strtotime($p->post_date)),
-            'rating' => $avg_rating === '' ? 0 : $avg_rating,
-            'votes' => $num_votes,
-            'comments' => $comments
-        ];
+        foreach ($fields as $field) {
+            if (isset($_POST['ucs_' . $field])) {
+                update_post_meta($post_id, 'ucs_' . $field, sanitize_text_field($_POST['ucs_' . $field]));
+            } else {
+                delete_post_meta($post_id, 'ucs_' . $field);
+            }
+        }
     }
+    add_action('save_post', 'ucs_save_meta_box_data');
 
-    // For non-SQL columns, sort in PHP
-    if ($is_php_sort && count($result) > 1) {
-        usort($result, function($a, $b) use ($sort, $order) {
-            $valA = $a[$sort]; $valB = $b[$sort];
-            if ($valA == $valB) return 0;
-            if ($order === 'ASC') return ($valA < $valB) ? -1 : 1;
-            return ($valA > $valB) ? -1 : 1;
-        });
-    }
-
-    wp_send_json([
-        'posts' => $result,
-        'page' => $page,
-        'max_page' => max(1, ceil($total/$per_page)),
-        'total' => $total
-    ]);
-});
+} // end is_admin() check

@@ -10,12 +10,15 @@ Author: Ronald Allan Rivera
 
 if ( ! defined('ABSPATH') ) exit; // Prevent direct access
 
+if (is_admin()) {
+    require_once __DIR__ . '/includes/admin.php';
+}
+
 // Load REST endpoints
 add_action('plugins_loaded', function() {
     require_once __DIR__ . '/includes/rest-endpoints.php';
     require_once __DIR__ . '/includes/compare-page-template.php';
 });
-
 
 // 1. Enqueue Vanilla JS and CSS only where shortcode/widget is present
 
@@ -212,7 +215,3 @@ add_filter('the_content', function($content) {
     }
     return $content;
 });
-
-if (is_admin()) {
-    require_once __DIR__ . '/includes/admin.php';
-}
