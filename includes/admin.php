@@ -109,11 +109,159 @@ function ucs_render_dashboard_widget() {
 
 
 function ucs_admin_ratings_page() {
-    echo '<div class="wrap"><h1>Ratings Management</h1>';
-    echo '<p>Here you can manage ratings for the Used Cars Search plugin.</p>';
-    // Add your ratings management UI here
-    echo '</div>';
+    ?>
+    <div class="wrap">
+        <h1>Ratings Management</h1>
+        <div id="ucs-admin-table"></div>
+        <script>
+        let ucsCurrentPage = 1, ucsSearch = '', ucsLoading = false;
+        let ucsCurrentSort = 'date', ucsCurrentOrder = 'desc';
+
+        function ucsSort(column) {
+            if (ucsCurrentSort === column) {
+                ucsCurrentOrder = ucsCurrentOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                ucsCurrentSort = column;
+                ucsCurrentOrder = 'desc';
+            }
+            ucsLoadRatings(1, ucsSearch, ucsCurrentSort, ucsCurrentOrder);
+        }
+
+        function ucsLoadRatings(page = 1, search = '', sort = ucsCurrentSort, order = ucsCurrentOrder) {
+            ucsLoading = true;
+            document.getElementById('ucs-admin-table').innerHTML = 'Loading...';
+            fetch(ajaxurl + '?action=ucs_ratings_list&page=' + page +
+                '&search=' + encodeURIComponent(search) +
+                '&sort=' + encodeURIComponent(sort) +
+                '&order=' + encodeURIComponent(order)
+            )
+            .then(r => r.json())
+            .then(data => {
+                ucsLoading = false;
+                document.getElementById('ucs-admin-table').innerHTML = `
+                    <form onsubmit="event.preventDefault();ucsSearch=this.search.value;ucsLoadRatings(1,ucsSearch);">
+                        <input type="text" name="search" value="${search.replace(/"/g, '&quot;')}" placeholder="Search title..." />
+                        <button type="submit">Search</button>
+                    </form>
+                    <table class="widefat fixed" style="margin-top:1em;">
+                        <thead>
+                        <tr>
+                            <th class="ucs-sort-th" onclick="ucsSort('ID')">ID</th>
+                            <th class="ucs-sort-th" onclick="ucsSort('title')">Title</th>
+                            <th class="ucs-sort-th" onclick="ucsSort('date')">Date</th>
+                            <th class="ucs-sort-th" onclick="ucsSort('rating')">Avg Rating</th>
+                            <th class="ucs-sort-th" onclick="ucsSort('votes')">Votes</th>
+                            <th class="ucs-sort-th" onclick="ucsSort('comments')">Comments</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            ${data.posts.map(post => `
+                                <tr>
+                                    <td>${post.ID}</td>
+                                    <td><a href="${post.permalink}" target="_blank">${post.title}</a></td>
+                                    <td>${post.date}</td>
+                                    <td style="color:#ffc107;font-weight:bold;">${post.rating ? post.rating + ' / 5' : '—'}</td>
+                                    <td>${post.votes}</td>
+                                    <td>${post.comments}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div style="margin-top:1em;">
+                        Page ${data.page} of ${data.max_page}
+                        <button ${data.page==1?'disabled':''} onclick="ucsLoadRatings(${data.page-1},'${search.replace(/'/g,"\\'")}')">Prev</button>
+                        <button ${data.page==data.max_page?'disabled':''} onclick="ucsLoadRatings(${data.page+1},'${search.replace(/'/g,"\\'")}')">Next</button>
+                    </div>
+                `;
+            });
+        }
+        document.addEventListener('DOMContentLoaded',function(){ucsLoadRatings();});
+        </script>
+    </div>
+    <?php
 }
+
+add_action('wp_ajax_ucs_ratings_list', function() {
+    global $wpdb;
+
+    $page = max(1, intval($_GET['page'] ?? 1));
+    $per_page = 20;
+    $offset = ($page-1)*$per_page;
+    $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
+
+    // Get sort and order from request
+    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'date';
+    $order = (isset($_GET['order']) && strtolower($_GET['order']) === 'asc') ? 'ASC' : 'DESC';
+
+    // Allowable SQL columns
+    $sortable = [
+        'ID' => 'ID',
+        'title' => 'post_title',
+        'date' => 'post_date'
+    ];
+    $sort_sql = $sortable[$sort] ?? 'post_date';
+
+    // For rating, votes, comments -- sort in PHP after fetching
+    $is_php_sort = in_array($sort, ['rating','votes','comments']);
+
+    // Query post IDs with search
+    $post_where = "WHERE post_type = 'post' AND post_status = 'publish'";
+    if ($search) {
+        $post_where .= $wpdb->prepare(" AND post_title LIKE %s", '%' . $wpdb->esc_like($search) . '%');
+    }
+
+    $total = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} $post_where");
+
+    // Use SQL ORDER BY for DB columns; otherwise default by date
+    $order_by = $is_php_sort ? 'post_date' : $sort_sql;
+
+    $posts = $wpdb->get_results($wpdb->prepare(
+        "SELECT ID, post_title, post_date FROM {$wpdb->posts} $post_where ORDER BY $order_by $order LIMIT %d OFFSET %d",
+        $per_page, $offset
+    ));
+
+    $result = [];
+    foreach ($posts as $p) {
+        // Ratings
+        $row = $wpdb->get_row($wpdb->prepare(
+            "SELECT AVG(rating) as avg_rating, COUNT(*) as num_votes FROM {$wpdb->prefix}ucs_ratings WHERE post_id=%d", $p->ID
+        ));
+        $avg_rating = $row && $row->num_votes > 0 ? round($row->avg_rating,2) : '';
+        $num_votes = $row ? intval($row->num_votes) : 0;
+
+        // Comments
+        $comments = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->comments} WHERE comment_post_ID = %d AND comment_approved = '1'", $p->ID
+        ));
+
+        $result[] = [
+            'ID' => $p->ID,
+            'title' => esc_html($p->post_title),
+            'permalink' => get_permalink($p->ID),
+            'date' => date('Y-m-d', strtotime($p->post_date)),
+            'rating' => $avg_rating === '' ? 0 : $avg_rating,
+            'votes' => $num_votes,
+            'comments' => $comments
+        ];
+    }
+
+    // For non-SQL columns, sort in PHP
+    if ($is_php_sort && count($result) > 1) {
+        usort($result, function($a, $b) use ($sort, $order) {
+            $valA = $a[$sort]; $valB = $b[$sort];
+            if ($valA == $valB) return 0;
+            if ($order === 'ASC') return ($valA < $valB) ? -1 : 1;
+            return ($valA > $valB) ? -1 : 1;
+        });
+    }
+
+    wp_send_json([
+        'posts' => $result,
+        'page' => $page,
+        'max_page' => max(1, ceil($total/$per_page)),
+        'total' => $total
+    ]);
+});
 
 
 
