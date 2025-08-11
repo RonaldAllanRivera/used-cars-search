@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.3] - 2025-08-11
+
+### Added
+- In‑admin REST API quick reference on the `Used Cars Search` admin page: dynamic endpoints via `rest_url()`, supported meta keys, Postman steps, and pretty‑printed Create/Update JSON payloads.
+
+### Docs
+- README updated with an "In‑Admin Quick Reference" section pointing to the dashboard docs.
+
+## [1.5.2] - 2025-08-11
+
+### Added
+- Register post meta for car details (`ucs_year`, `ucs_make`, `ucs_model`, `ucs_trim`, `ucs_price`, `ucs_mileage`, `ucs_engine`, `ucs_transmission`) and SEO fields (`_ucs_seo_title`, `_ucs_seo_description`, `_ucs_seo_keywords`, `_ucs_seo_noindex`) with `show_in_rest` for use via `/wp-json/wp/v2/posts`.
+- New docs in README: Postman steps, JSON payload examples, and Make.com setup notes.
+
+### Fixed
+- Prevent PHP 8 `ArgumentCountError` in meta sanitization by using wrapper sanitizer callbacks that accept 4 parameters (compatible with WP meta filters).
+- Resolve 403 Forbidden when updating protected (underscore) meta via REST by adding an `auth_callback` that checks user capability to edit the post.
+
 ## [1.5.1] - 2025-08-11
 
 ### Fixed

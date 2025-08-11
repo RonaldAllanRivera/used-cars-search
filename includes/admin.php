@@ -78,6 +78,85 @@ function ucs_admin_page() {
     do_settings_sections('used-cars-search');
     submit_button('Save Settings');
     echo '</form>';
+
+    // REST API documentation section
+    $posts_endpoint = esc_url( rest_url('wp/v2/posts') );
+    $read_example   = esc_url( rest_url('wp/v2/posts/123?_fields=id,title.rendered,meta') );
+
+    $create_payload = [
+        'title' => '2018 Honda Civic LX',
+        'status' => 'publish',
+        'content' => 'Description or details here.',
+        'meta' => [
+            'ucs_year' => 2018,
+            'ucs_make' => 'Honda',
+            'ucs_model' => 'Civic',
+            'ucs_trim' => 'LX',
+            'ucs_price' => 12995.0,
+            'ucs_mileage' => 58432,
+            'ucs_engine' => '2.0L I4',
+            'ucs_transmission' => 'Automatic',
+            '_ucs_seo_title' => '2018 Honda Civic LX for sale | DealerName',
+            '_ucs_seo_description' => 'Clean title Civic LX, low miles, great condition.',
+            '_ucs_seo_keywords' => 'Honda Civic 2018',
+            '_ucs_seo_noindex' => false,
+        ],
+    ];
+    $update_payload = [
+        'meta' => [
+            'ucs_price' => 12750.00,
+            'ucs_mileage' => 58010,
+            '_ucs_seo_noindex' => true,
+        ],
+    ];
+    $create_json = esc_html( wp_json_encode($create_payload, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES) );
+    $update_json = esc_html( wp_json_encode($update_payload, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES) );
+
+    echo '<hr style="margin:2em 0 1em">';
+    echo '<h2>REST API: Car Details & SEO</h2>';
+    echo '<p>This plugin registers all car details and SEO fields as post meta with REST support. You can create or update them via the core Posts endpoint.</p>';
+    echo '<ul style="line-height:1.6em;">';
+    echo '<li><strong>Create</strong>: <code>POST ' . $posts_endpoint . '</code></li>';
+    echo '<li><strong>Update</strong>: <code>POST ' . $posts_endpoint . '/{id}</code></li>';
+    echo '<li><strong>Read</strong>: <code>GET ' . $read_example . '</code></li>';
+    echo '</ul>';
+
+    echo '<p><strong>Authentication</strong>: Use <em>Application Passwords</em> (Users → Profile). In Postman/Make.com use Basic Auth with your WordPress username and the generated password.</p>';
+
+    echo '<p><strong>Supported meta keys</strong>:</p>';
+    echo '<ul style="columns:2;-webkit-columns:2;-moz-columns:2;line-height:1.6em;">';
+    echo '<li><code>ucs_year</code> (integer)</li>';
+    echo '<li><code>ucs_make</code> (string)</li>';
+    echo '<li><code>ucs_model</code> (string)</li>';
+    echo '<li><code>ucs_trim</code> (string)</li>';
+    echo '<li><code>ucs_price</code> (number)</li>';
+    echo '<li><code>ucs_mileage</code> (integer)</li>';
+    echo '<li><code>ucs_engine</code> (string)</li>';
+    echo '<li><code>ucs_transmission</code> (string)</li>';
+    echo '<li><code>_ucs_seo_title</code> (string)</li>';
+    echo '<li><code>_ucs_seo_description</code> (string)</li>';
+    echo '<li><code>_ucs_seo_keywords</code> (string)</li>';
+    echo '<li><code>_ucs_seo_noindex</code> (boolean)</li>';
+    echo '</ul>';
+
+    echo '<p><strong>Postman quick steps</strong>:</p>';
+    echo '<ol style="line-height:1.6em;">';
+    echo '<li>Create an Application Password (Users → Your Profile).</li>';
+    echo '<li>Set Authorization: <em>Basic Auth</em> (Username = your WP user, Password = Application Password).</li>';
+    echo '<li>Set Header: <code>Content-Type: application/json</code>.</li>';
+    echo '<li>POST to <code>' . $posts_endpoint . '</code> with the Create JSON below.</li>';
+    echo '<li>Then POST to <code>' . $posts_endpoint . '/{id}</code> with the Update JSON to modify fields.</li>';
+    echo '<li>Verify with GET: <code>' . $posts_endpoint . '/{id}?_fields=id,title.rendered,meta</code>.</li>';
+    echo '</ol>';
+
+    echo '<p><strong>Create JSON</strong>:</p>';
+    echo '<pre style="white-space:pre-wrap;max-width:900px;overflow:auto;background:#f6f7f7;padding:10px;border:1px solid #ccd0d4;"><code>' . $create_json . '</code></pre>';
+
+    echo '<p><strong>Update JSON</strong>:</p>';
+    echo '<pre style="white-space:pre-wrap;max-width:900px;overflow:auto;background:#f6f7f7;padding:10px;border:1px solid #ccd0d4;"><code>' . $update_json . '</code></pre>';
+
+    echo '<p><strong>Make.com</strong>: Use HTTP → Make a request, Method: POST, URL: <code>' . $posts_endpoint . '</code> (or <code>' . $posts_endpoint . '/{id}</code>), Auth: Basic, Headers: <code>Content-Type: application/json</code>. Map your variables into the <code>meta</code> object as shown above.</p>';
+
     echo '<div style="margin-top:2em;padding:1em;border:1px solid #c00;background:#fee;max-width:500px;">';
     echo '<b>Danger Zone</b><br>';
     echo '<a href="#" class="button">Reset All Ratings</a> <a href="#" class="button">Delete All Comments</a>';

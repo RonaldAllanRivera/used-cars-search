@@ -20,6 +20,8 @@ add_action('plugins_loaded', function() {
     require_once __DIR__ . '/includes/compare-page-template.php';
     // SEO module: adds SEO meta box and head tags safely
     require_once __DIR__ . '/includes/seo.php';
+    // Meta registration: expose car details + SEO fields to REST API
+    require_once __DIR__ . '/includes/meta.php';
 });
 
 // 1. Enqueue Vanilla JS and CSS only where shortcode/widget is present

@@ -74,6 +74,62 @@ add_filter('ucs_seo_post_types', function($types) {
 
 > Best practice: If you already use a full SEO suite (Yoast, Rank Math), keep this plugin's SEO output disabled (default) and use it only if you need lightweight, per-post overrides.
 
+## 🔌 REST API: Car Details & SEO (v1.5.2)
+
+* __Exposed Meta__: All car details (`ucs_year`, `ucs_make`, `ucs_model`, `ucs_trim`, `ucs_price`, `ucs_mileage`, `ucs_engine`, `ucs_transmission`) and SEO fields (`_ucs_seo_title`, `_ucs_seo_description`, `_ucs_seo_keywords`, `_ucs_seo_noindex`) are registered with `show_in_rest`.
+* __Endpoint__: Core WP posts API: `/wp-json/wp/v2/posts`.
+* __Auth__: Use an admin/editor account via Application Passwords (recommended for Postman/Make.com) or cookie auth.
+
+### Read (GET)
+```
+GET /wp-json/wp/v2/posts/123?_fields=id,title.rendered,meta
+```
+
+### Create or Update (POST)
+Headers: `Content-Type: application/json` and `Authorization: Basic <username:app_password>`
+
+```json
+{
+  "title": "2018 Honda Civic LX",
+  "status": "publish",
+  "meta": {
+    "ucs_year": 2018,
+    "ucs_make": "Honda",
+    "ucs_model": "Civic",
+    "ucs_trim": "LX",
+    "ucs_price": 12995.0,
+    "ucs_mileage": 58432,
+    "ucs_engine": "2.0L I4",
+    "ucs_transmission": "Automatic",
+    "_ucs_seo_title": "2018 Honda Civic LX for sale | DealerName",
+    "_ucs_seo_description": "Clean title Civic LX, low miles, great condition.",
+    "_ucs_seo_keywords": "Honda Civic 2018",
+    "_ucs_seo_noindex": false
+  }
+}
+```
+
+### Postman Quick Steps
+* __Auth__: Settings → Authorization → Basic Auth. Username = your WP user. Password = Application Password (Users → Profile → Application Passwords).
+* __Create__: POST `.../wp-json/wp/v2/posts` with the JSON body above.
+* __Update__: POST `.../wp-json/wp/v2/posts/{id}` with `{ "meta": { ... } }`.
+* __Verify__: GET `.../wp-json/wp/v2/posts/{id}?_fields=id,meta`.
+
+### Make.com (Integromat) Quick Steps
+* Module: HTTP → Make a request.
+* Method: POST. URL: `https://your-site.tld/wp-json/wp/v2/posts` (or `/posts/{id}` to update).
+* Auth: Basic → Provide username and Application Password.
+* Headers: `Content-Type: application/json`.
+* Body: Use the JSON payload above; map Make.com variables (e.g., year, make, price) into `meta` fields.
+
+### In‑Admin Quick Reference (v1.5.3)
+
+You can also find a live REST API quick reference directly inside WordPress Admin:
+
+* **Location**: `Used Cars Search` admin page
+* **Includes**: Dynamic endpoint URLs via `rest_url()`, supported meta keys, Postman steps, and pretty‑printed Create/Update JSON payloads
+* **Why**: Ensures future maintainers can integrate via Postman/Make.com without leaving WP Admin
+
 ## 🚗 Car Details Admin Dropdowns (v1.4.0)
 
 * The admin panel now features dropdowns for Year, Make, and Transmission when editing or adding a car post.
