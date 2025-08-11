@@ -47,6 +47,39 @@ Built for scale, with fast keyword autosuggest, category filtering, sortable res
 * Improved admin UX, with settings, compare page selection, and a "Danger Zone" for quick data resets.
 * The dashboard now mirrors the original plugin's admin interface, fully rebranded for Used Cars Search.
 
+## 🔍 SEO Meta (v1.5.0)
+
+* __Fields__: SEO Title, SEO Description, SEO Keywords, No-index toggle.
+* __Meta Box__: Shown on `post` by default. Extendable via `ucs_seo_post_types` filter.
+* **Output behavior**
+  * If no popular SEO plugin is detected, this plugin outputs:
+    * `<title>` override (when SEO Title is set)
+    * `<meta name="description">`
+    * `<meta name="keywords">` (legacy/optional)
+    * `<meta name="robots" content="noindex,follow">` when No-index is checked
+  * If Yoast SEO or Rank Math is active, output is disabled by default to avoid duplicate tags.
+* **Enable/disable output**
+
+```php
+// Force-enable or disable this plugin's SEO output
+add_filter('ucs_seo_enable_output', function($enabled) {
+    return true; // or false
+});
+```
+
+* **Target other post types**
+
+```php
+// Show the SEO meta box on additional post types
+add_filter('ucs_seo_post_types', function($types) {
+    $types[] = 'page';
+    $types[] = 'product';
+    return $types;
+});
+```
+
+> Best practice: If you already use a full SEO suite (Yoast, Rank Math), keep this plugin's SEO output disabled (default) and use it only if you need lightweight, per-post overrides.
+
 ## 🚗 Car Details Admin Dropdowns (v1.4.0)
 
 * The admin panel now features dropdowns for Year, Make, and Transmission when editing or adding a car post.

@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1] - 2025-08-11
+
+### Fixed
+- Resolved issue where SEO head tags output contained literal "\n" sequences; tags now render with proper newlines and clean markup.
+
+## [1.5.0] - 2025-08-11
+
+### Added
+- New SEO module (`includes/seo.php`) with meta box fields: SEO Title, SEO Description, SEO Keywords, and No-index toggle.
+- Frontend output: optional `<title>` override, `<meta name="description">`, `<meta name="keywords">`, and robots `noindex,follow` when enabled.
+- Conflict detection with Yoast SEO and Rank Math; disables this plugin's SEO output by default when detected.
+- Filters:
+  - `ucs_seo_enable_output` to enable/disable SEO tag output.
+  - `ucs_seo_post_types` to add the SEO meta box to additional post types.
+
+### Changed
+- Documentation updated (README) with usage examples and best practices for the SEO module.
+
 ## [1.4.2] - 2025-08-06
 
 ### Improved

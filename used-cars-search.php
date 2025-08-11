@@ -18,6 +18,8 @@ if (is_admin()) {
 add_action('plugins_loaded', function() {
     require_once __DIR__ . '/includes/rest-endpoints.php';
     require_once __DIR__ . '/includes/compare-page-template.php';
+    // SEO module: adds SEO meta box and head tags safely
+    require_once __DIR__ . '/includes/seo.php';
 });
 
 // 1. Enqueue Vanilla JS and CSS only where shortcode/widget is present
