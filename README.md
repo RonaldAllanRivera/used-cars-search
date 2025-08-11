@@ -1,29 +1,23 @@
 # Used Cars Search
 
-A **modern, AJAX-powered WordPress plugin** for advanced post searching.
-Built for scale, with fast keyword autosuggest, category filtering, sortable results, and robust admin controls.
-**No jQuery, no frameworks—just Vanilla JavaScript (ES6+) and the Fetch API for maximum speed and compatibility.**
+A production‑ready WordPress search and comparison plugin purpose‑built for used‑car inventories.
+Lightning‑fast autosuggest, sortable grid/list results, comprehensive car details, and comparison.
+SEO‑ready with conflict‑safe meta output and a clean, extensible architecture. Built with Vanilla JS (ES6) — no jQuery.
 
 ---
 
 ## 🚀 Features
 
-* All car details (Year, Make, Model, Trim, Price, Mileage, Engine, Transmission) are now displayed in the grid view, each on a separate labeled line.
-* Car details block is hidden if all fields are empty.
-* Price and mileage are formatted for better readability.
-
-* **Software Comparison** - Users can select up to four items and compare them side-by-side on a dedicated, responsive page.
-* **Lightning-Fast Search** - Optimized database queries for instant results, even with thousands of posts
-* **Precise Whole-Word Matching** - Accurate search results that match your exact terms
-* **Smart category filtering** with post counts and real-time UI updates (no page reload)
-* **Grid/List view toggle** with responsive design for all screen sizes
-* **Sortable, paginated results** (title, category, star rating, comments, date) — Pagination and total count now always match filtered (keyword/category) search!
-* **User star ratings** (1-5, per post, via custom widget)
-* **Search/list view displays average star ratings as yellow stars and vote count**
-* **Threaded comments** via native WP Comments API
-* **Shortcode support**
-* **Highly Scalable** - Optimized for 50k+ posts with database-level filtering
-* **Zero JS conflicts:** all JS and CSS are namespaced, loaded only when needed
+* **SEO Meta Module (conflict‑safe):** Per‑post SEO Title, Description, Keywords, and No‑index with automatic conflict detection for Yoast/Rank Math. Filter‑controlled output and post‑type targeting.
+* **Car Details, Done Right:** Grid cards show Year, Make, Model, Trim, Price, Mileage, Engine, Transmission — clearly labeled, formatted, and auto‑hidden when all values are empty.
+* **Lightning‑Fast Search & Autosuggest:** Whole‑word matching, fast queries, and smart category filtering with instant UI updates.
+* **Grid/List Views + Sorting:** Sort by title, category, rating, comments, and date. Pagination and totals always reflect applied filters.
+* **Compare up to 4 Cars:** Dedicated, responsive compare page with easy selection and a floating compare bar.
+* **User Ratings:** 1–5 star ratings per post with average and vote counts displayed in results.
+* **Admin Productivity:** Dropdowns for Year, Make, Transmission ensure consistent data entry.
+* **Zero Dependencies:** Pure ES6 + Fetch API. No jQuery or heavy frameworks.
+* **Scalable & Clean:** Namespaced assets, selective loading, and REST endpoints designed for large datasets.
+* **Extensible:** Carefully designed hooks/filters and modular PHP includes for safe customization.
 
 ---
 
