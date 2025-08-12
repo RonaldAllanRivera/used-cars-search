@@ -26,20 +26,20 @@ SEO‑ready with conflict‑safe meta output and a clean, extensible architectur
 1. Upload the plugin folder to `wp-content/plugins/`.
 2. Activate **Used Cars Search** in WP Admin.
 3. Add `[used_cars_search]` to any post or page.
-4. To enable the compare feature, create a new page (e.g., named "Compare"), add the `[ucs_compare_page]` shortcode to it, and then select this page from the dropdown in the plugin's settings page (**Popular AI Search -> Settings**).
+4. To enable the compare feature, create a new page (e.g., named "Compare"), add the `[ucs_compare_page]` shortcode to it, and then select this page from the dropdown in the plugin's settings page (**Used Cars Search -> Settings**).
 
 ---
 
 ## 🛠️ Enhanced Admin Dashboard (v1.4.1)
 
-* The admin dashboard/settings page has been restored and rebranded from the original plugin.
+* The admin dashboard/settings page is included as part of this plugin.
 * Now features a statistics widget showing:
   * Published Posts
   * Total Star Ratings
   * Average Star Rating
   * Approved Comments
 * Improved admin UX, with settings, compare page selection, and a "Danger Zone" for quick data resets.
-* The dashboard now mirrors the original plugin's admin interface, fully rebranded for Used Cars Search.
+* The dashboard provides settings, stats, and management tools designed for Used Cars Search.
 
 ## 🔍 SEO Meta (v1.5.0)
 
