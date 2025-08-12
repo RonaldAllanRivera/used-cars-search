@@ -88,8 +88,31 @@ function ucs_ai_settings_page() {
         </form>
 
         <hr>
+        <h2><?php esc_html_e('How to Use', 'used-cars-search'); ?></h2>
+        <div class="ucs-howto-box" style="background: #f8f9fa; padding: 15px 20px; border-left: 4px solid #2271b1; margin-bottom: 20px;">
+            <h3><?php esc_html_e('Configure:', 'used-cars-search'); ?></h3>
+            <ol>
+                <li><?php esc_html_e('WP Admin → Used Cars Search → AI Settings', 'used-cars-search'); ?></li>
+                <li><?php esc_html_e('Enable AI, enter API key, select model from dropdown.', 'used-cars-search'); ?></li>
+                <li><?php esc_html_e('Use "Test Connection" to verify; "OK" indicates success.', 'used-cars-search'); ?></li>
+            </ol>
+            
+            <h3><?php esc_html_e('Single post:', 'used-cars-search'); ?></h3>
+            <ol>
+                <li><?php esc_html_e('Edit any post → "AI Assist (Used Cars)" meta box.', 'used-cars-search'); ?></li>
+                <li><?php esc_html_e('Select fields → Generate → review → Apply.', 'used-cars-search'); ?></li>
+            </ol>
+            
+            <h3><?php esc_html_e('Bulk:', 'used-cars-search'); ?></h3>
+            <ol>
+                <li><?php esc_html_e('Posts → check posts → Bulk actions → "AI Assist: Generate & Apply" → Apply.', 'used-cars-search'); ?></li>
+                <li><?php esc_html_e('Notice shows processed/failed counts.', 'used-cars-search'); ?></li>
+            </ol>
+        </div>
+        
+        <hr>
         <h2><?php esc_html_e('Test Connection', 'used-cars-search'); ?></h2>
-        <p><?php esc_html_e('Click to verify your API key and model. No content is generated; the test requests a simple “OK” reply.', 'used-cars-search'); ?></p>
+        <p><?php esc_html_e('Click to verify your API key and model. No content is generated; the test requests a simple "OK" reply.', 'used-cars-search'); ?></p>
         <p>
             <button class="button button-secondary" id="ucs-ai-test-btn"><?php esc_html_e('Test Connection', 'used-cars-search'); ?></button>
             <span id="ucs-ai-test-status" style="margin-left:8px;"></span>
