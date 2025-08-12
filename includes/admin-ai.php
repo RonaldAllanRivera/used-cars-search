@@ -108,6 +108,36 @@ function ucs_ai_settings_page() {
                 <li><?php esc_html_e('Posts → check posts → Bulk actions → "AI Assist: Generate & Apply" → Apply.', 'used-cars-search'); ?></li>
                 <li><?php esc_html_e('Notice shows processed/failed counts.', 'used-cars-search'); ?></li>
             </ol>
+
+            <h3><?php esc_html_e('Background queue (WP‑Cron):', 'used-cars-search'); ?></h3>
+            <ol>
+                <li><?php esc_html_e('Enable AI above and save settings.', 'used-cars-search'); ?></li>
+                <li><?php esc_html_e('Enqueue posts: Posts → select items → Bulk actions → "AI Assist: Queue for Background" → Apply.', 'used-cars-search'); ?></li>
+                <li><?php esc_html_e('WP‑Cron runs every minute and processes queued items in small batches automatically.', 'used-cars-search'); ?></li>
+                <li><?php echo wp_kses_post(__('To run unattended while logged out or overnight on Laragon, schedule a task to request <code>http://localhost/popular-ai-software-search/wp-cron.php</code> every minute (Windows Task Scheduler).', 'used-cars-search')); ?></li>
+                <li><?php echo wp_kses_post(__('Alternative: add <code>define(\'ALTERNATE_WP_CRON\', true);</code> in wp-config.php and ensure periodic traffic to trigger WP‑Cron.', 'used-cars-search')); ?></li>
+                <li><?php esc_html_e('You will see admin notices for enqueue results; items are applied in the background—no browser tab required.', 'used-cars-search'); ?></li>
+            </ol>
+
+            <h4 style="margin-top:10px;"><?php esc_html_e('SiteGround and shared hosting setup:', 'used-cars-search'); ?></h4>
+            <p><?php esc_html_e('On shared hosts, it is best to disable the built‑in WP‑Cron trigger and use a real server cron calling wp-cron.php at a fixed interval.', 'used-cars-search'); ?></p>
+            <ol>
+                <li><?php echo wp_kses_post(__('In <code>wp-config.php</code> add: <code>define(\'DISABLE_WP_CRON\', true);</code>', 'used-cars-search')); ?></li>
+                <li><?php echo wp_kses_post(__('SiteGround: Site Tools → Devs → Cron Jobs → Create Cron Job', 'used-cars-search')); ?>
+                    <ul style="list-style: disc; margin-left:20px;">
+                        <li><?php echo wp_kses_post(__('Schedule: Every 1 minute (or every 5 minutes if 1 minute is not allowed).', 'used-cars-search')); ?></li>
+                        <li><?php echo wp_kses_post(__('Command (choose one):', 'used-cars-search')); ?>
+                            <div style="margin:6px 0 10px 0;">
+                                <code>wget -q -O - https://your-domain.com/wp-cron.php?doing_wp_cron &gt; /dev/null 2&gt;&1</code><br>
+                                <code>curl -s https://your-domain.com/wp-cron.php?doing_wp_cron &gt; /dev/null 2&gt;&1</code>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+                <li><?php echo wp_kses_post(__('cPanel (generic shared hosting): Cron Jobs → Add New Cron Job → use the same <code>wget</code> or <code>curl</code> command above.', 'used-cars-search')); ?></li>
+                <li><?php echo wp_kses_post(__('Replace <code>your-domain.com</code> with your real domain. Keep <code>?doing_wp_cron</code> to avoid caching layers from skipping the run.', 'used-cars-search')); ?></li>
+                <li><?php echo wp_kses_post(__('If your host restricts every‑minute intervals, pick the smallest allowed (e.g., 5 minutes). The queue will continue on the next tick.', 'used-cars-search')); ?></li>
+            </ol>
         </div>
         
         <hr>

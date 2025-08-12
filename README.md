@@ -1,12 +1,15 @@
 # Used Cars Search
 
-A production‑ready WordPress search and comparison plugin purpose‑built for used‑car inventories.
-Lightning‑fast autosuggest, sortable grid/list results, comprehensive car details, and comparison.
-SEO‑ready with conflict‑safe meta output and a clean, extensible architecture. Built with Vanilla JS (ES6) — no jQuery.
+A production‑ready WordPress search and comparison plugin engineered for scale and maintainability in used‑car inventories.
+Lightning‑fast autosuggest, sortable grid/list results, rich car details, and a polished compare flow.
+AI‑powered content generation with an unattended background queue (WP‑Cron). SEO‑ready with conflict‑safe meta output and a clean, extensible architecture. Built with Vanilla JS (ES6) — no jQuery.
 
 ---
 
 ## 🚀 Features
+
+* **Background AI Queue (WP‑Cron):** Unattended OpenAI generation at scale with a custom queue table, minutely worker, concurrency lock, and bulk enqueue action. Works on shared hosting via real cron (SiteGround/cPanel guides included).
+* **In‑Admin Guides:** Embedded “How to Use” for AI and background queue, plus an in‑admin REST API quick reference for maintainers.
 
 * **AI-Powered Content Generation:** OpenAI integration for auto-generating post titles, content, and SEO fields based on car details. Supports both single-post and bulk operations.
 * **SEO Meta Module (conflict‑safe):** Per‑post SEO Title, Description, Keywords, and No‑index with automatic conflict detection for Yoast/Rank Math. Filter‑controlled output and post‑type targeting.
@@ -167,6 +170,34 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 
 > Note: Requires your own OpenAI API key. The plugin includes a test connection feature to verify your API key works before enabling AI features.
 
+## 🔄 Unattended Background Queue (WP‑Cron)
+
+Run large AI generations while logged out or overnight. The plugin ships a custom queue table, a minutely worker, and a concurrency lock to process items in small batches safely.
+
+### How to use
+1. Enable AI and save in `Used Cars Search → AI Settings`.
+2. Enqueue posts: Posts list → select posts → Bulk actions → "AI Assist: Queue for Background" → Apply.
+3. Let WP‑Cron process items automatically in the background.
+
+### Local (Laragon)
+* Windows Task Scheduler: call `http://localhost/popular-ai-software-search/wp-cron.php` every minute.
+* Alternative: add `define('ALTERNATE_WP_CRON', true);` in `wp-config.php` and ensure periodic traffic.
+
+### SiteGround (shared hosting)
+1. In `wp-config.php` add: `define('DISABLE_WP_CRON', true);`
+2. Site Tools → Devs → Cron Jobs → Create Cron Job
+   * Schedule: every 1 minute (or the smallest allowed, e.g. 5 minutes)
+   * Command (choose one):
+     * `wget -q -O - https://your-domain.com/wp-cron.php?doing_wp_cron > /dev/null 2>&1`
+     * `curl -s https://your-domain.com/wp-cron.php?doing_wp_cron > /dev/null 2>&1`
+3. Keep `?doing_wp_cron` to bypass cache layers; replace `your-domain.com` with your actual domain.
+
+### cPanel (generic shared hosting)
+* Cron Jobs → Add New Cron Job
+* Use the same `wget` or `curl` command above and the smallest interval allowed.
+
+Tips: Batch size is modest by default and can be filtered via `ucs_ai_queue_batch_size`. If your host doesn’t allow 1‑minute crons, use 5 minutes—the queue resumes each tick.
+
 ## 🏗️ Roadmap
 
 * [x] Scaffold plugin structure, enqueue Vanilla JS, and register shortcode
@@ -176,6 +207,9 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 * [x] Add Software Comparison feature
 * [x] Build admin settings page
 * [x] Add OpenAI integration for AI-powered content generation
+* [x] WP‑Cron background AI queue for unattended generation (custom table, minutely worker, concurrency lock)
+* [ ] Queue status admin page (counts, pause/resume, retry failed)
+* [ ] CSV upload for car details with auto‑enqueue for AI generation
 * [ ] Add Elementor widget support
 * [ ] Optimize for large datasets (indexing, caching)
 * [ ] Polish, docs, and testing

@@ -10,10 +10,14 @@ Author: Ronald Allan Rivera
 
 if ( ! defined('ABSPATH') ) exit; // Prevent direct access
 
+// Load core AI utilities globally (needed by WP-Cron worker)
+require_once __DIR__ . '/includes/ai.php';
+// Load AI queue globally to register cron hooks
+require_once __DIR__ . '/includes/ai-queue.php';
+
 if (is_admin()) {
     require_once __DIR__ . '/includes/admin.php';
-    // AI modules: admin-only to avoid touching frontend
-    require_once __DIR__ . '/includes/ai.php';
+    // Admin-only modules/UI
     require_once __DIR__ . '/includes/admin-ai.php';
     require_once __DIR__ . '/includes/admin-ai-assist.php';
 }
@@ -138,6 +142,11 @@ register_activation_hook(__FILE__, function() {
     ) $charset;";
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
+    // Install AI queue table
+    require_once __DIR__ . '/includes/ai-queue.php';
+    if (function_exists('ucs_ai_queue_install')) {
+        ucs_ai_queue_install();
+    }
 });
 
 // [ucs_star_rating]

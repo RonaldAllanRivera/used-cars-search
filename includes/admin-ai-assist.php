@@ -165,34 +165,16 @@ function ucs_ai_ajax_apply() {
     $payload = isset($_POST['payload']) ? json_decode(stripslashes((string)$_POST['payload']), true) : [];
     if (!is_array($payload)) $payload = [];
     $fields = isset($payload['fields']) && is_array($payload['fields']) ? $payload['fields'] : ['title','content','seo_title','seo_description','seo_keywords'];
-
-    $updates = [];
-    $post_update = ['ID' => $post_id];
-    if (in_array('title', $fields, true) && !empty($payload['title'])) {
-        $post_update['post_title'] = sanitize_text_field($payload['title']);
-        $updates[] = 'title';
+    if (function_exists('ucs_ai_apply_changes_core')) {
+        $res = ucs_ai_apply_changes_core($post_id, $payload, $fields);
+        if (is_wp_error($res)) {
+            wp_send_json_error(['message' => $res->get_error_message()]);
+        }
+        $updated = isset($res['updated']) ? $res['updated'] : array();
+        wp_send_json_success(['message' => sprintf(__('Updated: %s', 'used-cars-search'), implode(', ', $updated))]);
+    } else {
+        wp_send_json_error(['message' => __('AI core not available.', 'used-cars-search')]);
     }
-    if (in_array('content', $fields, true) && !empty($payload['content'])) {
-        $post_update['post_content'] = wp_kses_post($payload['content']);
-        $updates[] = 'content';
-    }
-    if (count($post_update) > 1) {
-        wp_update_post($post_update);
-    }
-    if (in_array('seo_title', $fields, true) && !empty($payload['seo_title'])) {
-        update_post_meta($post_id, '_ucs_seo_title', sanitize_text_field($payload['seo_title']));
-        $updates[] = 'seo_title';
-    }
-    if (in_array('seo_description', $fields, true) && !empty($payload['seo_description'])) {
-        update_post_meta($post_id, '_ucs_seo_description', sanitize_textarea_field($payload['seo_description']));
-        $updates[] = 'seo_description';
-    }
-    if (in_array('seo_keywords', $fields, true) && !empty($payload['seo_keywords'])) {
-        update_post_meta($post_id, '_ucs_seo_keywords', sanitize_text_field($payload['seo_keywords']));
-        $updates[] = 'seo_keywords';
-    }
-
-    wp_send_json_success(['message' => sprintf(__('Updated: %s', 'used-cars-search'), implode(', ', $updates))]);
 }
 
 // Helper: Build messages and call OpenAI for a given post

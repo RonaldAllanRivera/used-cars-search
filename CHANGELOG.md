@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2025-08-12
+
+### Added
+- WP‑Cron background AI queue for unattended generation (custom DB table, minutely worker, concurrency lock, batch processing, bulk enqueue action).
+- In‑admin “Background queue (WP‑Cron)” how‑to with Laragon/local, SiteGround, and cPanel instructions.
+
+### Docs
+- README overview revamped to emphasize production‑grade architecture and the background AI queue.
+- New README section: Unattended Background Queue (WP‑Cron), including shared hosting guides (SiteGround/cPanel).
+- AI Settings page now includes background queue usage steps and hosting guidance.
+
 ## [1.5.4] - 2025-08-12
 
 ### Added

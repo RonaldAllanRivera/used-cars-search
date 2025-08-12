@@ -90,6 +90,108 @@ if (!function_exists('ucs_ai_chat_completion')) {
     }
 }
 
+// Core: Apply AI-generated changes to a post (shared by AJAX and Cron)
+if (!function_exists('ucs_ai_apply_changes_core')) {
+    function ucs_ai_apply_changes_core($post_id, $payload, $fields) {
+        $post_id = intval($post_id);
+        if (!$post_id || get_post_status($post_id) === false) {
+            return new WP_Error('ucs_ai_no_post', __('Invalid post.', 'used-cars-search'));
+        }
+
+        $fields = is_array($fields) ? $fields : array('title','content','seo_title','seo_description','seo_keywords');
+        $updated = array();
+        $post_update = array('ID' => $post_id);
+
+        if (in_array('title', $fields, true) && !empty($payload['title'])) {
+            $post_update['post_title'] = sanitize_text_field($payload['title']);
+            $updated[] = 'title';
+        }
+        if (in_array('content', $fields, true) && !empty($payload['content'])) {
+            $post_update['post_content'] = wp_kses_post($payload['content']);
+            $updated[] = 'content';
+        }
+        if (count($post_update) > 1) {
+            wp_update_post($post_update);
+        }
+
+        if (in_array('seo_title', $fields, true) && !empty($payload['seo_title'])) {
+            update_post_meta($post_id, '_ucs_seo_title', sanitize_text_field($payload['seo_title']));
+            $updated[] = 'seo_title';
+        }
+        if (in_array('seo_description', $fields, true) && !empty($payload['seo_description'])) {
+            update_post_meta($post_id, '_ucs_seo_description', sanitize_textarea_field($payload['seo_description']));
+            $updated[] = 'seo_description';
+        }
+        if (in_array('seo_keywords', $fields, true) && !empty($payload['seo_keywords'])) {
+            update_post_meta($post_id, '_ucs_seo_keywords', sanitize_text_field($payload['seo_keywords']));
+            $updated[] = 'seo_keywords';
+        }
+
+        return array('updated' => $updated);
+    }
+}
+
+// Core: Generate AI suggestions for a post id (shared by Cron)
+if (!function_exists('ucs_ai_generate_for_post_core')) {
+    function ucs_ai_generate_for_post_core($post_id, $fields = array('title','content','seo_title','seo_description','seo_keywords')) {
+        $post = get_post($post_id);
+        if (!$post) return new WP_Error('ucs_ai_no_post', __('Post not found.', 'used-cars-search'));
+
+        $fields = is_array($fields) ? $fields : array('title','content','seo_title','seo_description','seo_keywords');
+
+        $year = get_post_meta($post_id, 'ucs_year', true);
+        $make = get_post_meta($post_id, 'ucs_make', true);
+        $model = get_post_meta($post_id, 'ucs_model', true);
+        $trim = get_post_meta($post_id, 'ucs_trim', true);
+        $price = get_post_meta($post_id, 'ucs_price', true);
+        $mileage = get_post_meta($post_id, 'ucs_mileage', true);
+        $engine = get_post_meta($post_id, 'ucs_engine', true);
+        $trans = get_post_meta($post_id, 'ucs_transmission', true);
+
+        $details = array(
+            'year' => $year, 'make' => $make, 'model' => $model, 'trim' => $trim,
+            'price' => $price, 'mileage' => $mileage, 'engine' => $engine, 'transmission' => $trans,
+        );
+
+        $requested = implode(',', $fields);
+        $messages = array(
+            array('role' => 'system', 'content' => 'You are an assistant that writes concise, market-ready automotive listings. Always return STRICT JSON only.'),
+            array('role' => 'user', 'content' => wp_json_encode(array(
+                'task' => 'generate_used_car_post',
+                'requested_fields' => $fields,
+                'details' => $details,
+                'format' => array('title','content','seo_title','seo_description','seo_keywords')
+            )))
+        );
+
+        $resp = ucs_ai_chat_completion($messages, array());
+        if (is_wp_error($resp)) return $resp;
+
+        $content = '';
+        if (!empty($resp['choices'][0]['message']['content'])) {
+            $content = $resp['choices'][0]['message']['content'];
+        }
+        $json = json_decode($content, true);
+        if (!is_array($json)) {
+            // Try to extract JSON between braces
+            if (preg_match('/\{.*\}/s', $content, $m)) {
+                $json = json_decode($m[0], true);
+            }
+        }
+        if (!is_array($json)) return new WP_Error('ucs_ai_bad_json', __('Model did not return JSON.', 'used-cars-search'));
+
+        // Normalize keys
+        $out = array(
+            'title' => isset($json['title']) ? $json['title'] : '',
+            'content' => isset($json['content']) ? $json['content'] : '',
+            'seo_title' => isset($json['seo_title']) ? $json['seo_title'] : '',
+            'seo_description' => isset($json['seo_description']) ? $json['seo_description'] : '',
+            'seo_keywords' => isset($json['seo_keywords']) ? $json['seo_keywords'] : '',
+        );
+        return $out;
+    }
+}
+
 if (!function_exists('ucs_ai_ajax_test_connection')) {
     function ucs_ai_ajax_test_connection() {
         if (!current_user_can('manage_options')) {
