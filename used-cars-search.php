@@ -12,6 +12,10 @@ if ( ! defined('ABSPATH') ) exit; // Prevent direct access
 
 if (is_admin()) {
     require_once __DIR__ . '/includes/admin.php';
+    // AI modules: admin-only to avoid touching frontend
+    require_once __DIR__ . '/includes/ai.php';
+    require_once __DIR__ . '/includes/admin-ai.php';
+    require_once __DIR__ . '/includes/admin-ai-assist.php';
 }
 
 // Load REST endpoints

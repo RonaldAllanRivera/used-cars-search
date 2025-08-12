@@ -8,6 +8,7 @@ SEO‑ready with conflict‑safe meta output and a clean, extensible architectur
 
 ## 🚀 Features
 
+* **AI-Powered Content Generation:** OpenAI integration for auto-generating post titles, content, and SEO fields based on car details. Supports both single-post and bulk operations.
 * **SEO Meta Module (conflict‑safe):** Per‑post SEO Title, Description, Keywords, and No‑index with automatic conflict detection for Yoast/Rank Math. Filter‑controlled output and post‑type targeting.
 * **Car Details, Done Right:** Grid cards show Year, Make, Model, Trim, Price, Mileage, Engine, Transmission — clearly labeled, formatted, and auto‑hidden when all values are empty.
 * **Lightning‑Fast Search & Autosuggest:** Whole‑word matching, fast queries, and smart category filtering with instant UI updates.
@@ -152,6 +153,20 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 *   **Performance-focused**: Fast queries, selective asset loading, and optimized for large datasets.
 
 ---
+## 🤖 AI Content Generation (v1.5.4)
+
+* __OpenAI Integration__: Leverages OpenAI's API to generate high-quality, SEO-optimized content based on car details.
+* __Admin Settings__: Secure API key storage and model selection (supports multiple OpenAI models).
+* __Single-Post AI Assist__: Meta box on post edit screen with:
+  * Generate button to create AI suggestions for title, content, and SEO fields
+  * Field selection checkboxes to control which fields to update
+  * Apply to Post button that updates the post and refreshes the page automatically
+* __Bulk AI Assist__: Generate and apply content to multiple posts at once from the posts list screen.
+* __Smart Prompts__: Automatically builds prompts using car details (year, make, model, etc.) for contextually relevant content.
+* __Security__: Admin-only access, nonce verification, and capability checks throughout.
+
+> Note: Requires your own OpenAI API key. The plugin includes a test connection feature to verify your API key works before enabling AI features.
+
 ## 🏗️ Roadmap
 
 * [x] Scaffold plugin structure, enqueue Vanilla JS, and register shortcode
@@ -160,6 +175,7 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 * [x] Integrate star rating and comments
 * [x] Add Software Comparison feature
 * [x] Build admin settings page
+* [x] Add OpenAI integration for AI-powered content generation
 * [ ] Add Elementor widget support
 * [ ] Optimize for large datasets (indexing, caching)
 * [ ] Polish, docs, and testing

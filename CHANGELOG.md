@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.4] - 2025-08-12
+
+### Added
+- OpenAI API integration for AI-powered content generation
+- Admin settings UI for API key storage and model selection
+- Single-post AI Assist meta box for generating and applying AI content
+- Bulk AI Assist action for processing multiple posts at once
+- Smart prompt system that uses car details to generate relevant content
+
+### Fixed
+- Single-post "Apply to Post" button now properly refreshes the page after applying AI-generated content
+
+### Docs
+- README updated with comprehensive AI Content Generation documentation
+- Roadmap updated to mark OpenAI integration as completed
+
 ## [1.5.3] - 2025-08-11
 
 ### Added
