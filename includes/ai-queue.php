@@ -182,4 +182,87 @@ if (is_admin()) {
             echo '<div class="notice notice-success is-dismissible"><p>'.sprintf(esc_html__('AI Queue: enqueued %d posts, %d failed.', 'used-cars-search'), $ok, $fail).'</p></div>';
         }
     });
+
+    // AJAX: queue status (lock + counts)
+    add_action('wp_ajax_ucs_ai_queue_status', function(){
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(array('message' => 'forbidden'), 403);
+        }
+        check_ajax_referer('ucs_ai_admin', 'nonce');
+        global $wpdb; $table = ucs_ai_queue_table();
+        $queued = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status=%s", 'queued')));
+        $processing = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status=%s", 'processing')));
+        $errors = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status=%s", 'error')));
+        $lock = (bool) get_transient('ucs_ai_worker_lock');
+        wp_send_json_success(array(
+            'lock' => $lock,
+            'queued' => $queued,
+            'processing' => $processing,
+            'errors' => $errors,
+        ));
+    });
+
+    // Floating admin indicator (polls every 20s)
+    add_action('admin_footer', function(){
+        // Allow disabling via filter
+        if (false === apply_filters('ucs_ai_queue_indicator_enabled', true)) return;
+        $nonce = wp_create_nonce('ucs_ai_admin');
+        ?>
+        <style>
+            #ucs-ai-queue-indicator { position: fixed; right: 16px; top: 48px; z-index: 99999; background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 8px 10px; display: none; align-items: center; gap: 8px; }
+            #ucs-ai-queue-indicator .ucs-dot { width: 10px; height: 10px; border-radius: 50%; background: #8c8f94; display: inline-block; }
+            #ucs-ai-queue-indicator.ucs-running .ucs-dot { background: #2271b1; animation: ucs-pulse 1s infinite alternate; }
+            #ucs-ai-queue-indicator .ucs-text { font-size: 12px; color: #1d2327; }
+            @keyframes ucs-rotate { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+            @keyframes ucs-pulse { from { opacity: .5; } to { opacity: 1; } }
+        </style>
+        <div id="ucs-ai-queue-indicator" aria-live="polite" aria-atomic="true">
+            <span class="ucs-dot" aria-hidden="true"></span>
+            <span class="ucs-text"></span>
+        </div>
+        <script>
+        (function(){
+            const el = document.getElementById('ucs-ai-queue-indicator');
+            if (!el || typeof ajaxurl === 'undefined') return;
+            const text = el.querySelector('.ucs-text');
+            const dot = el.querySelector('.ucs-dot');
+            let timer;
+            function position(){
+                const bar = document.getElementById('wpadminbar');
+                const top = (bar ? bar.offsetHeight : 32) + 8; // keep below admin bar
+                el.style.top = top + 'px';
+            }
+            function render(state){
+                const { lock, queued, processing, errors } = state || {};
+                if (lock) {
+                    el.classList.add('ucs-running');
+                    text.textContent = `AI Queue: Processing… (in progress${processing?`, ${processing} processing`:''}${queued?`, ${queued} queued`:''})`;
+                    el.style.display = 'flex';
+                } else if ((queued||0) > 0 || (processing||0) > 0) {
+                    el.classList.remove('ucs-running');
+                    text.textContent = `AI Queue: Waiting ( ${queued||0} queued${processing?`, ${processing} processing`:''}${errors?`, ${errors} error(s)`:''} )`;
+                    el.style.display = 'flex';
+                } else {
+                    el.style.display = 'none';
+                }
+            }
+            function poll(){
+                const form = new FormData();
+                form.append('action','ucs_ai_queue_status');
+                form.append('nonce','<?php echo esc_js($nonce); ?>');
+                fetch(ajaxurl, { method: 'POST', credentials: 'same-origin', body: form })
+                    .then(r => r.json()).then(d => {
+                        if (d && d.success) render(d.data); else render(null);
+                    })
+                    .catch(() => render(null));
+            }
+            position();
+            poll();
+            timer = setInterval(poll, 20000);
+            window.addEventListener('resize', position);
+            window.addEventListener('beforeunload', function(){ if (timer) clearInterval(timer); });
+        })();
+        </script>
+        <?php
+    });
 }

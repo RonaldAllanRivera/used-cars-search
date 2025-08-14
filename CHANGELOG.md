@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.1] - 2025-08-14
+
+### Added
+- Admin queue indicator displayed at the top-right of WP Admin showing Processing/Waiting with counts; updates every 20 seconds.
+- New admin AJAX endpoint `ucs_ai_queue_status` (nonce + capability protected) returning lock state and queue counts.
+- Filter `ucs_ai_queue_indicator_enabled` to disable the indicator globally.
+
+### Docs
+- README updated with an "Admin status indicator" subsection under the WP‑Cron background queue.
+
 ## [1.6.0] - 2025-08-12
 
 ### Added

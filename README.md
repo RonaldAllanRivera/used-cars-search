@@ -10,7 +10,7 @@ AI‑powered content generation with an unattended background queue (WP‑Cron).
 
 * **Background AI Queue (WP‑Cron):** Unattended OpenAI generation at scale with a custom queue table, minutely worker, concurrency lock, and bulk enqueue action. Works on shared hosting via real cron (SiteGround/cPanel guides included).
 * **In‑Admin Guides:** Embedded “How to Use” for AI and background queue, plus an in‑admin REST API quick reference for maintainers.
-
+* **Admin Queue Indicator:** Live top‑right status in WP Admin while the queue is active (Processing/Waiting + counts). Updates every 20s; disable via filter.
 * **AI-Powered Content Generation:** OpenAI integration for auto-generating post titles, content, and SEO fields based on car details. Supports both single-post and bulk operations.
 * **SEO Meta Module (conflict‑safe):** Per‑post SEO Title, Description, Keywords, and No‑index with automatic conflict detection for Yoast/Rank Math. Filter‑controlled output and post‑type targeting.
 * **Car Details, Done Right:** Grid cards show Year, Make, Model, Trim, Price, Mileage, Engine, Transmission — clearly labeled, formatted, and auto‑hidden when all values are empty.
@@ -178,6 +178,15 @@ Run large AI generations while logged out or overnight. The plugin ships a custo
 1. Enable AI and save in `Used Cars Search → AI Settings`.
 2. Enqueue posts: Posts list → select posts → Bulk actions → "AI Assist: Queue for Background" → Apply.
 3. Let WP‑Cron process items automatically in the background.
+
+### Admin status indicator
+* A live top‑right indicator appears in WP Admin while the queue is running or items are queued.
+* It shows Processing…/Waiting with counts and updates every 20 seconds.
+* To disable the indicator globally:
+
+```php
+add_filter('ucs_ai_queue_indicator_enabled', '__return_false');
+```
 
 ### Local (Laragon)
 * Windows Task Scheduler: call `http://localhost/popular-ai-software-search/wp-cron.php` every minute.
