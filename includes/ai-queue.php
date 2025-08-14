@@ -93,6 +93,13 @@ add_action('ucs_ai_queue_worker', function(){
     if (!function_exists('ucs_ai_get_options')) return;
     $opts = ucs_ai_get_options();
     if (empty($opts['enabled'])) return; // Respect master toggle
+    if (!empty($opts['queue_paused'])) return; // Paused
+
+    // If a stop was requested while idle, honor it and clear.
+    if (get_transient('ucs_ai_queue_stop')) {
+        delete_transient('ucs_ai_queue_stop');
+        return;
+    }
 
     if (!ucs_ai_queue_lock_acquire()) return;
     try {
@@ -145,6 +152,12 @@ function ucs_ai_process_queue_batch($limit = 10) {
             'updated_at' => current_time('mysql'),
         ), array('id' => $id));
         $processed++;
+
+        // Soft stop requested: finish current item and exit
+        if (get_transient('ucs_ai_queue_stop')) {
+            delete_transient('ucs_ai_queue_stop');
+            break;
+        }
     }
     return $processed;
 }
@@ -183,7 +196,7 @@ if (is_admin()) {
         }
     });
 
-    // AJAX: queue status (lock + counts)
+    // AJAX: queue status (lock + counts + paused)
     add_action('wp_ajax_ucs_ai_queue_status', function(){
         if (!current_user_can('edit_posts')) {
             wp_send_json_error(array('message' => 'forbidden'), 403);
@@ -193,13 +206,55 @@ if (is_admin()) {
         $queued = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status=%s", 'queued')));
         $processing = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status=%s", 'processing')));
         $errors = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status=%s", 'error')));
+        $canceled = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE status=%s", 'canceled')));
         $lock = (bool) get_transient('ucs_ai_worker_lock');
+        $stopping = (bool) get_transient('ucs_ai_queue_stop');
+        $opts = function_exists('ucs_ai_get_options') ? ucs_ai_get_options() : array();
+        $paused = !empty($opts['queue_paused']);
         wp_send_json_success(array(
             'lock' => $lock,
             'queued' => $queued,
             'processing' => $processing,
             'errors' => $errors,
+            'canceled' => $canceled,
+            'paused' => $paused,
+            'stopping' => $stopping,
         ));
+    });
+
+    // AJAX: toggle pause/resume
+    add_action('wp_ajax_ucs_ai_queue_toggle_pause', function(){
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(array('message' => 'forbidden'), 403);
+        }
+        check_ajax_referer('ucs_ai_admin', 'nonce');
+        $opts = get_option('ucs_ai_options');
+        if (!is_array($opts)) $opts = array();
+        $paused = !empty($opts['queue_paused']);
+        $opts['queue_paused'] = $paused ? 0 : 1;
+        update_option('ucs_ai_options', $opts);
+        wp_send_json_success(array('paused' => (bool)$opts['queue_paused']));
+    });
+
+    // AJAX: request soft stop (after current item)
+    add_action('wp_ajax_ucs_ai_queue_stop', function(){
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(array('message' => 'forbidden'), 403);
+        }
+        check_ajax_referer('ucs_ai_admin', 'nonce');
+        set_transient('ucs_ai_queue_stop', 1, 5 * MINUTE_IN_SECONDS);
+        wp_send_json_success(array('stopping' => true));
+    });
+
+    // AJAX: cancel all queued items
+    add_action('wp_ajax_ucs_ai_queue_cancel_all', function(){
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(array('message' => 'forbidden'), 403);
+        }
+        check_ajax_referer('ucs_ai_admin', 'nonce');
+        global $wpdb; $table = ucs_ai_queue_table();
+        $updated = $wpdb->query("UPDATE $table SET status='canceled', updated_at=NOW() WHERE status='queued'");
+        wp_send_json_success(array('canceled' => intval($updated)));
     });
 
     // Floating admin indicator (polls every 20s)
@@ -219,6 +274,11 @@ if (is_admin()) {
         <div id="ucs-ai-queue-indicator" aria-live="polite" aria-atomic="true">
             <span class="ucs-dot" aria-hidden="true"></span>
             <span class="ucs-text"></span>
+            <span class="ucs-actions" style="display:flex; gap:6px; margin-left:8px;">
+                <button type="button" class="button button-small ucs-btn-pause">Pause</button>
+                <button type="button" class="button button-small ucs-btn-stop">Stop</button>
+                <button type="button" class="button button-small ucs-btn-cancel">Cancel queued</button>
+            </span>
         </div>
         <script>
         (function(){
@@ -226,6 +286,9 @@ if (is_admin()) {
             if (!el || typeof ajaxurl === 'undefined') return;
             const text = el.querySelector('.ucs-text');
             const dot = el.querySelector('.ucs-dot');
+            const btnPause = el.querySelector('.ucs-btn-pause');
+            const btnStop = el.querySelector('.ucs-btn-stop');
+            const btnCancel = el.querySelector('.ucs-btn-cancel');
             let timer;
             function position(){
                 const bar = document.getElementById('wpadminbar');
@@ -233,18 +296,38 @@ if (is_admin()) {
                 el.style.top = top + 'px';
             }
             function render(state){
-                const { lock, queued, processing, errors } = state || {};
-                if (lock) {
+                const { lock, queued, processing, errors, canceled, paused, stopping } = state || {};
+                // update buttons
+                if (paused) {
+                    btnPause.textContent = 'Resume';
+                } else {
+                    btnPause.textContent = 'Pause';
+                }
+                btnCancel.disabled = !(queued > 0);
+                // show status
+                if (paused) {
+                    el.classList.remove('ucs-running');
+                    text.textContent = `AI Queue: Paused ( ${queued||0} queued${processing?`, ${processing} processing`:''}${errors?`, ${errors} error(s)`:''}${canceled?`, ${canceled} canceled`:''} )`;
+                    el.style.display = (queued||processing||errors||canceled) ? 'flex' : 'flex';
+                } else if (lock) {
                     el.classList.add('ucs-running');
-                    text.textContent = `AI Queue: Processing… (in progress${processing?`, ${processing} processing`:''}${queued?`, ${queued} queued`:''})`;
+                    const stopNote = stopping ? ' — Stopping…' : '';
+                    text.textContent = `AI Queue: Processing… (in progress${processing?`, ${processing} processing`:''}${queued?`, ${queued} queued`:''}${errors?`, ${errors} error(s)`:''}${canceled?`, ${canceled} canceled`:''})${stopNote}`;
                     el.style.display = 'flex';
                 } else if ((queued||0) > 0 || (processing||0) > 0) {
                     el.classList.remove('ucs-running');
-                    text.textContent = `AI Queue: Waiting ( ${queued||0} queued${processing?`, ${processing} processing`:''}${errors?`, ${errors} error(s)`:''} )`;
+                    text.textContent = `AI Queue: Waiting ( ${queued||0} queued${processing?`, ${processing} processing`:''}${errors?`, ${errors} error(s)`:''}${canceled?`, ${canceled} canceled`:''} )`;
                     el.style.display = 'flex';
                 } else {
                     el.style.display = 'none';
                 }
+            }
+            function ajax(action){
+                const form = new FormData();
+                form.append('action', action);
+                form.append('nonce','<?php echo esc_js($nonce); ?>');
+                return fetch(ajaxurl, { method: 'POST', credentials: 'same-origin', body: form })
+                    .then(r => r.json());
             }
             function poll(){
                 const form = new FormData();
@@ -261,6 +344,18 @@ if (is_admin()) {
             timer = setInterval(poll, 20000);
             window.addEventListener('resize', position);
             window.addEventListener('beforeunload', function(){ if (timer) clearInterval(timer); });
+
+            // Wire up actions
+            if (btnPause) btnPause.addEventListener('click', function(){
+                btnPause.disabled = true; ajax('ucs_ai_queue_toggle_pause').then(() => { btnPause.disabled = false; poll(); }).catch(() => { btnPause.disabled = false; });
+            });
+            if (btnStop) btnStop.addEventListener('click', function(){
+                btnStop.disabled = true; ajax('ucs_ai_queue_stop').then(() => { btnStop.disabled = false; poll(); }).catch(() => { btnStop.disabled = false; });
+            });
+            if (btnCancel) btnCancel.addEventListener('click', function(){
+                if (!confirm('Cancel all queued items?')) return;
+                btnCancel.disabled = true; ajax('ucs_ai_queue_cancel_all').then(() => { btnCancel.disabled = false; poll(); }).catch(() => { btnCancel.disabled = false; });
+            });
         })();
         </script>
         <?php

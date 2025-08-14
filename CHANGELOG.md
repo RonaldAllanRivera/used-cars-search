@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.2] - 2025-08-14
+
+### Added
+- Admin indicator controls: Pause/Resume, Stop (soft stop), and Cancel queued.
+- Queue status now returns `paused`, `stopping`, and `canceled` counts.
+
+### Changed
+- Worker respects paused state and returns early when paused.
+- Worker honors Stop both at start (no-op for that tick) and mid-batch (finishes current item then stops).
+
+### Docs
+- README updated to document controls and behavior notes (pause, soft stop, cancel).
+
 ## [1.6.1] - 2025-08-14
 
 ### Added

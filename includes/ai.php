@@ -8,6 +8,7 @@ if (!function_exists('ucs_ai_get_options')) {
     function ucs_ai_get_options() {
         $defaults = array(
             'enabled'     => 0,
+            'queue_paused'=> 0,
             'api_key'     => '',
             'model'       => apply_filters('ucs_ai_model', 'gpt-4o-mini'),
             'temperature' => 0.3,
