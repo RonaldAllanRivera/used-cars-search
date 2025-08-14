@@ -264,7 +264,7 @@ if (is_admin()) {
         $nonce = wp_create_nonce('ucs_ai_admin');
         ?>
         <style>
-            #ucs-ai-queue-indicator { position: fixed; right: 16px; top: 48px; z-index: 99999; background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 8px 10px; display: none; align-items: center; gap: 8px; }
+            #ucs-ai-queue-indicator { position: fixed; left: 50%; transform: translateX(-50%); top: 48px; z-index: 99999; background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 8px 10px; display: none; align-items: center; gap: 8px; max-width: calc(100% - 32px); }
             #ucs-ai-queue-indicator .ucs-dot { width: 10px; height: 10px; border-radius: 50%; background: #8c8f94; display: inline-block; }
             #ucs-ai-queue-indicator.ucs-running .ucs-dot { background: #2271b1; animation: ucs-pulse 1s infinite alternate; }
             #ucs-ai-queue-indicator .ucs-text { font-size: 12px; color: #1d2327; }
@@ -292,8 +292,16 @@ if (is_admin()) {
             let timer;
             function position(){
                 const bar = document.getElementById('wpadminbar');
-                const top = (bar ? bar.offsetHeight : 32) + 8; // keep below admin bar
-                el.style.top = top + 'px';
+                let top = (bar ? bar.offsetHeight : 32);
+                // If Screen Options/Help panel is open, push indicator below it
+                const meta = document.getElementById('screen-meta');
+                if (meta) {
+                    const style = window.getComputedStyle(meta);
+                    if (style && style.display !== 'none' && meta.offsetHeight) {
+                        top += meta.offsetHeight;
+                    }
+                }
+                el.style.top = (top + 8) + 'px';
             }
             function render(state){
                 const { lock, queued, processing, errors, canceled, paused, stopping } = state || {};
@@ -344,6 +352,22 @@ if (is_admin()) {
             timer = setInterval(poll, 20000);
             window.addEventListener('resize', position);
             window.addEventListener('beforeunload', function(){ if (timer) clearInterval(timer); });
+
+            // Recalculate when Screen Options / Help are toggled
+            const toggleSelectors = '#show-settings-link, #contextual-help-link';
+            document.querySelectorAll(toggleSelectors).forEach(function(btn){
+                btn.addEventListener('click', function(){
+                    // run after WP toggles the panel
+                    setTimeout(position, 50);
+                    setTimeout(position, 300);
+                });
+            });
+            // Observe #screen-meta attribute changes
+            const metaEl = document.getElementById('screen-meta');
+            if (metaEl && 'MutationObserver' in window) {
+                const mo = new MutationObserver(function(){ position(); });
+                mo.observe(metaEl, { attributes: true, attributeFilter: ['style','class'] });
+            }
 
             // Wire up actions
             if (btnPause) btnPause.addEventListener('click', function(){

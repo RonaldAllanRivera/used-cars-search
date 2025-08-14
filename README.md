@@ -10,7 +10,7 @@ AI‑powered content generation with an unattended background queue (WP‑Cron).
 
 * **Background AI Queue (WP‑Cron):** Unattended OpenAI generation at scale with a custom queue table, minutely worker, concurrency lock, and bulk enqueue action. Works on shared hosting via real cron (SiteGround/cPanel guides included).
 * **In‑Admin Guides:** Embedded “How to Use” for AI and background queue, plus an in‑admin REST API quick reference for maintainers.
-* **Admin Queue Indicator:** Live top‑right status in WP Admin while the queue is active (Processing/Waiting + counts) with Pause/Resume, Stop‑after‑current, and Cancel queued controls. Updates every 20s; disable via filter.
+* **Admin Queue Indicator:** Live top‑center status in WP Admin while the queue is active (Processing/Waiting + counts) with Pause/Resume, Stop‑after‑current, and Cancel queued controls. Updates every 20s; disable via filter.
 * **AI-Powered Content Generation:** OpenAI integration for auto-generating post titles, content, and SEO fields based on car details. Supports both single-post and bulk operations.
 * **SEO Meta Module (conflict‑safe):** Per‑post SEO Title, Description, Keywords, and No‑index with automatic conflict detection for Yoast/Rank Math. Filter‑controlled output and post‑type targeting.
 * **Car Details, Done Right:** Grid cards show Year, Make, Model, Trim, Price, Mileage, Engine, Transmission — clearly labeled, formatted, and auto‑hidden when all values are empty.
@@ -180,7 +180,7 @@ Run large AI generations while logged out or overnight. The plugin ships a custo
 3. Let WP‑Cron process items automatically in the background.
 
 ### Admin status indicator
-* A live top‑right indicator appears in WP Admin while the queue is running or items are queued.
+* A live top‑center indicator appears in WP Admin while the queue is running or items are queued.
 * It shows Processing…/Waiting/Paused with counts and updates every 20 seconds.
 * Controls:
   * Pause/Resume: toggles queue processing on the next cron tick (items remain queued)

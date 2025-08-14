@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.3] - 2025-08-14
+
+### Changed
+- Admin queue indicator repositioned to top‑center to avoid overlap with "Screen Options" and "Help" buttons on posts list.
+- Indicator now accounts for the `#screen-meta` panel height and repositions on toggle.
+
 ## [1.6.2] - 2025-08-14
 
 ### Added
