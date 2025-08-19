@@ -388,11 +388,27 @@ add_action('wp_ajax_ucs_ratings_list', function() {
                     <select id="ucs_make" name="ucs_make">
                         <option value="">Select Make</option>
                         <?php
-                        $makes = [
+                        // Standard list
+                        $standard_makes = [
                             'Acura','Alfa Romeo','Audi','BMW','Buick','Cadillac','Chevrolet','Chrysler','Dodge','Fiat','Ford','Genesis','GMC','Honda','Hyundai','Infiniti','Jaguar','Jeep','Kia','Land Rover','Lexus','Lincoln','Maserati','Mazda','Mercedes-Benz','MINI','Mitsubishi','Nissan','Porsche','RAM','Subaru','Tesla','Toyota','Volkswagen','Volvo'
                         ];
-                        foreach ($makes as $make): ?>
-                            <option value="<?php echo $make; ?>" <?php selected($values['make'], $make); ?>><?php echo $make; ?></option>
+                        // Discover distinct makes from existing posts
+                        global $wpdb;
+                        $db_makes = $wpdb->get_col("SELECT DISTINCT meta_value FROM {$wpdb->postmeta} WHERE meta_key='ucs_make' AND meta_value<>''");
+                        $all_makes = array_merge($standard_makes, is_array($db_makes) ? $db_makes : []);
+                        // Ensure current value is included
+                        if (!empty($values['make'])) { $all_makes[] = (string)$values['make']; }
+                        // Unique by lowercase, then restore original cases by picking first occurrence
+                        $seen = [];
+                        $unique_makes = [];
+                        foreach ($all_makes as $m) {
+                            $key = strtolower(trim((string)$m));
+                            if ($key === '') continue;
+                            if (!isset($seen[$key])) { $seen[$key] = true; $unique_makes[] = trim((string)$m); }
+                        }
+                        natcasesort($unique_makes);
+                        foreach ($unique_makes as $make): ?>
+                            <option value="<?php echo esc_attr($make); ?>" <?php selected($values['make'], $make); ?>><?php echo esc_html($make); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </td>

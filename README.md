@@ -1,3 +1,35 @@
+## CSV Import (Admin)
+
+Use the in-admin importer to seed posts from a CSV. Each row creates/updates a post with car details saved to meta.
+
+### Where
+* Go to: `Used Cars Search → CSV Import`.
+
+### CSV format
+* Required columns: `Year, Make, Model`
+* Optional columns: `Trim, Mileage, Engine, Transmission, Price`
+* A sample file is included at: `cars.csv` in the plugin folder.
+
+### Mapping
+* Post title: `Year Make Model` (e.g., `2020 Ford Mustang`)
+* Post content: empty (ready for AI generation later)
+* Category: `Make` value (created if missing, selected if exists)
+* Meta keys:
+  * `ucs_year` (int)
+  * `ucs_make` (string)
+  * `ucs_model` (string)
+  * `ucs_trim` (string)
+  * `ucs_mileage` (int)
+  * `ucs_engine` (string)
+  * `ucs_transmission` (string)
+  * `ucs_price` (float)
+
+### Behavior
+* If a post with the same title already exists, the importer updates its category/meta instead of creating a new post.
+* Choose post status (Draft or Publish) for created posts.
+* Mileage and Price are sanitized to numbers; other fields are stored as text.
+* Admin Make dropdown auto‑includes newly imported Makes for easy editing later.
+
 # Used Cars Search
 
 A production‑ready WordPress search and comparison plugin engineered for scale and maintainability in used‑car inventories.
@@ -11,6 +43,7 @@ AI‑powered content generation with an unattended background queue (WP‑Cron).
 * **Background AI Queue (WP‑Cron):** Unattended OpenAI generation at scale with a custom queue table, minutely worker, concurrency lock, and bulk enqueue action. Works on shared hosting via real cron (SiteGround/cPanel guides included).
 * **In‑Admin Guides:** Embedded “How to Use” for AI and background queue, plus an in‑admin REST API quick reference for maintainers.
 * **Admin Queue Indicator:** Live top‑center status in WP Admin while the queue is active (Processing/Waiting + counts) with Pause/Resume, Stop‑after‑current, and Cancel queued controls. Updates every 20s; disable via filter.
+* **CSV Import (Admin):** Upload a CSV to create posts with car details. Title becomes `Year Make Model`; Make is assigned as Category (created if missing). Supports using the bundled `cars.csv` sample or your own file. Imported Makes automatically appear in the admin Make dropdown.
 * **AI-Powered Content Generation:** OpenAI integration for auto-generating post titles, content, and SEO fields based on car details. Supports both single-post and bulk operations.
 * **SEO Meta Module (conflict‑safe):** Per‑post SEO Title, Description, Keywords, and No‑index with automatic conflict detection for Yoast/Rank Math. Filter‑controlled output and post‑type targeting.
 * **Car Details, Done Right:** Grid cards show Year, Make, Model, Trim, Price, Mileage, Engine, Transmission — clearly labeled, formatted, and auto‑hidden when all values are empty.
@@ -18,7 +51,7 @@ AI‑powered content generation with an unattended background queue (WP‑Cron).
 * **Grid/List Views + Sorting:** Sort by title, category, rating, comments, and date. Pagination and totals always reflect applied filters.
 * **Compare up to 4 Cars:** Dedicated, responsive compare page with easy selection and a floating compare bar.
 * **User Ratings:** 1–5 star ratings per post with average and vote counts displayed in results.
-* **Admin Productivity:** Dropdowns for Year, Make, Transmission ensure consistent data entry.
+* **Admin Productivity:** Dropdowns for Year, Make, Transmission ensure consistent data entry. The Make dropdown auto‑expands with any distinct `ucs_make` values found in existing posts and remains alphabetically sorted.
 * **Zero Dependencies:** Pure ES6 + Fetch API. No jQuery or heavy frameworks.
 * **Scalable & Clean:** Namespaced assets, selective loading, and REST endpoints designed for large datasets.
 * **Extensible:** Carefully designed hooks/filters and modular PHP includes for safe customization.
@@ -137,7 +170,7 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 ## 🚗 Car Details Admin Dropdowns (v1.4.0)
 
 * The admin panel now features dropdowns for Year, Make, and Transmission when editing or adding a car post.
-* Year dropdown includes 2025–1980; Make dropdown includes all major car brands; Transmission dropdown includes all common types.
+* Year dropdown includes 2025–1980; Make dropdown includes all major car brands and automatically includes any new Make values found in existing posts (from CSV imports or manual entries); Transmission dropdown includes all common types.
 * This ensures data consistency and faster entry for admins.
 
 ---

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.5] - 2025-08-19
+
+### Improved
+- Admin Make dropdown now auto-includes distinct `ucs_make` values found in existing posts and remains alphabetically sorted. Ensures selections are never empty after CSV imports with new makes.
+
+### Fixed
+- Replaced deprecated `get_page_by_title()` in CSV importer with a direct `$wpdb` exact-title lookup to avoid WP 6.2+ deprecation notices.
+
+## [1.6.4] - 2025-08-19
+
+### Added
+- CSV Import (Admin): Upload a CSV to create/update posts with car details. Title = `Year Make Model`. Assigns `Make` as Category (creates if missing). Imports `Year, Make, Model, Trim, Mileage, Engine, Transmission, Price` into post meta.
+
 ## [1.6.3] - 2025-08-14
 
 ### Changed

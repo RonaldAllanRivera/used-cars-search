@@ -20,6 +20,7 @@ if (is_admin()) {
     // Admin-only modules/UI
     require_once __DIR__ . '/includes/admin-ai.php';
     require_once __DIR__ . '/includes/admin-ai-assist.php';
+    require_once __DIR__ . '/includes/admin-csv-import.php';
 }
 
 // Load REST endpoints
