@@ -1,3 +1,43 @@
+# Used Cars Search
+
+A production‑ready WordPress search and comparison plugin engineered for scale and maintainability in used‑car inventories.
+Lightning‑fast autosuggest, sortable grid/list results, rich car details, and a polished compare flow.
+AI‑powered content generation with an unattended background queue (WP‑Cron). SEO‑ready with conflict‑safe meta output and a clean, extensible architecture. Built with Vanilla JS (ES6) — no jQuery.
+
+
+
+---
+
+## 🚀 Features
+
+* **Background AI Queue (WP‑Cron):** Unattended OpenAI generation at scale with a custom queue table, minutely worker, concurrency lock, and bulk enqueue action. Works on shared hosting via real cron (SiteGround/cPanel guides included).
+* **In‑Admin Guides:** Embedded “How to Use” for AI and background queue, plus an in‑admin REST API quick reference for maintainers.
+* **Admin Queue Indicator:** Live top‑center status in WP Admin while the queue is active (Processing/Waiting + counts) with Pause/Resume, Stop‑after‑current, and Cancel queued controls. Updates every 20s; disable via filter.
+* **CSV Import (Admin):** Upload a CSV to create posts with car details. Title becomes `Year Make Model`; Make is assigned as Category (created if missing). Supports using the bundled `cars.csv` sample or your own file. Imported Makes automatically appear in the admin Make dropdown.
+* **AI-Powered Content Generation:** OpenAI integration for auto-generating post titles, content, and SEO fields based on car details. Supports both single-post and bulk operations.
+* **SEO Meta Module (conflict‑safe):** Per‑post SEO Title, Description, Keywords, and No‑index with automatic conflict detection for Yoast/Rank Math. Filter‑controlled output and post‑type targeting.
+* **Car Details, Done Right:** Grid cards show Year, Make, Model, Trim, Price, Mileage, Engine, Transmission — clearly labeled, formatted, and auto‑hidden when all values are empty.
+* **Lightning‑Fast Search & Autosuggest:** Whole‑word matching, fast queries, and smart category filtering with instant UI updates.
+* **Grid/List Views + Sorting:** Sort by title, category, rating, comments, and date. Pagination and totals always reflect applied filters.
+* **Compare up to 4 Cars:** Dedicated, responsive compare page with easy selection and a floating compare bar.
+* **User Ratings:** 1–5 star ratings per post with average and vote counts displayed in results.
+* **Admin Productivity:** Dropdowns for Year, Make, Transmission ensure consistent data entry. The Make dropdown auto‑expands with any distinct `ucs_make` values found in existing posts and remains alphabetically sorted.
+* **Dynamic Make Dropdown (New):** Automatically includes any newly imported or manually entered Makes from existing posts, deduplicated and alphabetically sorted for consistent data entry.
+* **Zero Dependencies:** Pure ES6 + Fetch API. No jQuery or heavy frameworks.
+* **Scalable & Clean:** Namespaced assets, selective loading, and REST endpoints designed for large datasets.
+* **Extensible:** Carefully designed hooks/filters and modular PHP includes for safe customization.
+
+---
+
+## 🛠️ Installation & Usage
+
+1. Upload the plugin folder to `wp-content/plugins/`.
+2. Activate **Used Cars Search** in WP Admin.
+3. Add `[used_cars_search]` to any post or page.
+4. To enable the compare feature, create a new page (e.g., named "Compare"), add the `[ucs_compare_page]` shortcode to it, and then select this page from the dropdown in the plugin's settings page (**Used Cars Search -> Settings**).
+
+---
+
 ## CSV Import (Admin)
 
 Use the in-admin importer to seed posts from a CSV. Each row creates/updates a post with car details saved to meta.
@@ -30,42 +70,7 @@ Use the in-admin importer to seed posts from a CSV. Each row creates/updates a p
 * Mileage and Price are sanitized to numbers; other fields are stored as text.
 * Admin Make dropdown auto‑includes newly imported Makes for easy editing later.
 
-# Used Cars Search
 
-A production‑ready WordPress search and comparison plugin engineered for scale and maintainability in used‑car inventories.
-Lightning‑fast autosuggest, sortable grid/list results, rich car details, and a polished compare flow.
-AI‑powered content generation with an unattended background queue (WP‑Cron). SEO‑ready with conflict‑safe meta output and a clean, extensible architecture. Built with Vanilla JS (ES6) — no jQuery.
-
----
-
-## 🚀 Features
-
-* **Background AI Queue (WP‑Cron):** Unattended OpenAI generation at scale with a custom queue table, minutely worker, concurrency lock, and bulk enqueue action. Works on shared hosting via real cron (SiteGround/cPanel guides included).
-* **In‑Admin Guides:** Embedded “How to Use” for AI and background queue, plus an in‑admin REST API quick reference for maintainers.
-* **Admin Queue Indicator:** Live top‑center status in WP Admin while the queue is active (Processing/Waiting + counts) with Pause/Resume, Stop‑after‑current, and Cancel queued controls. Updates every 20s; disable via filter.
-* **CSV Import (Admin):** Upload a CSV to create posts with car details. Title becomes `Year Make Model`; Make is assigned as Category (created if missing). Supports using the bundled `cars.csv` sample or your own file. Imported Makes automatically appear in the admin Make dropdown.
-* **AI-Powered Content Generation:** OpenAI integration for auto-generating post titles, content, and SEO fields based on car details. Supports both single-post and bulk operations.
-* **SEO Meta Module (conflict‑safe):** Per‑post SEO Title, Description, Keywords, and No‑index with automatic conflict detection for Yoast/Rank Math. Filter‑controlled output and post‑type targeting.
-* **Car Details, Done Right:** Grid cards show Year, Make, Model, Trim, Price, Mileage, Engine, Transmission — clearly labeled, formatted, and auto‑hidden when all values are empty.
-* **Lightning‑Fast Search & Autosuggest:** Whole‑word matching, fast queries, and smart category filtering with instant UI updates.
-* **Grid/List Views + Sorting:** Sort by title, category, rating, comments, and date. Pagination and totals always reflect applied filters.
-* **Compare up to 4 Cars:** Dedicated, responsive compare page with easy selection and a floating compare bar.
-* **User Ratings:** 1–5 star ratings per post with average and vote counts displayed in results.
-* **Admin Productivity:** Dropdowns for Year, Make, Transmission ensure consistent data entry. The Make dropdown auto‑expands with any distinct `ucs_make` values found in existing posts and remains alphabetically sorted.
-* **Zero Dependencies:** Pure ES6 + Fetch API. No jQuery or heavy frameworks.
-* **Scalable & Clean:** Namespaced assets, selective loading, and REST endpoints designed for large datasets.
-* **Extensible:** Carefully designed hooks/filters and modular PHP includes for safe customization.
-
----
-
-## 🛠️ Installation & Usage
-
-1. Upload the plugin folder to `wp-content/plugins/`.
-2. Activate **Used Cars Search** in WP Admin.
-3. Add `[used_cars_search]` to any post or page.
-4. To enable the compare feature, create a new page (e.g., named "Compare"), add the `[ucs_compare_page]` shortcode to it, and then select this page from the dropdown in the plugin's settings page (**Used Cars Search -> Settings**).
-
----
 
 ## 🛠️ Enhanced Admin Dashboard (v1.4.1)
 
