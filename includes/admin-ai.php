@@ -27,8 +27,12 @@ function ucs_ai_sanitize_options($opts) {
     $clean['model'] = in_array($requested_model, $models, true) ? $requested_model : 'gpt-4o-mini';
     $temp = isset($opts['temperature']) ? floatval($opts['temperature']) : 0.3;
     if ($temp < 0) $temp = 0; if ($temp > 1) $temp = 1; $clean['temperature'] = $temp;
-    $max  = isset($opts['max_tokens']) ? intval($opts['max_tokens']) : 800;
-    if ($max < 64) $max = 64; if ($max > 4000) $max = 4000; $clean['max_tokens'] = $max;
+    $max  = isset($opts['max_tokens']) ? intval($opts['max_tokens']) : 1200;
+    if ($max < 64) $max = 64; if ($max > 16000) $max = 16000; $clean['max_tokens'] = $max;
+    // Optional dynamic sub-headline settings
+    $clean['subheadline_enabled'] = isset($opts['subheadline_enabled']) ? 1 : 0;
+    $home = isset($opts['homepage_url']) ? trim($opts['homepage_url']) : '';
+    $clean['homepage_url'] = $home ? esc_url_raw($home) : '';
     return $clean;
 }
 
@@ -79,7 +83,24 @@ function ucs_ai_settings_page() {
                     <tr>
                         <th scope="row"><label for="ucs_ai_max_tokens"><?php esc_html_e('Max Tokens', 'used-cars-search'); ?></label></th>
                         <td>
-                            <input type="number" min="64" max="4000" id="ucs_ai_max_tokens" name="ucs_ai_options[max_tokens]" value="<?php echo esc_attr($opts['max_tokens'] ?? 800); ?>" />
+                            <input type="number" min="64" max="16000" id="ucs_ai_max_tokens" name="ucs_ai_options[max_tokens]" value="<?php echo esc_attr($opts['max_tokens'] ?? 1200); ?>" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="ucs_ai_subheadline_enabled"><?php esc_html_e('Enable Dynamic Sub-headline', 'used-cars-search'); ?></label></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" id="ucs_ai_subheadline_enabled" name="ucs_ai_options[subheadline_enabled]" <?php checked(!empty($opts['subheadline_enabled'])); ?> />
+                                <?php esc_html_e('Add a conversion-focused H2 sub-headline linking to the homepage at the top of content', 'used-cars-search'); ?>
+                            </label>
+                            <p class="description"><?php esc_html_e('When enabled, the model generates a dynamic sub-headline; when disabled, content starts with the intro paragraph.', 'used-cars-search'); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="ucs_ai_homepage_url"><?php esc_html_e('Homepage URL', 'used-cars-search'); ?></label></th>
+                        <td>
+                            <input type="url" id="ucs_ai_homepage_url" name="ucs_ai_options[homepage_url]" placeholder="https://everythingusedcars.com/" value="<?php echo esc_attr($opts['homepage_url'] ?? ''); ?>" class="regular-text" />
+                            <p class="description"><?php esc_html_e('Used for the sub-headline link. Leave blank to use the default.', 'used-cars-search'); ?></p>
                         </td>
                     </tr>
                 </tbody>

@@ -12,7 +12,7 @@ if (!function_exists('ucs_ai_get_options')) {
             'api_key'     => '',
             'model'       => apply_filters('ucs_ai_model', 'gpt-4o-mini'),
             'temperature' => 0.3,
-            'max_tokens'  => 800,
+            'max_tokens'  => 1200,
         );
         $opts = get_option('ucs_ai_options');
         if (!is_array($opts)) $opts = array();
@@ -155,13 +155,47 @@ if (!function_exists('ucs_ai_generate_for_post_core')) {
         );
 
         $requested = implode(',', $fields);
+        $opts_prompt = function_exists('ucs_ai_get_options') ? ucs_ai_get_options() : array();
+        $sub_enabled = !empty($opts_prompt['subheadline_enabled']);
+        $homepage_url = !empty($opts_prompt['homepage_url']) ? $opts_prompt['homepage_url'] : 'https://everythingusedcars.com/';
+
+        $system_message = $sub_enabled
+            ? 'You are a senior conversion copywriter and expert automotive copywriter. Output STRICT JSON only with keys ["title","content","seo_title","seo_description","seo_keywords"]. Do not include code fences, backticks, or any commentary outside JSON. Style: natural, persuasive, accurate, and fact-consistent with provided details. Constraints: Title 60-70 chars; SEO title 55-60 chars; SEO description 150-160 chars; Content 700-1200 words. Content must use HTML ONLY (no Markdown). Required content structure inside the "content" HTML: (1) First line: an H2 sub-headline linked to the homepage, formatted as <h2><a href="' . $homepage_url . '">{SUBHEADLINE}</a></h2>, where {SUBHEADLINE} is a dynamic, conversion-focused phrase derived from the generated "title" and the vehicle\'s primary value props. Requirements for {SUBHEADLINE}: 6–12 words; readable Title Case; no emojis; avoid boilerplate; do not duplicate the title verbatim; optionally include one benefit keyword (e.g., price, low mileage, fuel efficiency, reliability, warranty, financing). (2) Immediately after, include one introductory paragraph that frames the vehicle value (you may bold the vehicle name using <strong>Year Make Model Trim</strong>). (3) Use <h2> sections with these exact headings: "Vehicle Overview", "Why It Stands Out", "Who It Is For", "Performance & Efficiency", "Ownership & Reliability". (4) Add an <h3>"Frequently Asked Questions"</h3> section that contains a <ul> with 4–5 <li> items; each item starts with <strong>Question</strong> followed by the concise answer text in the same <li>. (5) Add an <h3>"Summary"</h3> section with a concise closing paragraph. (6) End the content with 6–12 lines of hashtags, each on its own line, starting with # (e.g., #UsedCars). Do NOT include any labels like "Keywords:", "Hashtags:", or counts like "TitleChars:" or "ContentWords:". If a field is unknown, omit it gracefully; never fabricate unavailable specs. Return only valid JSON.'
+            : 'You are a senior conversion copywriter and expert automotive copywriter. Output STRICT JSON only with keys ["title","content","seo_title","seo_description","seo_keywords"]. Do not include code fences, backticks, or any commentary outside JSON. Style: natural, persuasive, accurate, and fact-consistent with provided details. Constraints: Title 60-70 chars; SEO title 55-60 chars; SEO description 150-160 chars; Content 700-1200 words. Content must use HTML ONLY (no Markdown). Required content structure inside the "content" HTML: (1) Start with one introductory paragraph that frames the vehicle value (you may bold the vehicle name using <strong>Year Make Model Trim</strong>). (2) Use <h2> sections with these exact headings: "Vehicle Overview", "Why It Stands Out", "Who It Is For", "Performance & Efficiency", "Ownership & Reliability". (3) Add an <h3>"Frequently Asked Questions"</h3> section that contains a <ul> with 4–5 <li> items; each item starts with <strong>Question</strong> followed by the concise answer text in the same <li>. (4) Add an <h3>"Summary"</h3> section with a concise closing paragraph. (5) End the content with 6–12 lines of hashtags, each on its own line, starting with # (e.g., #UsedCars). Do NOT include any labels like "Keywords:", "Hashtags:", or counts like "TitleChars:" or "ContentWords:". If a field is unknown, omit it gracefully; never fabricate unavailable specs. Return only valid JSON.';
+
+        $guidelines = array(
+            'content_use_html_only_no_markdown',
+            'faq_list_items_4_to_5_inline_q_and_answer',
+            'hashtags_6_to_12_lines_each_prefixed_with_hash',
+            'keywords_include_year_make_model_trim_engine_transmission_price_mileage_if_available',
+            'avoid_fabricating_unavailable_specs'
+        );
+        if ($sub_enabled) {
+            $guidelines[] = 'first_line_is_h2_anchor_dynamic_conversion_subheadline_link_to_homepage';
+            $guidelines[] = 'subheadline_6_to_12_words_title_case_no_emojis_no_boilerplate';
+            $guidelines[] = 'intro_paragraph_follows_h2_anchor';
+        } else {
+            $guidelines[] = 'no_subheadline_start_with_intro_paragraph';
+        }
+
         $messages = array(
-            array('role' => 'system', 'content' => 'You are an assistant that writes concise, market-ready automotive listings. Always return STRICT JSON only.'),
+            array('role' => 'system', 'content' => $system_message),
             array('role' => 'user', 'content' => wp_json_encode(array(
                 'task' => 'generate_used_car_post',
                 'requested_fields' => $fields,
                 'details' => $details,
-                'format' => array('title','content','seo_title','seo_description','seo_keywords')
+                'format' => array('title','content','seo_title','seo_description','seo_keywords'),
+                'guidelines' => $guidelines,
+                'length_targets' => array(
+                    'title_chars_min' => 60,
+                    'title_chars_max' => 70,
+                    'seo_title_chars_min' => 55,
+                    'seo_title_chars_max' => 60,
+                    'seo_description_chars_min' => 150,
+                    'seo_description_chars_max' => 160,
+                    'content_words_min' => 700,
+                    'content_words_max' => 1200
+                )
             )))
         );
 

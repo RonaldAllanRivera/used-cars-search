@@ -208,6 +208,24 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 
 > Note: Requires your own OpenAI API key. The plugin includes a test connection feature to verify your API key works before enabling AI features.
 
+### HTML‑only structured output (v1.6.6)
+
+* **Unified generation path**: Manual Generate, Bulk Generate & Apply, and the background queue all use the same core generator for consistent results.
+* **Strict HTML layout** (no Markdown):
+  * Optional first line: `<h2><a href="{homepage_url}">{Dynamic Sub‑headline}</a></h2>` when enabled in settings
+  * Intro paragraph
+  * `<h2>` sections: Vehicle Overview, Why It Stands Out, Who It Is For, Performance & Efficiency, Ownership & Reliability
+  * `<h3>` Frequently Asked Questions with a `<ul>` containing 4–5 Q&A list items
+  * `<h3>` Summary with a closing paragraph
+  * Ends with 6–12 hashtag lines (each starts with `#`), no labels or counts
+* **Dynamic sub‑headline (optional)**:
+  * Toggle in AI Settings: “Enable Dynamic Sub‑headline”
+  * Configurable “Homepage URL” used for the link target
+  * Copy is short, benefit‑driven, and varies by post (not a fixed phrase)
+* **Token caps increased**:
+  * Default max tokens set to 1200; upper cap raised to 16000 via AI Settings
+* Security and consistency: Admin capability checks, nonce protection, and sanitized AI output before save.
+
 ## 🔄 Unattended Background Queue (WP‑Cron)
 
 Run large AI generations while logged out or overnight. The plugin ships a custom queue table, a minutely worker, and a concurrency lock to process items in small batches safely.

@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.6] - 2025-08-27
+
+### Added
+- AI Settings: optional "Enable Dynamic Sub-headline" toggle and "Homepage URL" to output a first-line H2 anchor link in generated content.
+- Core generator: strict JSON output contract for downstream usage (`title`, `content` [HTML-only], `seo_title`, `seo_description`, `seo_keywords`).
+- Long-form, conversion-focused sub-headline generation (when enabled) with dynamic copy per post.
+ - Settings UI + Sanitizer: New checkbox and URL field added in `includes/admin-ai.php` with proper sanitization and persistence.
+
+### Changed
+- Unified manual Generate, Bulk Generate & Apply, and background queue to use `ucs_ai_generate_for_post_core()` for consistent output.
+- `ucs_ai_generate_for_post_core()` prompt refactored to enforce a strict HTML-only long-form layout (no Markdown):
+  - Optional first line: `<h2><a href="{homepage_url}">{Dynamic Sub-headline}</a></h2>` when enabled
+  - Intro paragraph
+  - H2 sections: Vehicle Overview, Why It Stands Out, Who It Is For, Performance & Efficiency, Ownership & Reliability
+  - H3 "Frequently Asked Questions" with a `<ul>` of 4–5 Q&A items
+  - H3 "Summary" with a closing paragraph
+  - Ends with 6–12 hashtag lines (each starts with `#`), no labels or counts
+- Increased AI `max_tokens` upper cap to 16000 (default remains 1200; configurable in AI Settings).
+ - Manual single-post AI Assist now delegates fully to the core generator; Bulk Generate & Apply and the background queue worker also call the same core.
+ - Prompt guardrails tightened: HTML-only output, no emojis or boilerplate phrases, sub-headline 6–12 words in Title Case and not a verbatim repeat of the title.
+
+### Docs
+- README updated with “HTML-only structured output (v1.6.6)”, dynamic sub-headline settings, unified generation paths, and token caps.
+ - Admin "How to Use" reflects updated behavior and settings where applicable.
+
+### Security
+- All AI and settings endpoints remain capability + nonce protected; new settings fields are sanitized (`esc_url_raw`, `sanitize_text_field`) before save.
+
+### Known Issues
+- Some environments may still see the background AI queue step linger as "Step is still running." Investigation is ongoing (queue locking, transient locks, overlapping cron). Additional logging and safeguards are planned.
+
 ## [1.6.5] - 2025-08-19
 
 ### Improved

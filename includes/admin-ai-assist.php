@@ -179,75 +179,14 @@ function ucs_ai_ajax_apply() {
 
 // Helper: Build messages and call OpenAI for a given post
 function ucs_ai_generate_for_post($post_id, $fields) {
-    $p = get_post($post_id);
-    if (!$p) return new WP_Error('ucs_ai_no_post', __('Post not found', 'used-cars-search'));
-    $meta_keys = ['year','make','model','trim','price','mileage','engine','transmission'];
-    $meta = [];
-    foreach ($meta_keys as $k) { $meta[$k] = get_post_meta($post_id, 'ucs_'.$k, true); }
-
-    $requested = array_values(array_intersect($fields, ['title','content','seo_title','seo_description','seo_keywords']));
+    if (!function_exists('ucs_ai_generate_for_post_core')) {
+        return new WP_Error('ucs_ai_missing', __('AI core missing', 'used-cars-search'));
+    }
+    // Normalize requested fields
+    $requested = array_values(array_intersect((array)$fields, ['title','content','seo_title','seo_description','seo_keywords']));
     if (empty($requested)) $requested = ['title','content','seo_title','seo_description','seo_keywords'];
-
-    $sys = 'You generate compelling used car listing content and SEO, formatted as strict JSON only. Do not include code fences or explanations.';
-    $schema = [
-        'title' => 'string (<=60 chars)',
-        'content' => 'string (HTML allowed, paragraphs)',
-        'seo_title' => 'string (<=60 chars)',
-        'seo_description' => 'string (120-160 chars)',
-        'seo_keywords' => 'string (comma-separated keywords)'
-    ];
-
-    $user = [
-        'instructions' => 'Generate only the requested fields. Use provided details; do not fabricate unknown specs. Use US English. Format price like "$12,345" and mileage like "54,321 miles" when mentioned.',
-        'requested' => $requested,
-        'post' => [
-            'current_title' => $p->post_title,
-            'current_excerpt' => wp_strip_all_tags($p->post_excerpt),
-        ],
-        'details' => $meta,
-        'return_schema' => $schema
-    ];
-
-    if (!function_exists('ucs_ai_chat_completion')) return new WP_Error('ucs_ai_missing', __('AI core missing', 'used-cars-search'));
-
-    $messages = [
-        ['role' => 'system', 'content' => $sys],
-        ['role' => 'user', 'content' => wp_json_encode($user)]
-    ];
-
-    $resp = ucs_ai_chat_completion($messages);
-    if (is_wp_error($resp)) return $resp;
-
-    $text = '';
-    if (!empty($resp['choices'][0]['message']['content'])) {
-        $text = trim($resp['choices'][0]['message']['content']);
-    }
-    // Attempt to parse JSON content
-    $json = null;
-    if ($text !== '') {
-        $json = json_decode($text, true);
-        if (!is_array($json)) {
-            // Try to extract JSON block
-            $start = strpos($text, '{');
-            $end = strrpos($text, '}');
-            if ($start !== false && $end !== false && $end > $start) {
-                $maybe = substr($text, $start, $end - $start + 1);
-                $json = json_decode($maybe, true);
-            }
-        }
-    }
-    if (!is_array($json)) {
-        return new WP_Error('ucs_ai_bad_output', __('AI did not return valid JSON.', 'used-cars-search'));
-    }
-
-    $out = [];
-    if (in_array('title', $requested, true) && !empty($json['title'])) $out['title'] = sanitize_text_field($json['title']);
-    if (in_array('content', $requested, true) && !empty($json['content'])) $out['content'] = wp_kses_post($json['content']);
-    if (in_array('seo_title', $requested, true) && !empty($json['seo_title'])) $out['seo_title'] = sanitize_text_field($json['seo_title']);
-    if (in_array('seo_description', $requested, true) && !empty($json['seo_description'])) $out['seo_description'] = sanitize_textarea_field($json['seo_description']);
-    if (in_array('seo_keywords', $requested, true) && !empty($json['seo_keywords'])) $out['seo_keywords'] = sanitize_text_field($json['seo_keywords']);
-
-    return $out;
+    // Delegate to the shared core to ensure consistent long-form prompt, structure, and parsing
+    return ucs_ai_generate_for_post_core($post_id, $requested);
 }
 
 // Bulk action: AI Assist Generate & Apply
