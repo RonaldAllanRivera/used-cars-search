@@ -235,6 +235,10 @@ Run large AI generations while logged out or overnight. The plugin ships a custo
 2. Enqueue posts: Posts list → select posts → Bulk actions → "AI Assist: Queue for Background" → Apply.
 3. Let WP‑Cron process items automatically in the background.
 
+#### Scheduling behavior (v1.6.7)
+* When the worker applies AI content to posts with status `draft`, `pending`, or `auto-draft`, they are automatically scheduled 24 hours ahead (status `future`).
+* Schedules use the site timezone via `current_time()` and set `post_date_gmt` accordingly.
+
 ### Admin status indicator
 * A live top‑center indicator appears in WP Admin while the queue is running or items are queued.
 * It shows Processing…/Waiting/Paused with counts and updates every 20 seconds.

@@ -206,14 +206,13 @@ add_filter('handle_bulk_actions-edit-post', function($redirect_to, $action, $pos
         if (!current_user_can('edit_post', $pid)) { $fail++; continue; }
         $data = ucs_ai_generate_for_post($pid, ['title','content','seo_title','seo_description','seo_keywords']);
         if (is_wp_error($data)) { $fail++; continue; }
-        // apply
-        $u = ['ID' => $pid];
-        if (!empty($data['title'])) $u['post_title'] = $data['title'];
-        if (!empty($data['content'])) $u['post_content'] = $data['content'];
-        if (count($u) > 1) wp_update_post($u);
-        if (!empty($data['seo_title'])) update_post_meta($pid, '_ucs_seo_title', $data['seo_title']);
-        if (!empty($data['seo_description'])) update_post_meta($pid, '_ucs_seo_description', $data['seo_description']);
-        if (!empty($data['seo_keywords'])) update_post_meta($pid, '_ucs_seo_keywords', $data['seo_keywords']);
+        // apply via core (schedules post 24h ahead for draft/pending)
+        if (function_exists('ucs_ai_apply_changes_core')) {
+            $applied = ucs_ai_apply_changes_core($pid, $data, ['title','content','seo_title','seo_description','seo_keywords']);
+            if (is_wp_error($applied)) { $fail++; continue; }
+        } else {
+            $fail++; continue;
+        }
         $ok++;
     }
     return add_query_arg(['ucs_ai_bulk_done' => $ok, 'ucs_ai_bulk_fail' => $fail], $redirect_to);

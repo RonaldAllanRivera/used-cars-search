@@ -102,6 +102,7 @@ if (!function_exists('ucs_ai_apply_changes_core')) {
         $fields = is_array($fields) ? $fields : array('title','content','seo_title','seo_description','seo_keywords');
         $updated = array();
         $post_update = array('ID' => $post_id);
+        $current_status = get_post_status($post_id);
 
         if (in_array('title', $fields, true) && !empty($payload['title'])) {
             $post_update['post_title'] = sanitize_text_field($payload['title']);
@@ -112,6 +113,14 @@ if (!function_exists('ucs_ai_apply_changes_core')) {
             $updated[] = 'content';
         }
         if (count($post_update) > 1) {
+            // If we're updating a draft/pending/auto-draft with AI content, schedule it 24h from now
+            if (in_array($current_status, array('draft','pending','auto-draft'), true)) {
+                $ts_local = current_time('timestamp') + DAY_IN_SECONDS;
+                $ts_gmt   = current_time('timestamp', true) + DAY_IN_SECONDS;
+                $post_update['post_status']    = 'future';
+                $post_update['post_date']      = date('Y-m-d H:i:s', $ts_local);
+                $post_update['post_date_gmt']  = gmdate('Y-m-d H:i:s', $ts_gmt);
+            }
             wp_update_post($post_update);
         }
 

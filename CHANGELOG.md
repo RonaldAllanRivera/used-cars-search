@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.7] - 2025-09-01
+
+### Changed
+- AI-applied posts are now scheduled 24 hours ahead when applying generated content to posts in `draft`, `pending`, or `auto-draft` status.
+- Centralized scheduling in `ucs_ai_apply_changes_core()` so Manual Apply, Bulk Generate & Apply, and the background queue all behave consistently.
+
+### Docs
+- README updated to document the auto-scheduling behavior and affected workflows.
+
 ## [1.6.6] - 2025-08-27
 
 ### Added
