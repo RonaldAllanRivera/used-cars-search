@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.8] - 2025-09-04
+
+### Added
+- Compare page now displays all key car detail fields for each compared vehicle: Year, Make, Model, Trim, Price, Mileage, Engine, Transmission.
+
+### Changed
+- Localized the "miles" label on the compare page using the plugin text domain; price and mileage continue to use localized number formatting.
+
+### Docs
+- README updated with a new feature bullet and a "Compare Page Details (v1.6.8)" section describing the output and localization.
+
 ## [1.6.7] - 2025-09-01
 
 ### Changed

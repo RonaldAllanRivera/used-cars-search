@@ -20,6 +20,7 @@ AI‑powered content generation with an unattended background queue (WP‑Cron).
 * **Lightning‑Fast Search & Autosuggest:** Whole‑word matching, fast queries, and smart category filtering with instant UI updates.
 * **Grid/List Views + Sorting:** Sort by title, category, rating, comments, and date. Pagination and totals always reflect applied filters.
 * **Compare up to 4 Cars:** Dedicated, responsive compare page with easy selection and a floating compare bar.
+* **Compare details, side‑by‑side:** Year, Make, Model, Trim, Price, Mileage, Engine, Transmission (mileage unit localized).
 * **User Ratings:** 1–5 star ratings per post with average and vote counts displayed in results.
 * **Admin Productivity:** Dropdowns for Year, Make, Transmission ensure consistent data entry. The Make dropdown auto‑expands with any distinct `ucs_make` values found in existing posts and remains alphabetically sorted.
 * **Dynamic Make Dropdown (New):** Automatically includes any newly imported or manually entered Makes from existing posts, deduplicated and alphabetically sorted for consistent data entry.
@@ -225,6 +226,12 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 * **Token caps increased**:
   * Default max tokens set to 1200; upper cap raised to 16000 via AI Settings
 * Security and consistency: Admin capability checks, nonce protection, and sanitized AI output before save.
+
+## 🧾 Compare Page Details (v1.6.8)
+
+* **What’s shown:** Year, Make, Model, Trim, Price, Mileage, Engine, Transmission for each compared post.
+* **Formatting:** Localized thousands separators for Price and Mileage.
+* **Localization:** The “miles” unit label is translated via the plugin text domain.
 
 ## 🔄 Unattended Background Queue (WP‑Cron)
 

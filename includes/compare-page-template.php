@@ -31,6 +31,16 @@ function render_compare_page() {
             $query->the_post();
             $post_id = get_the_ID();
             $rating = ucs_get_rating_for_post($post_id);
+            // Fetch car details meta
+            $year = get_post_meta($post_id, 'ucs_year', true);
+            $make = get_post_meta($post_id, 'ucs_make', true);
+            $model = get_post_meta($post_id, 'ucs_model', true);
+            $trim = get_post_meta($post_id, 'ucs_trim', true);
+            $price = get_post_meta($post_id, 'ucs_price', true);
+            $mileage = get_post_meta($post_id, 'ucs_mileage', true);
+            $engine = get_post_meta($post_id, 'ucs_engine', true);
+            $transmission = get_post_meta($post_id, 'ucs_transmission', true);
+
             $posts_data[$post_id] = [
                 'title' => get_the_title(),
                 'permalink' => get_permalink(),
@@ -40,6 +50,16 @@ function render_compare_page() {
                 'comments' => get_comments_number(),
                 'rating' => $rating['avg'],
                 'votes' => $rating['count'],
+                'details' => [
+                    'year' => $year,
+                    'make' => $make,
+                    'model' => $model,
+                    'trim' => $trim,
+                    'price' => $price,
+                    'mileage' => $mileage,
+                    'engine' => $engine,
+                    'transmission' => $transmission,
+                ],
             ];
         }
         wp_reset_postdata();
@@ -47,13 +67,45 @@ function render_compare_page() {
 
     ?>
     <div class="ucs-compare-page">
-        <h1>Compare Used Cars</h1>
         <?php if (!empty($posts_data)): ?>
             <div class="ucs-results-grid ucs-compare-grid">
                 <?php foreach ($posts_data as $post): ?>
                     <div class="ucs-result-item">
                         <h3><a href="<?php echo esc_url($post['permalink']); ?>" target="_blank"><?php echo esc_html($post['title']); ?></a></h3>
+
+                        <?php
+                        // Build a compact top line: Year Make Model Trim
+                        $top_line_parts = [];
+                        if (!empty($post['details']['year'])) $top_line_parts[] = esc_html($post['details']['year']);
+                        if (!empty($post['details']['make'])) $top_line_parts[] = esc_html($post['details']['make']);
+                        if (!empty($post['details']['model'])) $top_line_parts[] = esc_html($post['details']['model']);
+                        if (!empty($post['details']['trim'])) $top_line_parts[] = esc_html($post['details']['trim']);
+                        $top_line = trim(implode(' ', $top_line_parts));
+                        ?>
+
+                        <?php if ($top_line): ?>
+                            <div class="ucs-car-info" style="margin-bottom:0.5rem; font-weight:600; color:#111827;">
+                                <?php echo $top_line; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="ucs-car-tags" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.6rem;">
+                            <?php if (!empty($post['details']['price']) && is_numeric($post['details']['price'])): ?>
+                                <span class="ucs-car-info">$<?php echo esc_html( number_format_i18n( floatval($post['details']['price']) ) ); ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($post['details']['mileage']) && is_numeric($post['details']['mileage'])): ?>
+                                <span class="ucs-mileage-tag"><?php echo esc_html( number_format_i18n( intval($post['details']['mileage']) ) ); ?> <?php echo esc_html__( 'miles', 'used-cars-search' ); ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($post['details']['engine'])): ?>
+                                <span class="ucs-engine-tag"><?php echo esc_html($post['details']['engine']); ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($post['details']['transmission'])): ?>
+                                <span class="ucs-transmission-tag"><?php echo esc_html($post['details']['transmission']); ?></span>
+                            <?php endif; ?>
+                        </div>
+
                         <p class="ucs-excerpt"><?php echo esc_html($post['excerpt']); ?></p>
+
                         <div class="ucs-result-meta">
                             <div class="ucs-category"><?php echo $post['category']; ?></div>
                             <div class="ucs-rating">
