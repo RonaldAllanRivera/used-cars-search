@@ -241,8 +241,8 @@
 }
 
 .ucs-sort-icon {
-    font-size: 0.89em;
-    margin-left: 3px;
+    font-size: 1em;
+    margin-left: 0.35em;
     vertical-align: middle;
     opacity: 0.7;
 }
@@ -406,6 +406,26 @@
     font-size: 0.8em;
     letter-spacing: 0.05em;
     white-space: nowrap;
+}
+
+/* Column width and header font adjustments to prevent header text conflicts */
+/* 5 = TRANS., 6 = CATEGORIES */
+.ucs-results-table thead th:nth-child(5),
+.ucs-results-table tbody td:nth-child(5) {
+    width: 10em !important;
+}
+.ucs-results-table thead th:nth-child(6),
+.ucs-results-table tbody td:nth-child(6) {
+    width: 10em !important;
+}
+
+/* Let long labels wrap and use a slightly smaller font on these headers */
+.ucs-results-table thead th:nth-child(5),
+.ucs-results-table thead th:nth-child(6) {
+    font-size: 0.72em !important;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.2;
 }
 
 .ucs-results-table td {
@@ -813,4 +833,225 @@
 .ucs-results[data-view="list"] {
     display: grid;
     grid-template-columns: 1fr 1fr;
+}
+
+/* Host overrides: normalize sorting icon size and action buttons */
+.ucs-results-table th .ucs-sort-icon,
+.ucs-sort-th .ucs-sort-icon,
+.ucs-sort-th .ucs-sort-icon::before,
+.ucs-sort-th .ucs-sort-icon::after,
+.ucs-sort-th svg,
+.ucs-sort-th img,
+.ucs-sort-th .dashicons {
+  width: 1em !important;
+  height: 1em !important;
+  font-size: 1em !important;
+  line-height: 1em !important;
+}
+
+.ucs-sort-th .ucs-sort-icon {
+  margin-left: 0.35em !important;
+  vertical-align: middle !important;
+  opacity: 0.85 !important;
+}
+
+/* Ensure table header line-height doesn't inflate icon size */
+.ucs-results-table th {
+  line-height: 1.2 !important;
+}
+
+/* Action buttons within the table should fit neatly inside the cell */
+.ucs-results-table .actions {
+  width: 110px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 6px !important;
+}
+
+.ucs-results-table .actions .ucs-button,
+.ucs-results-table .actions .btn,
+.ucs-results-table .actions button {
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  line-height: 1.1 !important;
+  border-radius: 6px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Defensive: if theme increases dashicons globally */
+.ucs-sort-th .dashicons {
+  font-size: 1em !important;
+  width: 1em !important;
+  height: 1em !important;
+}
+
+/* Defensive: common "sorting" header classes used by some themes/plugins */
+.ucs-results-table th.sorting,
+.ucs-results-table th.sorting_asc,
+.ucs-results-table th.sorting_desc,
+.ucs-results-table th[data-sort],
+.ucs-results-table th[class*="sorting"] {
+  background-size: 1em 1em !important;
+  background-position: right 0.5em center !important;
+  background-repeat: no-repeat !important;
+  padding-right: 2em !important; /* room for the icon */
+}
+
+/* Hard reset: remove any theme/plugin sort icons applied via background or pseudo-elements */
+.ucs-results-table th {
+  background-image: none !important;
+  background: none !important; /* keep thead bg; th-level image/icons removed */
+}
+.ucs-results-table th::before,
+.ucs-results-table th::after {
+  content: none !important;
+  display: none !important;
+}
+.ucs-results-table th a,
+.ucs-results-table th span {
+  background-image: none !important;
+  background: none !important;
+}
+
+/* Support for jQuery Tablesorter/common sort class names */
+.ucs-results-table th.header,
+.ucs-results-table th.headerSortUp,
+.ucs-results-table th.headerSortDown,
+.ucs-results-table th.tablesorter-header,
+.ucs-results-table th.tablesorter-headerAsc,
+.ucs-results-table th.tablesorter-headerDesc {
+  background-image: none !important;
+  background: none !important;
+}
+.ucs-results-table th.header::before,
+.ucs-results-table th.header::after,
+.ucs-results-table th.tablesorter-header::before,
+.ucs-results-table th.tablesorter-header::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Constrain any inline icons inside THs */
+.ucs-results-table th svg,
+.ucs-results-table th img,
+.ucs-results-table th i,
+.ucs-results-table th .dashicons {
+  width: 1em !important;
+  height: 1em !important;
+  max-width: 1em !important;
+  max-height: 1em !important;
+  font-size: 1em !important;
+  line-height: 1em !important;
+}
+
+/* Nuclear reset inside our search table headers (scoped) */
+#ucs-search-root .ucs-results-table thead th,
+#ucs-search-root .ucs-results-table thead th *,
+#ucs-search-root .ucs-results-table thead th *::before,
+#ucs-search-root .ucs-results-table thead th *::after {
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+#ucs-search-root .ucs-results-table thead th::before,
+#ucs-search-root .ucs-results-table thead th::after,
+#ucs-search-root .ucs-results-table thead th a::before,
+#ucs-search-root .ucs-results-table thead th a::after,
+#ucs-search-root .ucs-results-table thead th span::before,
+#ucs-search-root .ucs-results-table thead th span::after {
+  content: none !important;
+  display: none !important;
+}
+#ucs-search-root .ucs-results-table thead th .sorting-indicator,
+#ucs-search-root .ucs-results-table thead th .sorticon,
+#ucs-search-root .ucs-results-table thead th .tablesorter-header-inner {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 0 0 0.35em !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+/* DataTables older class patterns */
+#ucs-search-root .ucs-results-table.dataTable thead .sorting,
+#ucs-search-root .ucs-results-table.dataTable thead .sorting_asc,
+#ucs-search-root .ucs-results-table.dataTable thead .sorting_desc,
+#ucs-search-root .ucs-results-table thead th.orderable,
+#ucs-search-root .ucs-results-table thead th.sortable {
+  background-image: none !important;
+}
+
+/* Stronger: completely remove background on common sorting TH classes */
+#ucs-search-root .ucs-results-table thead th.sorting,
+#ucs-search-root .ucs-results-table thead th.sorting_asc,
+#ucs-search-root .ucs-results-table thead th.sorting_desc,
+#ucs-search-root .ucs-results-table thead th[class*="sorting"] {
+  background: none !important;
+  background-image: none !important;
+}
+
+/* Any element with sort-like class names inside TH should be tiny and transparent */
+#ucs-search-root .ucs-results-table thead th [class*="sort"],
+#ucs-search-root .ucs-results-table thead th [class*="Sort"],
+#ucs-search-root .ucs-results-table thead th [class^="sort"],
+#ucs-search-root .ucs-results-table thead th [class^="Sort"] {
+  display: inline-block !important;
+  width: 1em !important;
+  height: 1em !important;
+  max-width: 1em !important;
+  max-height: 1em !important;
+  margin-left: 0.35em !important;
+  vertical-align: middle !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  opacity: 0.85 !important;
+  font-size: 1em !important;
+  line-height: 1em !important;
+}
+
+/* And remove any pseudo-element arrows they might add */
+#ucs-search-root .ucs-results-table thead th [class*="sort"]::before,
+#ucs-search-root .ucs-results-table thead th [class*="sort"]::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Hide common injected sort icon elements outright */
+#ucs-search-root .ucs-results-table thead th .sorting-indicator,
+#ucs-search-root .ucs-results-table thead th .sorting-indicators,
+#ucs-search-root .ucs-results-table thead th .dataTables_sort_icon,
+#ucs-search-root .ucs-results-table thead th .tablesorter-icon,
+#ucs-search-root .ucs-results-table thead th .tablesorter-header-inner .tablesorter-icon,
+#ucs-search-root .ucs-results-table thead th .dashicons,
+#ucs-search-root .ucs-results-table thead th svg,
+#ucs-search-root .ucs-results-table thead th img {
+  display: none !important;
+}
+
+/* Highest specificity overrides for DataTables default arrows */
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th.sorting,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th.sorting_asc,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th.sorting_desc,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th[class*="sorting"] {
+  background: none !important;
+  background-image: none !important;
+}
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th.sorting::before,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th.sorting::after,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th.sorting_asc::before,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th.sorting_asc::after,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th.sorting_desc::before,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th.sorting_desc::after,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th[class*="sorting"]::before,
+#ucs-search-root .ucs-results-table.dataTable thead > tr > th[class*="sorting"]::after {
+  content: none !important;
+  display: none !important;
 }

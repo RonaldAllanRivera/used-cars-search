@@ -233,6 +233,17 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 * **Formatting:** Localized thousands separators for Price and Mileage.
 * **Localization:** The “miles” unit label is translated via the plugin text domain.
 
+## 🎛️ UI polish (v1.6.9)
+
+* __Sort icons scale with text__: Sorting arrows/icons are now sized in `em` and neutralize any theme/plugin-injected graphics for a clean, compact header.
+* __Header text collisions resolved__: Longer labels like TRANSMISSION and CATEGORIES get explicit `em`-based column widths and slightly smaller header font size with wrapping, preventing overlap.
+* __Column labels & order refined__:
+  * TRANSMISSION → TRANS.
+  * COMMENTS → COMM.
+  * Removed SUMMARY column for a tighter footprint
+  * Desktop list order: Title, Price, Mileage, Engine, Trans., Categories, Date, Rating, Comments, Actions
+* __Actions simplified__: The Actions column now focuses on the Compare button for a cleaner table.
+
 ## 🔄 Unattended Background Queue (WP‑Cron)
 
 Run large AI generations while logged out or overnight. The plugin ships a custom queue table, a minutely worker, and a concurrency lock to process items in small batches safely.

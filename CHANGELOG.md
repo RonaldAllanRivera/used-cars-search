@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.9] - 2025-09-05
+
+### Improved
+- Sorting icons now scale with header text using em units. Theme/plugin-injected sorting graphics are neutralized via scoped CSS to ensure a clean, compact look.
+- Results table headers polished to prevent collisions between longer labels (e.g., TRANSMISSION and CATEGORIES):
+  - Explicit em-based column widths for these headers
+  - Slightly reduced header font size on those columns
+  - Wrapping enabled with safe word breaks
+
+### Changed
+- Desktop list view column layout refined for readability and width efficiency:
+  - Abbreviated labels: TRANSMISSION → TRANS., COMMENTS → COMM.
+  - Removed SUMMARY column for a tighter table footprint
+  - Reordered columns to prioritize key info: Title, Price, Mileage, Engine, Trans., Categories, Date, Rating, Comments, Actions
+- Actions column simplified to only show the Compare button.
+
+### Docs
+- README updated with a new "UI polish (v1.6.9)" section summarizing the changes.
+
 ## [1.6.8] - 2025-09-04
 
 ### Added

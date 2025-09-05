@@ -51,6 +51,55 @@ let currentSortState = {
     sortOrder: 'desc'
 };
 
+// Injects high-priority CSS to neutralize theme sorting icons and constrain icon sizes
+function injectSortIconFixStyles() {
+    if (document.getElementById('ucs-sort-icon-fix')) return;
+    const css = `
+    /* Keep header background subtle */
+    #ucs-search-root .ucs-results-table thead { background-color: #f8fafc !important; }
+
+    /* Remove theme/plugin sort backgrounds and pseudo icons in headers */
+    #ucs-search-root .ucs-results-table thead th { background-image: none !important; }
+    #ucs-search-root .ucs-results-table thead th::before,
+    #ucs-search-root .ucs-results-table thead th::after,
+    #ucs-search-root .ucs-results-table thead th a::before,
+    #ucs-search-root .ucs-results-table thead th a::after,
+    #ucs-search-root .ucs-results-table thead th span::before,
+    #ucs-search-root .ucs-results-table thead th span::after { content: none !important; display: none !important; }
+
+    /* Widespread sorting class patterns */
+    #ucs-search-root .ucs-results-table thead th.sorting,
+    #ucs-search-root .ucs-results-table thead th.sorting_asc,
+    #ucs-search-root .ucs-results-table thead th.sorting_desc,
+    #ucs-search-root .ucs-results-table thead th[class*="sorting"],
+    #ucs-search-root .ucs-results-table thead th.header,
+    #ucs-search-root .ucs-results-table thead th.headerSortUp,
+    #ucs-search-root .ucs-results-table thead th.headerSortDown,
+    #ucs-search-root .ucs-results-table thead th.tablesorter-header,
+    #ucs-search-root .ucs-results-table thead th.tablesorter-headerAsc,
+    #ucs-search-root .ucs-results-table thead th.tablesorter-headerDesc { background: none !important; background-image: none !important; }
+
+    /* Any sort-related child element: no background, size relative to text */
+    #ucs-search-root .ucs-results-table thead th [class*="sort"],
+    #ucs-search-root .ucs-results-table thead th [class^="sort"] {
+      display: inline-block !important;
+      width: 1em !important; height: 1em !important; max-width: 1em !important; max-height: 1em !important;
+      margin-left: 0.35em !important; vertical-align: middle !important; background: transparent !important; background-image: none !important;
+      border: 0 !important; box-shadow: none !important;
+      font-size: 1em !important; line-height: 1em !important;
+    }
+    #ucs-search-root .ucs-results-table thead th [class*="sort"]::before,
+    #ucs-search-root .ucs-results-table thead th [class*="sort"]::after { content: none !important; display: none !important; }
+
+    /* Our own icon span sized with text */
+    #ucs-search-root .ucs-results-table thead th .ucs-sort-icon { display: inline-block !important; width: 1em !important; height: 1em !important; font-size: 1em !important; line-height: 1em !important; margin-left: 0.35em !important; opacity: .85 !important; }
+    `;
+    const style = document.createElement('style');
+    style.id = 'ucs-sort-icon-fix';
+    style.textContent = css;
+    document.head.appendChild(style);
+}
+
 function formatNumber(value, decimals = 0) {
     if (value === null || value === undefined || value === '') return '';
     let num = Number(value);
@@ -111,7 +160,7 @@ export function renderResults(container, data, state) {
             html += '</div>';
             container.innerHTML = html;
         } else {
-            let html = `<table class="ucs-results-table"><thead><tr><th class="ucs-sort-th" data-sort="title">TITLE <span class="ucs-sort-icon">${sortBy === 'title' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th>SUMMARY</th><th>PRICE</th><th>MILEAGE</th><th>ENGINE</th><th>TRANSMISSION</th><th class="ucs-sort-th" data-sort="category">CATEGORIES <span class="ucs-sort-icon">${sortBy === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th class="ucs-sort-th" data-sort="date">DATE <span class="ucs-sort-icon">${sortBy === 'date' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="rating">RATING <span class="ucs-sort-icon">${sortBy === 'rating' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="comments">COMMENTS <span class="ucs-sort-icon">${sortBy === 'comments' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th>ACTIONS</th></tr></thead><tbody>`;
+            let html = `<table class="ucs-results-table"><thead><tr><th class="ucs-sort-th" data-sort="title">TITLE <span class="ucs-sort-icon">${sortBy === 'title' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th>PRICE</th><th>MILEAGE</th><th>ENGINE</th><th>TRANS.</th><th class="ucs-sort-th" data-sort="category">CATEGORIES <span class="ucs-sort-icon">${sortBy === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th class="ucs-sort-th" data-sort="date">DATE <span class="ucs-sort-icon">${sortBy === 'date' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="rating">RATING <span class="ucs-sort-icon">${sortBy === 'rating' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="comments">COMMENTS <span class="ucs-sort-icon">${sortBy === 'comments' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th>ACTIONS</th></tr></thead><tbody>`;
             sortedPosts.forEach(post => {
                 const { price, mileage, engine, transmission } = post.custom_fields || {};
                 const categories = post.category ? 
@@ -129,8 +178,7 @@ export function renderResults(container, data, state) {
                 const date = post.date ? new Date(post.date).toLocaleDateString() : '—';
                 html += `
                     <tr>
-                        <td data-label="Title"><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></td>
-                        <td data-label="Summary">${post.excerpt || '—'}</td>
+                        <td data-label="Title"><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></td>                        
                         <td data-label="Price">${price ? `$${formatNumber(price, 2)}` : '\u2014'}</td>
                         <td data-label="Mileage">${mileage ? `${formatNumber(mileage, 0)} miles` : '\u2014'}</td>
                         <td data-label="Engine">${engine || '—'}</td>
@@ -140,14 +188,15 @@ export function renderResults(container, data, state) {
                         <td data-label="Rating">${rating}</td>
                         <td data-label="Comments" class="ucs-nowrap">${post.comments > 0 ? `<a href="${post.permalink}#comments" class="ucs-comment-link" target="_blank" rel="noopener">${post.comments}</a>` : '—'}</td>
                         <td data-label="Actions" class="ucs-nowrap">
-                            <a href="${post.permalink}" class="ucs-button" target="_blank" rel="noopener">View</a>
-                            ${post.website ? `<a href="${post.website}" class="ucs-button" target="_blank" rel="noopener nofollow">Website</a>` : ''}
-                            <br><br><button class="ucs-compare-btn ucs-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>
+                            <button class="ucs-compare-btn ucs-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>
                         </td>
                     </tr>`;
             });
             html += `</tbody></table>`;
             container.innerHTML = html;
+
+            // Ensure our small, neutral sorting icons override any theme styles
+            injectSortIconFixStyles();
 
             // Add sort event listeners
             document.querySelectorAll('.ucs-sort-th').forEach(th => {
