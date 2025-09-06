@@ -171,6 +171,7 @@ function ucs_ai_ajax_apply() {
             wp_send_json_error(['message' => $res->get_error_message()]);
         }
         $updated = isset($res['updated']) ? $res['updated'] : array();
+        /* translators: %s = comma-separated list of updated fields (e.g., title, content, seo_title) */
         wp_send_json_success(['message' => sprintf(__('Updated: %s', 'used-cars-search'), implode(', ', $updated))]);
     } else {
         wp_send_json_error(['message' => __('AI core not available.', 'used-cars-search')]);
@@ -225,6 +226,7 @@ add_action('admin_notices', function(){
     if (isset($_GET['ucs_ai_bulk_done'])) {
         $ok = intval($_GET['ucs_ai_bulk_done']);
         $fail = intval($_GET['ucs_ai_bulk_fail'] ?? 0);
+        /* translators: 1: number of posts successfully processed, 2: number of posts that failed */
         echo '<div class="notice notice-success is-dismissible"><p>'.sprintf(esc_html__('AI Assist: processed %d posts, %d failed.', 'used-cars-search'), $ok, $fail).'</p></div>';
     }
 });

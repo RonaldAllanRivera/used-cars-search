@@ -353,6 +353,33 @@ Tips: Batch size is modest by default and can be filtered via `ucs_ai_queue_batc
 
 ---
 
+## 🌐 Internationalization (i18n)
+
+* **Text domain**: `used-cars-search`
+* **Domain path**: `/languages`
+* **Loader**: Text domain is loaded on `plugins_loaded` in `used-cars-search.php`.
+* **Generating POT**: Use WP‑CLI to scan PHP/JS and regenerate `languages/used-cars-search.pot`.
+
+Example (see more commands below):
+
+```bash
+wp i18n make-pot . languages/used-cars-search.pot \
+  --slug=used-cars-search \
+  --domain=used-cars-search \
+  --exclude=wporg-assets,node_modules,vendor,*.map
+```
+
+## 🗑️ Uninstall cleanup
+
+When the plugin is deleted (WP Admin → Plugins → Delete), `uninstall.php` removes:
+
+* Options: `ucs_options`, `ucs_ai_options`, `ucs_stopwords`
+* Transients: `ucs_ai_worker_lock`, `ucs_ai_queue_stop`
+* Cron: unschedules the `ucs_ai_queue_worker` event
+* Tables: drops `{prefix}ucs_ai_queue` and `{prefix}ucs_ratings` if they exist
+
+Note: Post meta and content are preserved by default. If you want a “purge everything” mode (including post meta), we can add an opt‑in flag.
+
 ## 🤝 Credits
 
 Developed by Ronald Allan Rivera

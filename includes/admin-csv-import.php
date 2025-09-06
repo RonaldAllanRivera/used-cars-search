@@ -51,6 +51,7 @@ function ucs_render_csv_import_page() {
         echo '<div class="notice notice-error"><p>' . implode('<br>', array_map('esc_html', $errors)) . '</p></div>';
     }
     if ($results && $results['ok']) {
+        /* translators: 1: total rows processed, 2: posts created, 3: posts updated, 4: rows skipped */
         echo '<div class="notice notice-success"><p>' . sprintf(
             esc_html__('Imported %d rows. Created %d posts, updated %d posts. Skipped %d rows.','used-cars-search'),
             intval($results['total']), intval($results['created']), intval($results['updated']), intval($results['skipped'])
@@ -117,6 +118,7 @@ function ucs_process_cars_csv($file_path) {
         $i = array_search(strtolower($h), $lower, true);
         if ($i === false) {
             fclose($fh);
+            /* translators: %s = missing CSV column header label */
             return ['ok'=>false, 'message' => sprintf(__('Missing required column: %s', 'used-cars-search'), $h)];
         }
         $map[$h] = $i;

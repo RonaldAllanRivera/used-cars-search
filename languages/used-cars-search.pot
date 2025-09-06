@@ -1,0 +1,495 @@
+# Copyright (C) 2025 Ronald Allan Rivera
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Used Cars Search 1.6.9\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/used-cars-search\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-09-06T13:50:53+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: used-cars-search\n"
+
+#. Plugin Name of the plugin
+#: used-cars-search.php
+msgid "Used Cars Search"
+msgstr ""
+
+#. Description of the plugin
+#: used-cars-search.php
+msgid "AJAX-powered, vanilla JS WordPress plugin for advanced used car search with autosuggest, grid/list view, and Elementor support."
+msgstr ""
+
+#. Author of the plugin
+#: used-cars-search.php
+msgid "Ronald Allan Rivera"
+msgstr ""
+
+#: includes/admin-ai-assist.php:10
+msgid "AI Assist (Used Cars)"
+msgstr ""
+
+#: includes/admin-ai-assist.php:28
+msgid "AI features are currently disabled. Enable them in Used Cars Search → AI Settings."
+msgstr ""
+
+#: includes/admin-ai-assist.php:30
+msgid "Select fields to generate and click Generate. Review the suggestions and click Apply."
+msgstr ""
+
+#: includes/admin-ai-assist.php:31
+msgid "Post Title"
+msgstr ""
+
+#: includes/admin-ai-assist.php:32
+msgid "Post Content"
+msgstr ""
+
+#: includes/admin-ai-assist.php:33
+#: includes/admin-ai-assist.php:43
+#: includes/seo.php:58
+msgid "SEO Title"
+msgstr ""
+
+#: includes/admin-ai-assist.php:34
+#: includes/admin-ai-assist.php:44
+#: includes/seo.php:62
+msgid "SEO Description"
+msgstr ""
+
+#: includes/admin-ai-assist.php:35
+#: includes/seo.php:66
+msgid "SEO Keywords"
+msgstr ""
+
+#: includes/admin-ai-assist.php:36
+msgid "Generate"
+msgstr ""
+
+#: includes/admin-ai-assist.php:40
+msgid "Suggestions"
+msgstr ""
+
+#: includes/admin-ai-assist.php:41
+#: includes/admin-csv-import.php:62
+msgid "Title"
+msgstr ""
+
+#: includes/admin-ai-assist.php:42
+msgid "Content"
+msgstr ""
+
+#: includes/admin-ai-assist.php:45
+msgid "SEO Keywords (comma-separated)"
+msgstr ""
+
+#: includes/admin-ai-assist.php:46
+msgid "Apply to Post"
+msgstr ""
+
+#: includes/admin-ai-assist.php:68
+msgid "Generating..."
+msgstr ""
+
+#: includes/admin-ai-assist.php:93
+msgid "Applying..."
+msgstr ""
+
+#: includes/admin-ai-assist.php:135
+#: includes/admin-ai-assist.php:161
+#: includes/ai.php:243
+msgid "Unauthorized"
+msgstr ""
+
+#: includes/admin-ai-assist.php:146
+msgid "AI is disabled in settings."
+msgstr ""
+
+#. translators: %s = comma-separated list of updated fields (e.g., title, content, seo_title)
+#: includes/admin-ai-assist.php:175
+#, php-format
+msgid "Updated: %s"
+msgstr ""
+
+#: includes/admin-ai-assist.php:177
+msgid "AI core not available."
+msgstr ""
+
+#: includes/admin-ai-assist.php:184
+msgid "AI core missing"
+msgstr ""
+
+#: includes/admin-ai-assist.php:195
+msgid "AI Assist: Generate & Apply"
+msgstr ""
+
+#: includes/admin-ai-assist.php:224
+msgid "AI is disabled in settings. Enable it to use bulk action."
+msgstr ""
+
+#. translators: 1: number of posts successfully processed, 2: number of posts that failed
+#: includes/admin-ai-assist.php:230
+#, php-format
+msgid "AI Assist: processed %d posts, %d failed."
+msgstr ""
+
+#: includes/admin-ai.php:9
+#: includes/admin-ai.php:10
+#: includes/admin-ai.php:46
+msgid "AI Settings"
+msgstr ""
+
+#: includes/admin-ai.php:47
+msgid "Configure OpenAI integration. This feature is admin-only and does not affect frontend functionality."
+msgstr ""
+
+#: includes/admin-ai.php:53
+msgid "Enable AI Features"
+msgstr ""
+
+#: includes/admin-ai.php:55
+msgid "Enabled (admin tools only)"
+msgstr ""
+
+#: includes/admin-ai.php:59
+msgid "OpenAI API Key"
+msgstr ""
+
+#: includes/admin-ai.php:62
+msgid "Stored securely in WordPress options. Used only on the server for API calls."
+msgstr ""
+
+#: includes/admin-ai.php:66
+#: includes/admin.php:417
+msgid "Model"
+msgstr ""
+
+#: includes/admin-ai.php:74
+msgid "Default: gpt-4o-mini. You can filter the available list via ucs_ai_models."
+msgstr ""
+
+#: includes/admin-ai.php:78
+msgid "Temperature"
+msgstr ""
+
+#: includes/admin-ai.php:84
+msgid "Max Tokens"
+msgstr ""
+
+#: includes/admin-ai.php:90
+msgid "Enable Dynamic Sub-headline"
+msgstr ""
+
+#: includes/admin-ai.php:94
+msgid "Add a conversion-focused H2 sub-headline linking to the homepage at the top of content"
+msgstr ""
+
+#: includes/admin-ai.php:96
+msgid "When enabled, the model generates a dynamic sub-headline; when disabled, content starts with the intro paragraph."
+msgstr ""
+
+#: includes/admin-ai.php:100
+msgid "Homepage URL"
+msgstr ""
+
+#: includes/admin-ai.php:103
+msgid "Used for the sub-headline link. Leave blank to use the default."
+msgstr ""
+
+#: includes/admin-ai.php:112
+msgid "How to Use"
+msgstr ""
+
+#: includes/admin-ai.php:114
+msgid "Configure:"
+msgstr ""
+
+#: includes/admin-ai.php:116
+msgid "WP Admin → Used Cars Search → AI Settings"
+msgstr ""
+
+#: includes/admin-ai.php:117
+msgid "Enable AI, enter API key, select model from dropdown."
+msgstr ""
+
+#: includes/admin-ai.php:118
+msgid "Use \"Test Connection\" to verify; \"OK\" indicates success."
+msgstr ""
+
+#: includes/admin-ai.php:121
+msgid "Single post:"
+msgstr ""
+
+#: includes/admin-ai.php:123
+msgid "Edit any post → \"AI Assist (Used Cars)\" meta box."
+msgstr ""
+
+#: includes/admin-ai.php:124
+msgid "Select fields → Generate → review → Apply."
+msgstr ""
+
+#: includes/admin-ai.php:127
+msgid "Bulk:"
+msgstr ""
+
+#: includes/admin-ai.php:129
+msgid "Posts → check posts → Bulk actions → \"AI Assist: Generate & Apply\" → Apply."
+msgstr ""
+
+#: includes/admin-ai.php:130
+msgid "Notice shows processed/failed counts."
+msgstr ""
+
+#: includes/admin-ai.php:133
+msgid "Background queue (WP‑Cron):"
+msgstr ""
+
+#: includes/admin-ai.php:135
+msgid "Enable AI above and save settings."
+msgstr ""
+
+#: includes/admin-ai.php:136
+msgid "Enqueue posts: Posts → select items → Bulk actions → \"AI Assist: Queue for Background\" → Apply."
+msgstr ""
+
+#: includes/admin-ai.php:137
+msgid "WP‑Cron runs every minute and processes queued items in small batches automatically."
+msgstr ""
+
+#: includes/admin-ai.php:138
+msgid "To run unattended while logged out or overnight on Laragon, schedule a task to request <code>http://localhost/popular-ai-software-search/wp-cron.php</code> every minute (Windows Task Scheduler)."
+msgstr ""
+
+#: includes/admin-ai.php:139
+msgid "Alternative: add <code>define('ALTERNATE_WP_CRON', true);</code> in wp-config.php and ensure periodic traffic to trigger WP‑Cron."
+msgstr ""
+
+#: includes/admin-ai.php:140
+msgid "You will see admin notices for enqueue results; items are applied in the background—no browser tab required."
+msgstr ""
+
+#: includes/admin-ai.php:143
+msgid "SiteGround and shared hosting setup:"
+msgstr ""
+
+#: includes/admin-ai.php:144
+msgid "On shared hosts, it is best to disable the built‑in WP‑Cron trigger and use a real server cron calling wp-cron.php at a fixed interval."
+msgstr ""
+
+#: includes/admin-ai.php:146
+msgid "In <code>wp-config.php</code> add: <code>define('DISABLE_WP_CRON', true);</code>"
+msgstr ""
+
+#: includes/admin-ai.php:147
+msgid "SiteGround: Site Tools → Devs → Cron Jobs → Create Cron Job"
+msgstr ""
+
+#: includes/admin-ai.php:149
+msgid "Schedule: Every 1 minute (or every 5 minutes if 1 minute is not allowed)."
+msgstr ""
+
+#: includes/admin-ai.php:150
+msgid "Command (choose one):"
+msgstr ""
+
+#: includes/admin-ai.php:158
+msgid "cPanel (generic shared hosting): Cron Jobs → Add New Cron Job → use the same <code>wget</code> or <code>curl</code> command above."
+msgstr ""
+
+#: includes/admin-ai.php:159
+msgid "Replace <code>your-domain.com</code> with your real domain. Keep <code>?doing_wp_cron</code> to avoid caching layers from skipping the run."
+msgstr ""
+
+#: includes/admin-ai.php:160
+msgid "If your host restricts every‑minute intervals, pick the smallest allowed (e.g., 5 minutes). The queue will continue on the next tick."
+msgstr ""
+
+#: includes/admin-ai.php:165
+#: includes/admin-ai.php:168
+msgid "Test Connection"
+msgstr ""
+
+#: includes/admin-ai.php:166
+msgid "Click to verify your API key and model. No content is generated; the test requests a simple \"OK\" reply."
+msgstr ""
+
+#: includes/admin-csv-import.php:8
+#: includes/admin-csv-import.php:9
+#: includes/admin-csv-import.php:47
+msgid "CSV Import"
+msgstr ""
+
+#: includes/admin-csv-import.php:17
+msgid "Insufficient permissions"
+msgstr ""
+
+#: includes/admin-csv-import.php:27
+msgid "Sample cars.csv not found in plugin folder."
+msgstr ""
+
+#: includes/admin-csv-import.php:37
+msgid "Please upload a CSV file or choose the sample file."
+msgstr ""
+
+#: includes/admin-csv-import.php:48
+msgid "Upload a CSV of cars to create draft posts. Title is Year Make Model. Car details are saved to custom fields. The Make is assigned as the post category (created if missing)."
+msgstr ""
+
+#: includes/admin-csv-import.php:56
+#, php-format
+msgid "Imported %d rows. Created %d posts, updated %d posts. Skipped %d rows."
+msgstr ""
+
+#: includes/admin-csv-import.php:60
+msgid "Summary"
+msgstr ""
+
+#: includes/admin-csv-import.php:62
+msgid "Category"
+msgstr ""
+
+#: includes/admin-csv-import.php:62
+msgid "Post ID"
+msgstr ""
+
+#: includes/admin-csv-import.php:62
+msgid "Action"
+msgstr ""
+
+#: includes/admin-csv-import.php:79
+msgid "CSV File"
+msgstr ""
+
+#: includes/admin-csv-import.php:80
+msgid "Use cars.csv from this plugin folder"
+msgstr ""
+
+#: includes/admin-csv-import.php:81
+msgid "Post Status"
+msgstr ""
+
+#: includes/admin-csv-import.php:81
+msgid "Draft"
+msgstr ""
+
+#: includes/admin-csv-import.php:81
+msgid "Publish"
+msgstr ""
+
+#: includes/admin-csv-import.php:83
+msgid "Import CSV"
+msgstr ""
+
+#: includes/admin-csv-import.php:101
+msgid "CSV file not found."
+msgstr ""
+
+#: includes/admin-csv-import.php:106
+msgid "Unable to open CSV file."
+msgstr ""
+
+#: includes/admin-csv-import.php:111
+msgid "Empty CSV."
+msgstr ""
+
+#. translators: %s = missing CSV column header label
+#: includes/admin-csv-import.php:122
+#, php-format
+msgid "Missing required column: %s"
+msgstr ""
+
+#: includes/admin.php:352
+msgid "Car Details"
+msgstr ""
+
+#: includes/admin.php:375
+msgid "Year"
+msgstr ""
+
+#: includes/admin.php:386
+msgid "Make"
+msgstr ""
+
+#: includes/admin.php:421
+msgid "Trim"
+msgstr ""
+
+#: includes/admin.php:425
+msgid "Price"
+msgstr ""
+
+#: includes/admin.php:429
+msgid "Mileage"
+msgstr ""
+
+#: includes/admin.php:433
+msgid "Engine"
+msgstr ""
+
+#: includes/admin.php:437
+msgid "Transmission"
+msgstr ""
+
+#: includes/ai-queue.php:52
+msgid "Every Minute (UCS)"
+msgstr ""
+
+#: includes/ai-queue.php:168
+msgid "AI Assist: Queue for Background"
+msgstr ""
+
+#: includes/ai-queue.php:190
+msgid "AI is disabled in settings. Enable it to enqueue."
+msgstr ""
+
+#. translators: 1: number of posts enqueued successfully, 2: number of posts that failed to enqueue
+#: includes/ai-queue.php:196
+#, php-format
+msgid "AI Queue: enqueued %d posts, %d failed."
+msgstr ""
+
+#: includes/ai.php:62
+msgid "OpenAI API key is not configured."
+msgstr ""
+
+#. translators: %d = HTTP status code returned by the OpenAI API
+#: includes/ai.php:85
+#, php-format
+msgid "OpenAI HTTP %d"
+msgstr ""
+
+#: includes/ai.php:89
+msgid "Invalid JSON from OpenAI."
+msgstr ""
+
+#: includes/ai.php:100
+msgid "Invalid post."
+msgstr ""
+
+#: includes/ai.php:149
+msgid "Post not found."
+msgstr ""
+
+#: includes/ai.php:226
+msgid "Model did not return JSON."
+msgstr ""
+
+#: includes/ai.php:253
+msgid "API key is empty."
+msgstr ""
+
+#: includes/compare-page-template.php:97
+msgid "miles"
+msgstr ""
+
+#: includes/seo.php:42
+msgid "Used Cars SEO"
+msgstr ""
+
+#: includes/seo.php:72
+msgid "No-index this post"
+msgstr ""

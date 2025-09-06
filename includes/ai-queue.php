@@ -192,6 +192,7 @@ if (is_admin()) {
         if (isset($_GET['ucs_ai_queue_done'])) {
             $ok = intval($_GET['ucs_ai_queue_done']);
             $fail = intval($_GET['ucs_ai_queue_fail'] ?? 0);
+            /* translators: 1: number of posts enqueued successfully, 2: number of posts that failed to enqueue */
             echo '<div class="notice notice-success is-dismissible"><p>'.sprintf(esc_html__('AI Queue: enqueued %d posts, %d failed.', 'used-cars-search'), $ok, $fail).'</p></div>';
         }
     });

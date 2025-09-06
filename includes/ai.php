@@ -81,6 +81,7 @@ if (!function_exists('ucs_ai_chat_completion')) {
         $code = wp_remote_retrieve_response_code($resp);
         $raw  = wp_remote_retrieve_body($resp);
         if ($code < 200 || $code >= 300) {
+            /* translators: %d = HTTP status code returned by the OpenAI API */
             return new WP_Error('ucs_ai_http_error', sprintf(__('OpenAI HTTP %d', 'used-cars-search'), $code), array('body' => $raw));
         }
         $data = json_decode($raw, true);

@@ -3,12 +3,21 @@
 /*
 Plugin Name: Used Cars Search
 Description: AJAX-powered, vanilla JS WordPress plugin for advanced used car search with autosuggest, grid/list view, and Elementor support.
-Version: 0.2.0
+Version: 1.6.9
 Author: Ronald Allan Rivera
+Text Domain: used-cars-search
+Domain Path: /languages
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 
 if ( ! defined('ABSPATH') ) exit; // Prevent direct access
+
+// i18n: load the plugin text domain
+add_action('plugins_loaded', function() {
+    load_plugin_textdomain('used-cars-search', false, dirname(plugin_basename(__FILE__)) . '/languages');
+});
 
 // Load core AI utilities globally (needed by WP-Cron worker)
 require_once __DIR__ . '/includes/ai.php';
