@@ -19,6 +19,26 @@ add_action('plugins_loaded', function() {
     load_plugin_textdomain('used-cars-search', false, dirname(plugin_basename(__FILE__)) . '/languages');
 });
 
+// On activation: create required DB tables (ratings)
+function ucs_install() {
+    global $wpdb;
+    $table = $wpdb->prefix . 'ucs_ratings';
+    $charset = $wpdb->get_charset_collate();
+    $sql = "CREATE TABLE $table (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        post_id BIGINT UNSIGNED NOT NULL,
+        rating TINYINT UNSIGNED NOT NULL,
+        ip VARCHAR(45) NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_post (post_id),
+        KEY idx_ip (ip)
+    ) $charset;";
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    dbDelta($sql);
+}
+register_activation_hook(__FILE__, 'ucs_install');
+
 // Load core AI utilities globally (needed by WP-Cron worker)
 require_once __DIR__ . '/includes/ai.php';
 // Load AI queue globally to register cron hooks

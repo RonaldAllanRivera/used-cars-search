@@ -2,7 +2,7 @@
 Contributors: ronaldallanrivera
 Tags: used cars, search, autosuggest, compare, ratings, inventory, automotive, vehicle, car dealer, elementor
 Requires at least: 6.0
-Tested up to: 6.6
+Tested up to: 6.8.2
 Requires PHP: 7.4
 Stable tag: 1.6.9
 License: GPLv2 or later
