@@ -187,6 +187,10 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 * **Ratings Management Panel**: View, search, and sort all posts with average rating, votes, and comments.
 * **Danger Zone Tools**: One-click "Reset All Ratings" and "Delete All Comments" for fast cleanup during testing.
 
+### Maintenance (v1.6.10)
+* Ratings Management sorting fixed for ID, Title, and Date (normalized sort keys and proper `WP_Query` mapping; numeric fallback for ID).
+* Hardened AJAX sanitization and whitelisting for all sort inputs.
+
 ---
 ## 💡 Tech Stack & Philosophy
 

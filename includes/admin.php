@@ -27,8 +27,48 @@ add_action('admin_menu', function() {
 
 add_action('admin_init', 'ucs_settings_init');
 
+/**
+ * Sanitize plugin options before saving to database.
+ *
+ * @param array $input The input array of options to be sanitized.
+ * @return array Sanitized options array.
+ */
+function ucs_sanitize_options($input) {
+    $sanitized = array();
+    
+    // Sanitize compare page ID
+    if (isset($input['compare_page_id'])) {
+        $sanitized['compare_page_id'] = absint($input['compare_page_id']);
+    }
+    
+    // Sanitize boolean values
+    $boolean_fields = array();
+    foreach ($boolean_fields as $field) {
+        if (isset($input[$field])) {
+            $sanitized[$field] = (bool) $input[$field];
+        }
+    }
+    
+    // Sanitize text fields
+    $text_fields = array();
+    foreach ($text_fields as $field) {
+        if (isset($input[$field])) {
+            $sanitized[$field] = sanitize_text_field($input[$field]);
+        }
+    }
+    
+    return $sanitized;
+}
+
 function ucs_settings_init() {
-    register_setting('used-cars-search', 'ucs_options');
+    register_setting(
+        'used-cars-search', 
+        'ucs_options',
+        array(
+            'sanitize_callback' => 'ucs_sanitize_options',
+            'default' => array()
+        )
+    );
 
     add_settings_section(
         'ucs_settings_section',
@@ -46,10 +86,21 @@ function ucs_settings_init() {
     );
 }
 
+/**
+ * Renders the settings section description.
+ *
+ * @since 1.0.0
+ */
 function ucs_settings_section_callback() {
-    echo '<p>Configure the settings for the Used Cars Search plugin.</p>';
+    // translators: Description for the plugin settings section
+    echo '<p>' . esc_html__('Configure the settings for the Used Cars Search plugin.', 'used-cars-search') . '</p>';
 }
 
+/**
+ * Renders the compare page dropdown in the settings.
+ *
+ * @since 1.0.0
+ */
 function ucs_compare_page_id_callback() {
     $options = get_option('ucs_options');
     $selected_page_id = isset($options['compare_page_id']) ? $options['compare_page_id'] : '';
@@ -57,22 +108,29 @@ function ucs_compare_page_id_callback() {
     $pages = get_pages();
 
     if ($pages) {
-        echo "<select name='ucs_options[compare_page_id]'>";
-        echo "<option value=''>— Select a Page —</option>";
+        echo '<select name="ucs_options[compare_page_id]">';
+        echo '<option value="">' . esc_html__('— Select a Page —', 'used-cars-search') . '</option>';
         foreach ($pages as $page) {
-            $selected = $selected_page_id == $page->ID ? 'selected' : '';
-            echo "<option value='{$page->ID}' $selected>" . esc_html($page->post_title) . "</option>";
+            echo '<option value="' . esc_attr( $page->ID ) . '" ' . selected( (int) $selected_page_id, (int) $page->ID, false ) . '>' . esc_html( $page->post_title ) . '</option>';
         }
-        echo "</select>";
+        echo '</select>';
     }
 }
 
+/**
+ * Renders the main admin page.
+ *
+ * @since 1.0.0
+ */
 function ucs_admin_page() {
     $options = get_option('ucs_options');
-    echo '<div class="wrap"><h1>Used Cars Search</h1>';
+    // translators: Main admin page title
+    echo '<div class="wrap"><h1>' . esc_html__('Used Cars Search', 'used-cars-search') . '</h1>';
     ucs_render_dashboard_widget();
-    echo "<p>How to display the search UI:<br><code>[used_cars_search]</code> in any page or post, or add it to a template with <code>echo do_shortcode('[used_cars_search]');</code></p>";
-    echo '<p>How to display the compare page:<br><code>[ucs_compare_page]</code> in a new page (e.g., a page with the slug "/compare").</p>';
+    // translators: Instructions for displaying the search UI
+    echo '<p>' . esc_html__('How to display the search UI:', 'used-cars-search') . '<br><code>[used_cars_search]</code> ' . esc_html__('in any page or post, or add it to a template with', 'used-cars-search') . ' <code>' . esc_html('echo do_shortcode(\'[used_cars_search]\');') . '</code></p>';
+    // translators: Instructions for displaying the compare page
+    echo '<p>' . esc_html__('How to display the compare page:', 'used-cars-search') . '<br><code>[ucs_compare_page]</code> ' . esc_html__('in a new page (e.g., a page with the slug "/compare").', 'used-cars-search') . '</p>';
     echo '<form method="post" action="options.php">';
     settings_fields('used-cars-search');
     do_settings_sections('used-cars-search');
@@ -113,17 +171,27 @@ function ucs_admin_page() {
     $update_json = esc_html( wp_json_encode($update_payload, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES) );
 
     echo '<hr style="margin:2em 0 1em">';
-    echo '<h2>REST API: Car Details & SEO</h2>';
-    echo '<p>This plugin registers all car details and SEO fields as post meta with REST support. You can create or update them via the core Posts endpoint.</p>';
+    echo '<h2>' . esc_html__('REST API: Car Details & SEO', 'used-cars-search') . '</h2>';
+    echo '<p>' . esc_html__('This plugin registers all car details and SEO fields as post meta with REST support. You can create or update them via the core Posts endpoint.', 'used-cars-search') . '</p>';
     echo '<ul style="line-height:1.6em;">';
-    echo '<li><strong>Create</strong>: <code>POST ' . $posts_endpoint . '</code></li>';
-    echo '<li><strong>Update</strong>: <code>POST ' . $posts_endpoint . '/{id}</code></li>';
-    echo '<li><strong>Read</strong>: <code>GET ' . $read_example . '</code></li>';
+    // translators: %s is the REST API endpoint URL for creating posts
+    echo '<li><strong>' . esc_html__('Create', 'used-cars-search') . ':</strong> <code>POST ' . esc_html( $posts_endpoint ) . '</code></li>';
+    // translators: %s is the REST API endpoint URL for updating posts
+    echo '<li><strong>' . esc_html__('Update', 'used-cars-search') . ':</strong> <code>POST ' . esc_html( $posts_endpoint . '/{id}' ) . '</code></li>';
+    // translators: %s is the REST API endpoint URL for reading posts
+    echo '<li><strong>' . esc_html__('Read', 'used-cars-search') . ':</strong> <code>GET ' . esc_html( $read_example ) . '</code></li>';
     echo '</ul>';
 
-    echo '<p><strong>Authentication</strong>: Use <em>Application Passwords</em> (Users → Profile). In Postman/Make.com use Basic Auth with your WordPress username and the generated password.</p>';
+    // translators: Authentication instructions for the REST API
+    echo '<p><strong>' . esc_html__('Authentication', 'used-cars-search') . '</strong>: ' . 
+         esc_html__('Use', 'used-cars-search') . ' <em>' . 
+         esc_html__('Application Passwords', 'used-cars-search') . '</em> (' . 
+         esc_html__('Users → Profile', 'used-cars-search') . '). ' .
+         esc_html__('In Postman/Make.com use Basic Auth with your WordPress username and the generated password.', 'used-cars-search') . 
+         '</p>';
 
-    echo '<p><strong>Supported meta keys</strong>:</p>';
+    // translators: Section header for supported meta keys
+    echo '<p><strong>' . esc_html__('Supported meta keys', 'used-cars-search') . ':</strong></p>';
     echo '<ul style="columns:2;-webkit-columns:2;-moz-columns:2;line-height:1.6em;">';
     echo '<li><code>ucs_year</code> (integer)</li>';
     echo '<li><code>ucs_make</code> (string)</li>';
@@ -139,31 +207,65 @@ function ucs_admin_page() {
     echo '<li><code>_ucs_seo_noindex</code> (boolean)</li>';
     echo '</ul>';
 
-    echo '<p><strong>Postman quick steps</strong>:</p>';
+    echo '<p><strong>' . esc_html__('Postman quick steps', 'used-cars-search') . ':</strong></p>';
     echo '<ol style="line-height:1.6em;">';
-    echo '<li>Create an Application Password (Users → Your Profile).</li>';
-    echo '<li>Set Authorization: <em>Basic Auth</em> (Username = your WP user, Password = Application Password).</li>';
-    echo '<li>Set Header: <code>Content-Type: application/json</code>.</li>';
-    echo '<li>POST to <code>' . $posts_endpoint . '</code> with the Create JSON below.</li>';
-    echo '<li>Then POST to <code>' . $posts_endpoint . '/{id}</code> with the Update JSON to modify fields.</li>';
-    echo '<li>Verify with GET: <code>' . $posts_endpoint . '/{id}?_fields=id,title.rendered,meta</code>.</li>';
+    echo '<li>' . esc_html__('Create an Application Password (Users → Your Profile).', 'used-cars-search') . '</li>';
+    echo '<li>' . sprintf(
+        /* translators: %1$s: The authentication method (Basic Auth) */
+        esc_html__('Set Authorization: %1$s (Username = your WP user, Password = Application Password).', 'used-cars-search'),
+        '<em>' . esc_html__('Basic Auth', 'used-cars-search') . '</em>'
+    ) . '</li>';
+    echo '<li>' . sprintf(
+        /* translators: %s: The HTTP header to be set (e.g., Content-Type: application/json) */
+        esc_html__('Set Header: %s', 'used-cars-search'),
+        '<code>Content-Type: application/json</code>'
+    ) . '</li>';
+    echo '<li>' . sprintf(
+        /* translators: %1$s: The REST API endpoint URL for creating posts */
+        esc_html__('POST to %1$s with the Create JSON below.', 'used-cars-search'),
+        '<code>' . esc_html($posts_endpoint) . '</code>'
+    ) . '</li>';
+    echo '<li>' . sprintf(
+        /* translators: %1$s: The REST API endpoint URL for updating a post (includes {id} placeholder) */
+        esc_html__('Then POST to %1$s with the Update JSON to modify fields.', 'used-cars-search'),
+        '<code>' . esc_html($posts_endpoint . '/{id}') . '</code>'
+    ) . '</li>';
+    echo '<li>' . sprintf(
+        /* translators: %s: The REST API endpoint URL for getting post details (includes {id} placeholder and _fields parameter) */
+        esc_html__('Verify with GET: %s', 'used-cars-search'),
+        '<code>' . esc_html($posts_endpoint . '/{id}?_fields=id,title.rendered,meta') . '</code>'
+    ) . '.</li>';
     echo '</ol>';
 
-    echo '<p><strong>Create JSON</strong>:</p>';
-    echo '<pre style="white-space:pre-wrap;max-width:900px;overflow:auto;background:#f6f7f7;padding:10px;border:1px solid #ccd0d4;"><code>' . $create_json . '</code></pre>';
+    echo '<p><strong>' . esc_html__('Create JSON', 'used-cars-search') . ':</strong></p>';
+    echo '<pre style="white-space:pre-wrap;max-width:900px;overflow:auto;background:#f6f7f7;padding:10px;border:1px solid #ccd0d4;"><code>' . esc_html( $create_json ) . '</code></pre>';
 
-    echo '<p><strong>Update JSON</strong>:</p>';
-    echo '<pre style="white-space:pre-wrap;max-width:900px;overflow:auto;background:#f6f7f7;padding:10px;border:1px solid #ccd0d4;"><code>' . $update_json . '</code></pre>';
+    echo '<p><strong>' . esc_html__('Update JSON', 'used-cars-search') . ':</strong></p>';
+    echo '<pre style="white-space:pre-wrap;max-width:900px;overflow:auto;background:#f6f7f7;padding:10px;border:1px solid #ccd0d4;"><code>' . esc_html( $update_json ) . '</code></pre>';
 
-    echo '<p><strong>Make.com</strong>: Use HTTP → Make a request, Method: POST, URL: <code>' . $posts_endpoint . '</code> (or <code>' . $posts_endpoint . '/{id}</code>), Auth: Basic, Headers: <code>Content-Type: application/json</code>. Map your variables into the <code>meta</code> object as shown above.</p>';
+    echo '<p><strong>Make.com</strong>: ' . sprintf(
+        /* translators: %1$s: The REST API endpoint for creating posts, %2$s: The endpoint for updating posts, %3$s: The required Content-Type header, %4$s: The meta object name */
+        esc_html__('Use HTTP → Make a request, Method: POST, URL: %1$s (or %2$s), Auth: Basic, Headers: %3$s. Map your variables into the %4$s object as shown above.', 'used-cars-search'),
+        '<code>' . esc_html($posts_endpoint) . '</code>',
+        '<code>' . esc_html($posts_endpoint . '/{id}') . '</code>',
+        '<code>Content-Type: application/json</code>',
+        '<code>meta</code>'
+    ) . '</p>';
 
+    // translators: Warning section for dangerous operations
     echo '<div style="margin-top:2em;padding:1em;border:1px solid #c00;background:#fee;max-width:500px;">';
-    echo '<b>Danger Zone</b><br>';
-    echo '<a href="#" class="button">Reset All Ratings</a> <a href="#" class="button">Delete All Comments</a>';
+    echo '<b>' . esc_html__('Danger Zone', 'used-cars-search') . '</b><br>';
+    echo '<a href="#" class="button">' . esc_html__('Reset All Ratings', 'used-cars-search') . '</a> ';
+    echo '<a href="#" class="button">' . esc_html__('Delete All Comments', 'used-cars-search') . '</a>';
     echo '</div>';
     echo '</div>';
 }
 
+/**
+ * Renders the dashboard widget with plugin statistics.
+ *
+ * @since 1.0.0
+ */
 function ucs_render_dashboard_widget() {
     global $wpdb;
     $post_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'post' AND post_status = 'publish'");
@@ -178,19 +280,26 @@ function ucs_render_dashboard_widget() {
     ");
 
     echo '<ul style="line-height:1.6em;font-size:1.11em;margin:0;padding:0 0 0 1.4em;">';
-    echo '<li><strong>Published Posts:</strong> ' . number_format($post_count) . '</li>';
-    echo '<li><strong>Total Star Ratings:</strong> ' . number_format($num_ratings) . '</li>';
-    echo '<li><strong>Average Star Rating:</strong> ' . ($num_ratings > 0 ? '<span style="color:#ffc107;font-weight:bold">' . $avg_rating . ' / 5</span>' : '—') . '</li>';
-    echo '<li><strong>Approved Comments:</strong> ' . number_format($comment_count) . '</li>';
+    echo '<li><strong>' . esc_html__('Published Posts:', 'used-cars-search') . '</strong> ' . esc_html(number_format($post_count)) . '</li>';
+    // translators: %s is the number of star ratings
+    echo '<li><strong>' . esc_html__('Total Star Ratings:', 'used-cars-search') . '</strong> ' . esc_html( number_format( $num_ratings ) ) . '</li>';
+    // translators: %s is the average star rating out of 5
+    echo '<li><strong>' . esc_html__('Average Star Rating:', 'used-cars-search') . '</strong> ' . ( $num_ratings > 0 ? '<span style="color:#ffc107;font-weight:bold">' . esc_html( $avg_rating ) . ' / 5</span>' : '—' ) . '</li>';
+    echo '<li><strong>' . esc_html__('Approved Comments:', 'used-cars-search') . '</strong> ' . esc_html(number_format($comment_count)) . '</li>';
     echo '</ul>';
     echo '<hr style="margin:1.2em 0 0.7em 0;">';
 }
 
 
+/**
+ * Renders the ratings management page.
+ *
+ * @since 1.0.0
+ */
 function ucs_admin_ratings_page() {
     ?>
     <div class="wrap">
-        <h1>Ratings Management</h1>
+        <h1><?php echo esc_html__('Ratings Management', 'used-cars-search'); ?></h1>
         <div id="ucs-admin-table"></div>
         <script>
         let ucsCurrentPage = 1, ucsSearch = '', ucsLoading = false;
@@ -209,11 +318,21 @@ function ucs_admin_ratings_page() {
         function ucsLoadRatings(page = 1, search = '', sort = ucsCurrentSort, order = ucsCurrentOrder) {
             ucsLoading = true;
             document.getElementById('ucs-admin-table').innerHTML = 'Loading...';
-            fetch(ajaxurl + '?action=ucs_ratings_list&page=' + page +
-                '&search=' + encodeURIComponent(search) +
-                '&sort=' + encodeURIComponent(sort) +
-                '&order=' + encodeURIComponent(order)
-            )
+            
+            // Create form data to send as POST
+            const formData = new FormData();
+            formData.append('action', 'ucs_ratings_list');
+            formData.append('nonce', ucsVars.nonce);
+            formData.append('page', page);
+            formData.append('search', search);
+            formData.append('sort', sort);
+            formData.append('order', order);
+            
+            fetch(ajaxurl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData
+            })
             .then(r => r.json())
             .then(data => {
                 ucsLoading = false;
@@ -254,99 +373,172 @@ function ucs_admin_ratings_page() {
                 `;
             });
         }
-        document.addEventListener('DOMContentLoaded',function(){ucsLoadRatings();});
+        // Localize script with nonce
+        const ucsVars = {
+            'nonce': '<?php echo esc_js(wp_create_nonce("ucs_ratings_nonce")); ?>'
+        };
+        
+        document.addEventListener('DOMContentLoaded',function(){
+            ucsLoadRatings();
+        });
         </script>
     </div>
     <?php
 }
 
 add_action('wp_ajax_ucs_ratings_list', function() {
+    // Verify nonce for AJAX request
+    check_ajax_referer('ucs_ratings_nonce', 'nonce');
+    
     global $wpdb;
 
-    $page = max(1, intval($_GET['page'] ?? 1));
+    // Sanitize and validate input from POST data
+    $page = max(1, intval($_POST['page'] ?? 1));
     $per_page = 20;
     $offset = ($page-1)*$per_page;
-    $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
-
-    // Get sort and order from request
-    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'date';
-    $order = (isset($_GET['order']) && strtolower($_GET['order']) === 'asc') ? 'ASC' : 'DESC';
-
-    // Allowable SQL columns
-    $sortable = [
-        'ID' => 'ID',
-        'title' => 'post_title',
-        'date' => 'post_date'
+    $search = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
+    // Normalize sort key to lowercase and whitelist allowed values
+    $sort_raw = isset($_POST['sort']) ? sanitize_text_field(wp_unslash($_POST['sort'])) : 'date';
+    $sort = strtolower($sort_raw);
+    $allowed_sorts = ['id','title','date','rating','votes','comments'];
+    if (!in_array($sort, $allowed_sorts, true)) {
+        $sort = 'date';
+    }
+    $order = (isset($_POST['order']) && in_array(strtoupper($_POST['order']), ['ASC', 'DESC'], true)) 
+        ? strtoupper($_POST['order']) 
+        : 'DESC';
+        
+    // Initialize response array
+    $response = [
+        'posts' => [],
+        'page' => $page,
+        'max_page' => 1,
+        'total' => 0
     ];
-    $sort_sql = $sortable[$sort] ?? 'post_date';
 
     // For rating, votes, comments -- sort in PHP after fetching
-    $is_php_sort = in_array($sort, ['rating','votes','comments']);
+    $is_php_sort = in_array($sort, ['rating','votes','comments'], true);
+    
+    // Allowable SQL columns for direct DB sorting (keys normalized to lowercase)
+    $sortable = [
+        'id' => 'ID',
+        'title' => 'title',
+        'date' => 'date'
+    ];
+    $sort_sql = isset($sortable[$sort]) ? $sortable[$sort] : 'date';
 
-    // Query post IDs with search
-    $post_where = "WHERE post_type = 'post' AND post_status = 'publish'";
+    // Build base query
+    $query_args = [
+        'post_type' => 'post',
+        'post_status' => 'publish',
+        'posts_per_page' => $per_page,
+        'paged' => $page,
+        'update_post_term_cache' => false,
+        'update_post_meta_cache' => false,
+        'no_found_rows' => false
+    ];
+    
+    // Add search if provided
     if ($search) {
-        $post_where .= $wpdb->prepare(" AND post_title LIKE %s", '%' . $wpdb->esc_like($search) . '%');
+        $query_args['s'] = $search;
     }
+    
+    // Handle sorting
+    if ($sort === 'id') {
+        $query_args['orderby'] = 'ID';
+        $query_args['order'] = $order;
+    } else if ($sort === 'date') {
+        $query_args['orderby'] = 'date';
+        $query_args['order'] = $order;
+    } else if ($sort === 'title') {
+        $query_args['orderby'] = 'title';
+        $query_args['order'] = $order;
+    }
+    
+    // Get posts with WP_Query for better security and compatibility
+    $posts_query = new WP_Query($query_args);
+    $total = $posts_query->found_posts;
+    $response['max_page'] = max(1, ceil($total / $per_page));
+    $response['total'] = $total;
 
-    $total = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} $post_where");
-
-    // Use SQL ORDER BY for DB columns; otherwise default by date
-    $order_by = $is_php_sort ? 'post_date' : $sort_sql;
-
-    $posts = $wpdb->get_results($wpdb->prepare(
-        "SELECT ID, post_title, post_date FROM {$wpdb->posts} $post_where ORDER BY $order_by $order LIMIT %d OFFSET %d",
-        $per_page, $offset
-    ));
-
+    // Process the posts
     $result = [];
-    foreach ($posts as $p) {
-        // Ratings
-        $row = $wpdb->get_row($wpdb->prepare(
-            "SELECT AVG(rating) as avg_rating, COUNT(*) as num_votes FROM {$wpdb->prefix}ucs_ratings WHERE post_id=%d", $p->ID
-        ));
-        $avg_rating = $row && $row->num_votes > 0 ? round($row->avg_rating,2) : '';
-        $num_votes = $row ? intval($row->num_votes) : 0;
-
-        // Comments
-        $comments = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->comments} WHERE comment_post_ID = %d AND comment_approved = '1'", $p->ID
-        ));
-
-        $result[] = [
-            'ID' => $p->ID,
-            'title' => esc_html($p->post_title),
-            'permalink' => get_permalink($p->ID),
-            'date' => date('Y-m-d', strtotime($p->post_date)),
-            'rating' => $avg_rating === '' ? 0 : $avg_rating,
-            'votes' => $num_votes,
-            'comments' => $comments
-        ];
+    
+    if ($posts_query->have_posts()) {
+        while ($posts_query->have_posts()) {
+            $posts_query->the_post();
+            global $post;
+            
+            // Get ratings
+            $row = $wpdb->get_row($wpdb->prepare(
+                "SELECT AVG(rating) as avg_rating, COUNT(*) as num_votes 
+                FROM {$wpdb->prefix}ucs_ratings 
+                WHERE post_id = %d", 
+                $post->ID
+            ));
+            
+            $avg_rating = $row && $row->num_votes > 0 ? round($row->avg_rating, 2) : 0;
+            $num_votes = $row ? intval($row->num_votes) : 0;
+            
+            // Get comment count
+            $comments = get_comments([
+                'post_id' => $post->ID,
+                'count' => true,
+                'status' => 'approve'
+            ]);
+            
+            $result[] = [
+                'ID' => $post->ID,
+                'title' => get_the_title($post->ID),
+                'permalink' => get_permalink($post->ID),
+                'date' => gmdate('Y-m-d', strtotime($post->post_date . ' UTC')),
+                'rating' => (float)$avg_rating,
+                'votes' => $num_votes,
+                'comments' => (int)$comments
+            ];
+        }
+        wp_reset_postdata();
     }
-
-    // For non-SQL columns, sort in PHP
+    
+    // If we're not already sorting in the query, sort in PHP
     if ($is_php_sort && count($result) > 1) {
         usort($result, function($a, $b) use ($sort, $order) {
-            $valA = $a[$sort]; $valB = $b[$sort];
+            $valA = $a[$sort];
+            $valB = $b[$sort];
             if ($valA == $valB) return 0;
-            if ($order === 'ASC') return ($valA < $valB) ? -1 : 1;
-            return ($valA > $valB) ? -1 : 1;
+            
+            // Handle different data types properly
+            if (is_numeric($valA) && is_numeric($valB)) {
+                return ($order === 'ASC') ? ($valA - $valB) : ($valB - $valA);
+            }
+            
+            // String comparison
+            $cmp = strcmp((string)$valA, (string)$valB);
+            return ($order === 'ASC') ? $cmp : -$cmp;
         });
     }
 
-    wp_send_json([
-        'posts' => $result,
-        'page' => $page,
-        'max_page' => max(1, ceil($total/$per_page)),
-        'total' => $total
-    ]);
+    // Fallback: if sorting by ID, enforce numeric sort in PHP to ensure correct order regardless of DB ordering
+    if ($sort === 'id' && count($result) > 1) {
+        usort($result, function($a, $b) use ($order) {
+            if ($a['ID'] == $b['ID']) return 0;
+            return ($order === 'ASC') ? ($a['ID'] <=> $b['ID']) : ($b['ID'] <=> $a['ID']);
+        });
+    }
+    
+    $response['posts'] = $result;
+    wp_send_json($response);
 });
 
 
 
-
     // Register Meta Box
-    function ucs_add_car_details_meta_box() {
+    /**
+ * Adds the car details meta box to the post editor.
+ *
+ * @since 1.0.0
+ */
+function ucs_add_car_details_meta_box() {
         add_meta_box(
             'ucs_car_details_meta_box',
             __('Car Details', 'used-cars-search'),
@@ -359,7 +551,13 @@ add_action('wp_ajax_ucs_ratings_list', function() {
     add_action('add_meta_boxes', 'ucs_add_car_details_meta_box');
 
     // Render Meta Box Content
-    function ucs_render_car_details_meta_box($post) {
+    /**
+ * Renders the car details meta box content.
+ *
+ * @since 1.0.0
+ * @param WP_Post $post The post object.
+ */
+function ucs_render_car_details_meta_box($post) {
         // Security nonce
         wp_nonce_field('ucs_save_meta_box_data', 'ucs_meta_box_nonce');
 
@@ -372,21 +570,21 @@ add_action('wp_ajax_ucs_ratings_list', function() {
         ?>
         <table class="form-table">
             <tr>
-                <th><label for="ucs_year"><?php _e('Year', 'used-cars-search'); ?></label></th>
+                <th><label for="ucs_year"><?php esc_html_e('Year', 'used-cars-search'); ?></label></th>
                 <td>
                     <select id="ucs_year" name="ucs_year">
-                        <option value="">Select Year</option>
+                        <option value=""><?php esc_html_e('Select Year', 'used-cars-search'); ?></option>
                         <?php for ($y = 2025; $y >= 1980; $y--): ?>
-                            <option value="<?php echo $y; ?>" <?php selected($values['year'], $y); ?>><?php echo $y; ?></option>
+                            <option value="<?php echo esc_attr( $y ); ?>" <?php selected( (string)$values['year'], (string)$y ); ?>><?php echo esc_html( $y ); ?></option>
                         <?php endfor; ?>
                     </select>
                 </td>
             </tr>
             <tr>
-                <th><label for="ucs_make"><?php _e('Make', 'used-cars-search'); ?></label></th>
+                <th><label for="ucs_make"><?php esc_html_e('Make', 'used-cars-search'); ?></label></th>
                 <td>
                     <select id="ucs_make" name="ucs_make">
-                        <option value="">Select Make</option>
+                        <option value=""><?php esc_html_e('Select Make', 'used-cars-search'); ?></option>
                         <?php
                         // Standard list
                         $standard_makes = [
@@ -408,42 +606,42 @@ add_action('wp_ajax_ucs_ratings_list', function() {
                         }
                         natcasesort($unique_makes);
                         foreach ($unique_makes as $make): ?>
-                            <option value="<?php echo esc_attr($make); ?>" <?php selected($values['make'], $make); ?>><?php echo esc_html($make); ?></option>
+                            <option value="<?php echo esc_attr($make); ?>" <?php selected( (string)$values['make'], (string)$make ); ?>><?php echo esc_html($make); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </td>
             </tr>
             <tr>
-                <th><label for="ucs_model"><?php _e('Model', 'used-cars-search'); ?></label></th>
+                <th><label for="ucs_model"><?php esc_html_e('Model', 'used-cars-search'); ?></label></th>
                 <td><input type="text" id="ucs_model" name="ucs_model" value="<?php echo esc_attr($values['model']); ?>" class="regular-text" /></td>
             </tr>
             <tr>
-                <th><label for="ucs_trim"><?php _e('Trim', 'used-cars-search'); ?></label></th>
+                <th><label for="ucs_trim"><?php esc_html_e('Trim', 'used-cars-search'); ?></label></th>
                 <td><input type="text" id="ucs_trim" name="ucs_trim" value="<?php echo esc_attr($values['trim']); ?>" class="regular-text" /></td>
             </tr>
             <tr>
-                <th><label for="ucs_price"><?php _e('Price', 'used-cars-search'); ?></label></th>
+                <th><label for="ucs_price"><?php esc_html_e('Price', 'used-cars-search'); ?></label></th>
                 <td><input type="number" id="ucs_price" name="ucs_price" value="<?php echo esc_attr($values['price']); ?>" class="regular-text" step="0.01"/></td>
             </tr>
             <tr>
-                <th><label for="ucs_mileage"><?php _e('Mileage', 'used-cars-search'); ?></label></th>
+                <th><label for="ucs_mileage"><?php esc_html_e('Mileage', 'used-cars-search'); ?></label></th>
                 <td><input type="number" id="ucs_mileage" name="ucs_mileage" value="<?php echo esc_attr($values['mileage']); ?>" class="regular-text" /></td>
             </tr>
             <tr>
-                <th><label for="ucs_engine"><?php _e('Engine', 'used-cars-search'); ?></label></th>
+                <th><label for="ucs_engine"><?php esc_html_e('Engine', 'used-cars-search'); ?></label></th>
                 <td><input type="text" id="ucs_engine" name="ucs_engine" value="<?php echo esc_attr($values['engine']); ?>" class="regular-text" /></td>
             </tr>
             <tr>
-                <th><label for="ucs_transmission"><?php _e('Transmission', 'used-cars-search'); ?></label></th>
+                <th><label for="ucs_transmission"><?php esc_html_e('Transmission', 'used-cars-search'); ?></label></th>
                 <td>
                     <select id="ucs_transmission" name="ucs_transmission">
-                        <option value="">Select Transmission</option>
+                        <option value=""><?php esc_html_e('Select Transmission', 'used-cars-search'); ?></option>
                         <?php
                         $transmissions = [
                             'Automatic','Manual','CVT','Dual-Clutch','Tiptronic','Semi-Automatic','Automated Manual'
                         ];
                         foreach ($transmissions as $trans): ?>
-                            <option value="<?php echo $trans; ?>" <?php selected($values['transmission'], $trans); ?>><?php echo $trans; ?></option>
+                            <option value="<?php echo esc_attr( $trans ); ?>" <?php selected( (string)$values['transmission'], (string)$trans ); ?>><?php echo esc_html( $trans ); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </td>
@@ -453,9 +651,16 @@ add_action('wp_ajax_ucs_ratings_list', function() {
     }
 
     // Save Meta Box Data
-    function ucs_save_meta_box_data($post_id) {
+    /**
+ * Saves the car details meta box data.
+ *
+ * @since 1.0.0
+ * @param int $post_id The post ID.
+ */
+function ucs_save_meta_box_data($post_id) {
         // Verify nonce
-        if (!isset($_POST['ucs_meta_box_nonce']) || !wp_verify_nonce($_POST['ucs_meta_box_nonce'], 'ucs_save_meta_box_data')) {
+        $nonce = isset($_POST['ucs_meta_box_nonce']) ? sanitize_text_field(wp_unslash($_POST['ucs_meta_box_nonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'ucs_save_meta_box_data')) {
             return;
         }
         // Prevent autosave
@@ -470,10 +675,12 @@ add_action('wp_ajax_ucs_ratings_list', function() {
         $fields = ['year', 'make', 'model', 'trim', 'price', 'mileage', 'engine', 'transmission'];
 
         foreach ($fields as $field) {
-            if (isset($_POST['ucs_' . $field])) {
-                update_post_meta($post_id, 'ucs_' . $field, sanitize_text_field($_POST['ucs_' . $field]));
+            $meta_key = 'ucs_' . $field;
+            if (isset($_POST[$meta_key])) {
+                $value = sanitize_text_field(wp_unslash($_POST[$meta_key]));
+                update_post_meta($post_id, $meta_key, $value);
             } else {
-                delete_post_meta($post_id, 'ucs_' . $field);
+                delete_post_meta($post_id, $meta_key);
             }
         }
     }

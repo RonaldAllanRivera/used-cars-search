@@ -59,6 +59,7 @@ if (!function_exists('ucs_ai_chat_completion')) {
         $opts = ucs_ai_get_options();
         $api_key = isset($args['api_key']) && $args['api_key'] ? $args['api_key'] : $opts['api_key'];
         if (!$api_key) {
+            // translators: Error message when the OpenAI API key is missing
             return new WP_Error('ucs_ai_no_key', __('OpenAI API key is not configured.', 'used-cars-search'));
         }
         $model = isset($args['model']) && $args['model'] ? $args['model'] : $opts['model'];
@@ -82,10 +83,12 @@ if (!function_exists('ucs_ai_chat_completion')) {
         $raw  = wp_remote_retrieve_body($resp);
         if ($code < 200 || $code >= 300) {
             /* translators: %d = HTTP status code returned by the OpenAI API */
+            // translators: %d is the HTTP status code from the OpenAI API
             return new WP_Error('ucs_ai_http_error', sprintf(__('OpenAI HTTP %d', 'used-cars-search'), $code), array('body' => $raw));
         }
         $data = json_decode($raw, true);
         if (!is_array($data)) {
+            // translators: Error message when the response from OpenAI is not valid JSON
             return new WP_Error('ucs_ai_bad_json', __('Invalid JSON from OpenAI.', 'used-cars-search'), array('body' => $raw));
         }
         return $data;
@@ -116,10 +119,9 @@ if (!function_exists('ucs_ai_apply_changes_core')) {
         if (count($post_update) > 1) {
             // If we're updating a draft/pending/auto-draft with AI content, schedule it 24h from now
             if (in_array($current_status, array('draft','pending','auto-draft'), true)) {
-                $ts_local = current_time('timestamp') + DAY_IN_SECONDS;
-                $ts_gmt   = current_time('timestamp', true) + DAY_IN_SECONDS;
+                $ts_gmt = current_time('timestamp', true) + DAY_IN_SECONDS;
                 $post_update['post_status']    = 'future';
-                $post_update['post_date']      = date('Y-m-d H:i:s', $ts_local);
+                $post_update['post_date']      = get_date_from_gmt(gmdate('Y-m-d H:i:s', $ts_gmt), 'Y-m-d H:i:s');
                 $post_update['post_date_gmt']  = gmdate('Y-m-d H:i:s', $ts_gmt);
             }
             wp_update_post($post_update);
@@ -146,7 +148,10 @@ if (!function_exists('ucs_ai_apply_changes_core')) {
 if (!function_exists('ucs_ai_generate_for_post_core')) {
     function ucs_ai_generate_for_post_core($post_id, $fields = array('title','content','seo_title','seo_description','seo_keywords')) {
         $post = get_post($post_id);
-        if (!$post) return new WP_Error('ucs_ai_no_post', __('Post not found.', 'used-cars-search'));
+        if (!$post) {
+            // translators: Error message when a post cannot be found
+            return new WP_Error('ucs_ai_no_post', __('Post not found.', 'used-cars-search'));
+        }
 
         $fields = is_array($fields) ? $fields : array('title','content','seo_title','seo_description','seo_keywords');
 
@@ -240,6 +245,7 @@ if (!function_exists('ucs_ai_generate_for_post_core')) {
 if (!function_exists('ucs_ai_ajax_test_connection')) {
     function ucs_ai_ajax_test_connection() {
         if (!current_user_can('manage_options')) {
+            // translators: Error message when user doesn't have permission
             wp_send_json_error(array('message' => __('Unauthorized', 'used-cars-search')), 403);
         }
         check_ajax_referer('ucs_ai_nonce', 'nonce');
@@ -250,6 +256,7 @@ if (!function_exists('ucs_ai_ajax_test_connection')) {
             $api_key = $opts['api_key'];
         }
         if (!$api_key) {
+            // translators: Error message when the API key is not provided
             wp_send_json_error(array('message' => __('API key is empty.', 'used-cars-search')));
         }
 

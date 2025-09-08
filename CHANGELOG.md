@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.10] - 2025-09-08
+
+### Fixed
+- Ratings Management: Sorting now works reliably for ID, Title, and Date. Normalized the `sort` parameter and mapped it to proper `WP_Query` `orderby` values; added a numeric PHP fallback for ID.
+
+### Security/Hardening
+- AJAX handler `ucs_ratings_list`: Normalized and whitelisted `sort` keys, strengthened input sanitization, and limited PHP-side sorting to rating/votes/comments only.
+
+### Docs
+- Updated README and WordPress `readme.txt` to reflect the Ratings Management fixes and version bump.
+
 ## [1.6.9] - 2025-09-05
 
 ### Added

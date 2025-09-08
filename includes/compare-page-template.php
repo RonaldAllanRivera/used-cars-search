@@ -12,7 +12,7 @@ function render_compare_page() {
     $compare_ids = array_filter(array_map('intval', explode(',', $compare_ids_str)));
 
     if (empty($compare_ids)) {
-        echo '<div class="ucs-compare-page"><p>No items selected for comparison. Please go back and select up to 4 items.</p></div>';
+        echo '<div class="ucs-compare-page"><p>' . esc_html__( 'No items selected for comparison. Please go back and select up to 4 items.', 'used-cars-search' ) . '</p></div>';
         return ob_get_clean();
     }
 
@@ -85,7 +85,7 @@ function render_compare_page() {
 
                         <?php if ($top_line): ?>
                             <div class="ucs-car-info" style="margin-bottom:0.5rem; font-weight:600; color:#111827;">
-                                <?php echo $top_line; ?>
+                                <?php echo esc_html( $top_line ); ?>
                             </div>
                         <?php endif; ?>
 
@@ -107,12 +107,12 @@ function render_compare_page() {
                         <p class="ucs-excerpt"><?php echo esc_html($post['excerpt']); ?></p>
 
                         <div class="ucs-result-meta">
-                            <div class="ucs-category"><?php echo $post['category']; ?></div>
+                            <div class="ucs-category"><?php echo wp_kses_post( $post['category'] ); ?></div>
                             <div class="ucs-rating">
                                 <?php if ($post['votes'] > 0): ?>
                                     <span class="star-rating">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
-                                            <span class="dashicons dashicons-star-<?php echo ($i <= round($post['rating'])) ? 'filled' : 'empty'; ?>"></span>
+                                            <span class="dashicons dashicons-star-<?php echo esc_attr( ($i <= round($post['rating'])) ? 'filled' : 'empty' ); ?>"></span>
                                         <?php endfor; ?>
                                     </span>
                                     <span class="ucs-votes">(<?php echo esc_html($post['votes']); ?>)</span>
@@ -124,7 +124,7 @@ function render_compare_page() {
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <p>Could not retrieve the selected items. Please try again.</p>
+            <p><?php echo esc_html__( 'Could not retrieve the selected items. Please try again.', 'used-cars-search' ); ?></p>
         <?php endif; ?>
     </div>
     <?php

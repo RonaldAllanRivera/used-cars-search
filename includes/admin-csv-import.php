@@ -14,32 +14,40 @@ add_action('admin_menu', function(){
 });
 
 function ucs_render_csv_import_page() {
-    if (!current_user_can('manage_options')) { wp_die(__('Insufficient permissions', 'used-cars-search')); }
+    if (!current_user_can('manage_options')) { wp_die( esc_html__( 'Insufficient permissions', 'used-cars-search' ) ); }
 
     $results = null; $errors = [];
-    if (!empty($_POST['ucs_csv_import_nonce']) && wp_verify_nonce($_POST['ucs_csv_import_nonce'], 'ucs_csv_import')) {
+    $nonce = isset($_POST['ucs_csv_import_nonce']) ? sanitize_text_field(wp_unslash($_POST['ucs_csv_import_nonce'])) : '';
+    if (!empty($nonce) && wp_verify_nonce($nonce, 'ucs_csv_import')) {
         $use_sample = !empty($_POST['ucs_use_sample']);
         $file_path = '';
         if ($use_sample) {
             $sample = plugin_dir_path(__DIR__ . '/..') . 'cars.csv';
             // plugin_dir_path expects a file; resolve from this file
             $sample = dirname(__DIR__) . '/cars.csv';
-            if (file_exists($sample)) { $file_path = $sample; } else { $errors[] = __('Sample cars.csv not found in plugin folder.', 'used-cars-search'); }
+            if (file_exists($sample)) { 
+                $file_path = $sample; 
+            } else { 
+                $errors[] = esc_html__('Sample cars.csv not found in plugin folder.', 'used-cars-search'); 
+            }
         } else {
             // Handle file upload
             if (!empty($_FILES['ucs_csv_file']['name'])) {
                 require_once ABSPATH . 'wp-admin/includes/file.php';
                 $overrides = [ 'test_form' => false, 'mimes' => ['csv' => 'text/csv','txt' => 'text/plain'] ];
                 $uploaded = wp_handle_upload($_FILES['ucs_csv_file'], $overrides);
-                if (isset($uploaded['error'])) { $errors[] = $uploaded['error']; }
-                else { $file_path = $uploaded['file']; }
+                if (isset($uploaded['error'])) { 
+                    $errors[] = esc_html($uploaded['error']); 
+                } else { 
+                    $file_path = $uploaded['file']; 
+                }
             } else {
-                $errors[] = __('Please upload a CSV file or choose the sample file.', 'used-cars-search');
+                $errors[] = esc_html__('Please upload a CSV file or choose the sample file.', 'used-cars-search');
             }
         }
         if ($file_path && empty($errors)) {
             $results = ucs_process_cars_csv($file_path);
-            if (!$results['ok']) { $errors[] = $results['message']; }
+            if (!$results['ok']) { $errors[] = esc_html($results['message']); }
         }
     }
 
@@ -51,21 +59,22 @@ function ucs_render_csv_import_page() {
         echo '<div class="notice notice-error"><p>' . implode('<br>', array_map('esc_html', $errors)) . '</p></div>';
     }
     if ($results && $results['ok']) {
-        /* translators: 1: total rows processed, 2: posts created, 3: posts updated, 4: rows skipped */
-        echo '<div class="notice notice-success"><p>' . sprintf(
-            esc_html__('Imported %d rows. Created %d posts, updated %d posts. Skipped %d rows.','used-cars-search'),
-            intval($results['total']), intval($results['created']), intval($results['updated']), intval($results['skipped'])
-        ) . '</p></div>';
+        // translators: 1: total rows processed, 2: posts created, 3: posts updated, 4: rows skipped
+        $import_msg = __( 'Imported %1$d rows. Created %2$d posts, updated %3$d posts. Skipped %4$d rows.', 'used-cars-search' );
+        echo '<div class="notice notice-success"><p>' . esc_html( sprintf(
+            $import_msg,
+            (int) $results['total'], (int) $results['created'], (int) $results['updated'], (int) $results['skipped']
+        ) ) . '</p></div>';
         if (!empty($results['rows'])) {
             echo '<h2>' . esc_html__('Summary', 'used-cars-search') . '</h2>';
             echo '<table class="widefat fixed striped" style="max-width:1000px;">';
             echo '<thead><tr><th>#</th><th>' . esc_html__('Title','used-cars-search') . '</th><th>' . esc_html__('Category','used-cars-search') . '</th><th>' . esc_html__('Post ID','used-cars-search') . '</th><th>' . esc_html__('Action','used-cars-search') . '</th></tr></thead><tbody>';
             foreach ($results['rows'] as $i => $row) {
                 echo '<tr>';
-                echo '<td>' . ($i+1) . '</td>';
+                echo '<td>' . esc_html( (string) ($i + 1) ) . '</td>';
                 echo '<td>' . esc_html($row['title']) . '</td>';
                 echo '<td>' . esc_html($row['make']) . '</td>';
-                echo '<td>' . ($row['post_id'] ? intval($row['post_id']) : '—') . '</td>';
+                echo '<td>' . ( $row['post_id'] ? esc_html( (string) intval($row['post_id']) ) : esc_html('—') ) . '</td>';
                 echo '<td>' . esc_html($row['action']) . '</td>';
                 echo '</tr>';
             }
@@ -86,9 +95,13 @@ function ucs_render_csv_import_page() {
 }
 
 function ucs_process_cars_csv($file_path) {
-    $status = isset($_POST['ucs_import_status']) && in_array($_POST['ucs_import_status'], ['draft','publish'], true)
-        ? $_POST['ucs_import_status']
-        : 'draft';
+    // Verify nonce before processing
+    if (!isset($_POST['ucs_csv_import_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['ucs_csv_import_nonce'])), 'ucs_csv_import')) {
+        return ['ok' => false, 'message' => __('Security check failed. Please try again.', 'used-cars-search')];
+    }
+    
+    $import_status = isset($_POST['ucs_import_status']) ? sanitize_text_field(wp_unslash($_POST['ucs_import_status'])) : '';
+    $status = in_array($import_status, ['draft', 'publish'], true) ? $import_status : 'draft';
 
     $required = ['Year','Make','Model'];
     $optional = ['Trim','Mileage','Engine','Transmission','Price'];
@@ -97,19 +110,36 @@ function ucs_process_cars_csv($file_path) {
     $total = $created = $updated = $skipped = 0;
     $rows_out = [];
 
-    if (!file_exists($file_path)) {
+    // Initialize the WordPress filesystem
+    global $wp_filesystem;
+    if (!function_exists('WP_Filesystem')) {
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+    }
+    
+    // Initialize the filesystem
+    $credentials = request_filesystem_credentials('', '', false, false, null);
+    if (!WP_Filesystem($credentials)) {
+        return ['ok' => false, 'message' => __('Unable to initialize filesystem access.', 'used-cars-search')];
+    }
+
+    if (!$wp_filesystem->exists($file_path)) {
         return ['ok' => false, 'message' => __('CSV file not found.', 'used-cars-search')];
     }
 
-    $fh = fopen($file_path, 'r');
-    if (!$fh) {
-        return ['ok' => false, 'message' => __('Unable to open CSV file.', 'used-cars-search')];
+    $file_content = $wp_filesystem->get_contents($file_path);
+    if ($file_content === false) {
+        return ['ok' => false, 'message' => __('Unable to read CSV file.', 'used-cars-search')];
     }
 
-    // Handle potential BOM
-    $first = fgets($fh);
-    if ($first === false) { fclose($fh); return ['ok'=>false, 'message' => __('Empty CSV.', 'used-cars-search')]; }
-    $first = preg_replace('/^\xEF\xBB\xBF/', '', $first);
+    // Handle potential BOM and split into lines
+    $lines = explode("\n", str_replace("\r", "", $file_content));
+    if (empty($lines)) {
+        return ['ok' => false, 'message' => __('Empty CSV.', 'used-cars-search')];
+    }
+    
+    // Process first line (header)
+    $first = array_shift($lines);
+    $first = preg_replace('/^\xEF\xBB\xBF/', '', $first); // Remove BOM if present
     $headers = str_getcsv($first);
 
     // Build header map (case-insensitive)
@@ -117,7 +147,6 @@ function ucs_process_cars_csv($file_path) {
     foreach ($required as $h) {
         $i = array_search(strtolower($h), $lower, true);
         if ($i === false) {
-            fclose($fh);
             /* translators: %s = missing CSV column header label */
             return ['ok'=>false, 'message' => sprintf(__('Missing required column: %s', 'used-cars-search'), $h)];
         }
@@ -128,10 +157,14 @@ function ucs_process_cars_csv($file_path) {
         if ($i !== false) { $map[$h] = $i; }
     }
 
-    // Iterate rows
-    $rowIndex = 1; // header consumed
-    while (($cols = fgetcsv($fh)) !== false) {
+    // Process remaining rows
+    $rowIndex = 1; // header already processed
+    foreach ($lines as $line) {
         $rowIndex++;
+        if (trim($line) === '') { continue; }
+        
+        // Parse CSV line
+        $cols = str_getcsv($line);
         if (count($cols) === 1 && trim((string)$cols[0]) === '') { continue; }
         $total++;
 
@@ -207,8 +240,6 @@ function ucs_process_cars_csv($file_path) {
             'action' => $action
         ];
     }
-    fclose($fh);
-
     return [
         'ok' => true,
         'total' => $total,

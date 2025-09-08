@@ -14,10 +14,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 if ( ! defined('ABSPATH') ) exit; // Prevent direct access
 
-// i18n: load the plugin text domain
-add_action('plugins_loaded', function() {
-    load_plugin_textdomain('used-cars-search', false, dirname(plugin_basename(__FILE__)) . '/languages');
-});
+// Translations are automatically loaded from the 'languages' directory by WordPress
 
 // On activation: create required DB tables (ratings)
 function ucs_install() {

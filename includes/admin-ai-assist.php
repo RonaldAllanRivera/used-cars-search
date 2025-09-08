@@ -130,15 +130,25 @@ function ucs_ai_render_assist_box($post) {
 // AJAX: Generate suggestions for a post
 add_action('wp_ajax_ucs_ai_generate', 'ucs_ai_ajax_generate');
 function ucs_ai_ajax_generate() {
-    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+    $post_id = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
     if (!$post_id || !current_user_can('edit_post', $post_id)) {
         wp_send_json_error(['message' => __('Unauthorized', 'used-cars-search')], 403);
     }
     check_ajax_referer('ucs_ai_mb_nonce', 'nonce');
 
-    $fields = isset($_POST['fields']) ? json_decode(stripslashes((string)$_POST['fields']), true) : ['title','content','seo_title','seo_description','seo_keywords'];
-    if (!is_array($fields) || empty($fields)) {
-        $fields = ['title','content','seo_title','seo_description','seo_keywords'];
+    $fields = [];
+    if (isset($_POST['fields'])) {
+        $fields_json = isset($_POST['fields']) ? sanitize_text_field(wp_unslash($_POST['fields'])) : '[]';
+        $fields = json_decode($fields_json, true);
+        if (!is_array($fields)) {
+            $fields = [];
+        }
+        // Ensure only allowed field names are processed
+        $allowed_fields = ['title', 'content', 'seo_title', 'seo_description', 'seo_keywords'];
+        $fields = array_intersect($fields, $allowed_fields);
+    }
+    if (empty($fields)) {
+        $fields = ['title', 'content', 'seo_title', 'seo_description', 'seo_keywords'];
     }
 
     $opts = function_exists('ucs_ai_get_options') ? ucs_ai_get_options() : [];
@@ -156,13 +166,20 @@ function ucs_ai_ajax_generate() {
 // AJAX: Apply selected suggestions to post
 add_action('wp_ajax_ucs_ai_apply', 'ucs_ai_ajax_apply');
 function ucs_ai_ajax_apply() {
-    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+    $post_id = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
     if (!$post_id || !current_user_can('edit_post', $post_id)) {
         wp_send_json_error(['message' => __('Unauthorized', 'used-cars-search')], 403);
     }
     check_ajax_referer('ucs_ai_mb_nonce', 'nonce');
 
-    $payload = isset($_POST['payload']) ? json_decode(stripslashes((string)$_POST['payload']), true) : [];
+    $payload = [];
+    if (isset($_POST['payload'])) {
+        $payload_json = isset($_POST['payload']) ? sanitize_text_field(wp_unslash($_POST['payload'])) : '{}';
+        $payload = json_decode($payload_json, true);
+        if (!is_array($payload)) {
+            $payload = [];
+        }
+    }
     if (!is_array($payload)) $payload = [];
     $fields = isset($payload['fields']) && is_array($payload['fields']) ? $payload['fields'] : ['title','content','seo_title','seo_description','seo_keywords'];
     if (function_exists('ucs_ai_apply_changes_core')) {
@@ -216,17 +233,39 @@ add_filter('handle_bulk_actions-edit-post', function($redirect_to, $action, $pos
         }
         $ok++;
     }
-    return add_query_arg(['ucs_ai_bulk_done' => $ok, 'ucs_ai_bulk_fail' => $fail], $redirect_to);
+    $redirect_args = [
+        'ucs_ai_bulk_done' => $ok, 
+        'ucs_ai_bulk_fail' => $fail,
+        '_wpnonce' => wp_create_nonce('ucs_ai_bulk_action')
+    ];
+    return add_query_arg($redirect_args, $redirect_to);
 }, 10, 3);
 
 add_action('admin_notices', function(){
-    if (!empty($_GET['ucs_ai_bulk_error'])) {
+    // Only show to admins
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    
+    // Nonce check for all GET parameters
+    $ucs_ai_bulk_done = isset($_GET['ucs_ai_bulk_done']) ? sanitize_text_field(wp_unslash($_GET['ucs_ai_bulk_done'])) : '';
+    $ucs_ai_bulk_fail = isset($_GET['ucs_ai_bulk_fail']) ? sanitize_text_field(wp_unslash($_GET['ucs_ai_bulk_fail'])) : '';
+    $ucs_ai_bulk_error = isset($_GET['ucs_ai_bulk_error']) ? sanitize_text_field(wp_unslash($_GET['ucs_ai_bulk_error'])) : '';
+    
+    if (!empty($ucs_ai_bulk_done) || !empty($ucs_ai_bulk_fail) || !empty($ucs_ai_bulk_error)) {
+        $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
+        if (empty($nonce) || !wp_verify_nonce($nonce, 'ucs_ai_bulk_action')) {
+            return;
+        }
+    }
+    if (!empty($ucs_ai_bulk_error)) {
         echo '<div class="notice notice-error is-dismissible"><p>'.esc_html__('AI is disabled in settings. Enable it to use bulk action.', 'used-cars-search').'</p></div>';
     }
-    if (isset($_GET['ucs_ai_bulk_done'])) {
-        $ok = intval($_GET['ucs_ai_bulk_done']);
-        $fail = intval($_GET['ucs_ai_bulk_fail'] ?? 0);
-        /* translators: 1: number of posts successfully processed, 2: number of posts that failed */
-        echo '<div class="notice notice-success is-dismissible"><p>'.sprintf(esc_html__('AI Assist: processed %d posts, %d failed.', 'used-cars-search'), $ok, $fail).'</p></div>';
+    if (!empty($ucs_ai_bulk_done)) {
+        $ok = absint($ucs_ai_bulk_done);
+        $fail = !empty($ucs_ai_bulk_fail) ? absint($ucs_ai_bulk_fail) : 0;
+        // translators: 1: number of posts successfully processed, 2: number of posts that failed
+        $notice = sprintf( __( 'AI Assist: processed %1$d posts, %2$d failed.', 'used-cars-search' ), (int) $ok, (int) $fail );
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $notice ) . '</p></div>';
     }
 });

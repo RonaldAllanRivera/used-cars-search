@@ -1,15 +1,16 @@
 === Used Cars Search ===
 Contributors: ronaldallanrivera
-Tags: used cars, search, autosuggest, compare, ratings, inventory, automotive, vehicle, car dealer, elementor
+Tags: search, autosuggest, compare, ratings, ai
 Requires at least: 6.0
-Tested up to: 6.8.2
+Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.6.9
+Stable tag: 1.6.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Fast, lightweight search and comparison plugin for used car inventories with autosuggest and ratings.
 
 == Description ==
-Used Cars Search is a fast, conflict‑safe search and comparison plugin for used‑car inventories. It features autosuggest, sortable list/grid results, a polished compare flow, and lightweight, dependency‑free JavaScript.
+Used Cars Search is a fast, conflict‑safe search & compare plugin for used‑car inventories. It includes autosuggest, sortable list/grid results, and a polished compare flow.
 
 Key features:
 - Autosuggest for quick keyword discovery
@@ -71,6 +72,10 @@ When the plugin is deleted, uninstall.php removes:
 Post meta and content are preserved by default.
 
 == Changelog ==
+= 1.6.10 =
+- Ratings Management: Fixed sorting for ID, Title, and Date by normalizing the `sort` parameter and mapping to proper `orderby` values in `WP_Query`. Added a numeric PHP fallback for ID to guarantee correct ordering.
+- Security/Hardening: Whitelisted sort keys and strengthened input sanitization in the `ucs_ratings_list` AJAX handler.
+
 = 1.6.9 =
 - Sort icons now scale with header text using em units; theme/plugin arrows neutralized by scoped CSS.
 - Prevent header collisions for longer labels with em‑based widths and smaller header font with wrapping (TRANS., CATEGORIES).

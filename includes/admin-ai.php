@@ -135,7 +135,13 @@ function ucs_ai_settings_page() {
                 <li><?php esc_html_e('Enable AI above and save settings.', 'used-cars-search'); ?></li>
                 <li><?php esc_html_e('Enqueue posts: Posts → select items → Bulk actions → "AI Assist: Queue for Background" → Apply.', 'used-cars-search'); ?></li>
                 <li><?php esc_html_e('WP‑Cron runs every minute and processes queued items in small batches automatically.', 'used-cars-search'); ?></li>
-                <li><?php echo wp_kses_post(__('To run unattended while logged out or overnight on Laragon, schedule a task to request <code>http://localhost/popular-ai-software-search/wp-cron.php</code> every minute (Windows Task Scheduler).', 'used-cars-search')); ?></li>
+                <li><?php 
+                echo wp_kses_post(sprintf(
+                    /* translators: %s: The URL to wp-cron.php */
+                    __('To run unattended while logged out or overnight, schedule a task to request <code>%s</code> every minute (Windows Task Scheduler).', 'used-cars-search'),
+                    esc_url(home_url('wp-cron.php'))
+                )); 
+                ?></li>
                 <li><?php echo wp_kses_post(__('Alternative: add <code>define(\'ALTERNATE_WP_CRON\', true);</code> in wp-config.php and ensure periodic traffic to trigger WP‑Cron.', 'used-cars-search')); ?></li>
                 <li><?php esc_html_e('You will see admin notices for enqueue results; items are applied in the background—no browser tab required.', 'used-cars-search'); ?></li>
             </ol>
@@ -188,12 +194,12 @@ function ucs_ai_settings_page() {
                         if (d && d.success && d.data && d.data.ok) {
                             status.innerHTML = '<span style="color:green;">OK</span>';
                         } else {
-                            const msg = d && d.data && d.data.message ? d.data.message : 'Failed';
-                            status.innerHTML = '<span style="color:#a00;">' + String(msg) + '</span>';
+                            const msg = d && d.data && d.data.message ? d.data.message : '<?php echo esc_js(__('Failed', 'used-cars-search')); ?>';
+                            status.textContent = msg;
                         }
                     })
-                    .catch(err => {
-                        status.innerHTML = '<span style="color:#a00;">' + (err && err.message ? err.message : 'Error') + '</span>';
+                    .catch(() => {
+                        status.textContent = '<?php echo esc_js(__('Error', 'used-cars-search')); ?>';
                     });
             });
         })();

@@ -111,8 +111,14 @@ function ucs_rest_autosuggest($request) {
     $q = strtolower(sanitize_text_field($request['q']));
     $stopwords = ucs_get_stopwords();
     global $wpdb;
-    $sql = $wpdb->prepare("SELECT post_title FROM $wpdb->posts WHERE post_status = 'publish' AND post_type = 'post' LIMIT 3000");
-    $results = $wpdb->get_results($sql);
+    $results = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT post_title FROM {$wpdb->posts} WHERE post_status = %s AND post_type = %s LIMIT %d",
+            'publish',
+            'post',
+            3000
+        )
+    );
     $keywords = [];
     foreach ($results as $row) {
         $words = preg_split('/\W+/', strtolower($row->post_title));
