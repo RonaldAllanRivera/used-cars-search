@@ -349,6 +349,11 @@
     }
 }
 
+/* Compare Button */
+.ucs-compare-btn {
+    font-size: 0.625em !important; /* 10px/16px */
+}
+
 /* Table Styles */
 .ucs-table-container {
     width: 100%;
