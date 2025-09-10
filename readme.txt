@@ -74,7 +74,7 @@ Post meta and content are preserved by default.
 == Changelog ==
 = 1.6.10 =
 - Ratings Management: Fixed sorting for ID, Title, and Date by normalizing the `sort` parameter and mapping to proper `orderby` values in `WP_Query`. Added a numeric PHP fallback for ID to guarantee correct ordering.
-- UI: Set consistent 10px font size for Compare buttons across all views.
+- UI: Set consistent 0.625em font size for Compare buttons across all views.
 - Security/Hardening: Whitelisted sort keys and strengthened input sanitization in the `ucs_ratings_list` AJAX handler.
 
 = 1.6.9 =

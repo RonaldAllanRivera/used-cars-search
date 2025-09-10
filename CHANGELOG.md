@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Ratings Management: Sorting now works reliably for ID, Title, and Date. Normalized the `sort` parameter and mapped it to proper `WP_Query` `orderby` values; added a numeric PHP fallback for ID.
-- UI: Set consistent 10px font size for Compare buttons across all views.
+- UI: Set consistent 0.625em font size for Compare buttons across all views.
 
 ### Security/Hardening
 - AJAX handler `ucs_ratings_list`: Normalized and whitelisted `sort` keys, strengthened input sanitization, and limited PHP-side sorting to rating/votes/comments only.
