@@ -151,17 +151,74 @@ if (!function_exists('ucs_ai_apply_changes_core')) {
             wp_update_post($post_update);
         }
 
-        if (in_array('seo_title', $fields, true) && !empty($payload['seo_title'])) {
-            update_post_meta($post_id, '_ucs_seo_title', sanitize_text_field($payload['seo_title']));
-            $updated[] = 'seo_title';
+        // Prepare fallbacks for SEO fields if missing
+        $given_title   = isset($payload['title']) ? sanitize_text_field($payload['title']) : '';
+        $given_content = isset($payload['content']) ? wp_kses_post($payload['content']) : '';
+        $current_title = get_the_title($post_id);
+        $current_content = get_post_field('post_content', $post_id);
+
+        $fields_lc = array_map('strtolower', (array)$fields);
+        $sel_title_or_content = in_array('title', $fields_lc, true) || in_array('content', $fields_lc, true);
+
+        if (in_array('seo_title', $fields_lc, true) || $sel_title_or_content) {
+            $seo_title_in = isset($payload['seo_title']) ? trim($payload['seo_title']) : '';
+            $seo_title = sanitize_text_field($seo_title_in);
+            if ($seo_title === '') {
+                $base = $given_title !== '' ? $given_title : $current_title;
+                if (function_exists('mb_substr')) { $seo_title = mb_substr($base, 0, 60); } else { $seo_title = substr($base, 0, 60); }
+            }
+            if ($seo_title !== '') {
+                update_post_meta($post_id, '_ucs_seo_title', $seo_title);
+                // Popular SEO plugins
+                update_post_meta($post_id, '_yoast_wpseo_title', $seo_title);
+                update_post_meta($post_id, 'rank_math_title', $seo_title);
+                $updated[] = 'seo_title';
+            }
         }
-        if (in_array('seo_description', $fields, true) && !empty($payload['seo_description'])) {
-            update_post_meta($post_id, '_ucs_seo_description', sanitize_textarea_field($payload['seo_description']));
-            $updated[] = 'seo_description';
+        if (in_array('seo_description', $fields_lc, true) || $sel_title_or_content) {
+            $seo_desc_in = isset($payload['seo_description']) ? trim($payload['seo_description']) : '';
+            $seo_desc = sanitize_textarea_field($seo_desc_in);
+            if ($seo_desc === '') {
+                $text = wp_strip_all_tags($given_content !== '' ? $given_content : $current_content);
+                $text = trim(preg_replace('/\s+/', ' ', $text));
+                if (function_exists('mb_substr')) { $seo_desc = mb_substr($text, 0, 160); } else { $seo_desc = substr($text, 0, 160); }
+            }
+            if ($seo_desc !== '') {
+                update_post_meta($post_id, '_ucs_seo_description', $seo_desc);
+                // Popular SEO plugins
+                update_post_meta($post_id, '_yoast_wpseo_metadesc', $seo_desc);
+                update_post_meta($post_id, 'rank_math_description', $seo_desc);
+                $updated[] = 'seo_description';
+            }
         }
-        if (in_array('seo_keywords', $fields, true) && !empty($payload['seo_keywords'])) {
-            update_post_meta($post_id, '_ucs_seo_keywords', sanitize_text_field($payload['seo_keywords']));
-            $updated[] = 'seo_keywords';
+        if (in_array('seo_keywords', $fields_lc, true) || $sel_title_or_content) {
+            $seo_keywords_in = isset($payload['seo_keywords']) ? trim($payload['seo_keywords']) : '';
+            $seo_keywords_raw = sanitize_text_field($seo_keywords_in);
+            if ($seo_keywords_raw === '') {
+                // Build from Year/Make/Model/Trim meta
+                $year = get_post_meta($post_id, 'ucs_year', true);
+                $make = get_post_meta($post_id, 'ucs_make', true);
+                $model = get_post_meta($post_id, 'ucs_model', true);
+                $trimv = get_post_meta($post_id, 'ucs_trim', true);
+                $kw = array();
+                if ($year && $make && $model) { $kw[] = trim($year.' '.$make.' '.$model.($trimv?(' '.$trimv):'')); }
+                if ($make && $model) { $kw[] = $make.' '.$model; }
+                if ($make) { $kw[] = 'used '.$make; }
+                if ($model) { $kw[] = 'used '.$model; }
+                if ($make && $model) { $kw[] = $make.' '.$model.' for sale'; }
+                $kw = array_values(array_unique(array_filter($kw)));
+                $seo_keywords_raw = implode(', ', array_slice($kw, 0, 6));
+            }
+            if ($seo_keywords_raw !== '') {
+                update_post_meta($post_id, '_ucs_seo_keywords', $seo_keywords_raw);
+                // Use first keyword as focus keyphrase for plugins
+                $first_kw = trim(explode(',', $seo_keywords_raw)[0]);
+                if ($first_kw !== '') {
+                    update_post_meta($post_id, '_yoast_wpseo_focuskw', $first_kw);
+                    update_post_meta($post_id, 'rank_math_focus_keyword', $first_kw);
+                }
+                $updated[] = 'seo_keywords';
+            }
         }
 
         return array('updated' => $updated);
@@ -289,6 +346,39 @@ if (!function_exists('ucs_ai_generate_for_post_core')) {
             'seo_description' => isset($json['seo_description']) ? $json['seo_description'] : '',
             'seo_keywords' => isset($json['seo_keywords']) ? $json['seo_keywords'] : '',
         );
+
+        // Fallbacks to guarantee SEO fields are present
+        // 1) SEO Title
+        if (in_array('seo_title', $fields, true) && empty($out['seo_title'])) {
+            $base_title = $out['title'] ? $out['title'] : get_the_title($post_id);
+            if (function_exists('mb_substr')) {
+                $out['seo_title'] = mb_substr($base_title, 0, 60);
+            } else {
+                $out['seo_title'] = substr($base_title, 0, 60);
+            }
+        }
+        // 2) SEO Description from content text
+        if (in_array('seo_description', $fields, true) && empty($out['seo_description'])) {
+            $text = wp_strip_all_tags($out['content']);
+            $text = trim(preg_replace('/\s+/', ' ', $text));
+            if (function_exists('mb_substr')) {
+                $out['seo_description'] = mb_substr($text, 0, 160);
+            } else {
+                $out['seo_description'] = substr($text, 0, 160);
+            }
+        }
+        // 3) SEO Keywords from meta (Year/Make/Model/Trim)
+        if (in_array('seo_keywords', $fields, true) && empty($out['seo_keywords'])) {
+            $kw = array();
+            if ($year && $make && $model) { $kw[] = trim($year.' '.$make.' '.$model.($trim?(' '.$trim):'')); }
+            if ($make && $model) { $kw[] = $make.' '.$model; }
+            if ($make) { $kw[] = 'used '.$make; }
+            if ($model) { $kw[] = 'used '.$model; }
+            if ($make && $model) { $kw[] = $make.' '.$model.' for sale'; }
+            $kw = array_values(array_unique(array_filter($kw)));
+            $out['seo_keywords'] = implode(', ', array_slice($kw, 0, 6));
+        }
+
         return $out;
     }
 }

@@ -10,7 +10,7 @@ add_action('add_meta_boxes', function() {
         __('AI Assist (Used Cars)', 'used-cars-search'),
         'ucs_ai_render_assist_box',
         'post',
-        'side',
+        'normal', // was 'side' — move to main column for better usability
         'high'
     );
 });
@@ -23,7 +23,7 @@ function ucs_ai_render_assist_box($post) {
     foreach ($fields as $f) { $meta[$f] = get_post_meta($post->ID, 'ucs_'.$f, true); }
     $opts = function_exists('ucs_ai_get_options') ? ucs_ai_get_options() : [];
     $enabled = !empty($opts['enabled']);
-    echo '<div style="font-size:12px;line-height:1.45">';
+    echo '<div style="font-size:13px;line-height:1.5">';
     if (!$enabled) {
         echo '<p>'.esc_html__('AI features are currently disabled. Enable them in Used Cars Search → AI Settings.', 'used-cars-search').'</p>';
     }
@@ -39,9 +39,9 @@ function ucs_ai_render_assist_box($post) {
     echo '<div id="ucs-ai-results" style="display:none">';
     echo '<p><strong>'.esc_html__('Suggestions', 'used-cars-search').'</strong></p>';
     echo '<label>'.esc_html__('Title', 'used-cars-search').'<br><input type="text" id="ucs-ai-title" class="widefat"></label><br>';
-    echo '<label>'.esc_html__('Content', 'used-cars-search').'<br><textarea id="ucs-ai-content" rows="6" class="widefat"></textarea></label><br>';
+    echo '<label>'.esc_html__('Content', 'used-cars-search').'<br><textarea id="ucs-ai-content" rows="18" class="widefat" style="min-height:320px;"></textarea></label><br>';
     echo '<label>'.esc_html__('SEO Title', 'used-cars-search').'<br><input type="text" id="ucs-ai-seo-title" class="widefat"></label><br>';
-    echo '<label>'.esc_html__('SEO Description', 'used-cars-search').'<br><textarea id="ucs-ai-seo-description" rows="3" class="widefat"></textarea></label><br>';
+    echo '<label>'.esc_html__('SEO Description', 'used-cars-search').'<br><textarea id="ucs-ai-seo-description" rows="6" class="widefat" style="min-height:120px;"></textarea></label><br>';
     echo '<label>'.esc_html__('SEO Keywords (comma-separated)', 'used-cars-search').'<br><input type="text" id="ucs-ai-seo-keywords" class="widefat"></label><br>';
     echo '<p><button type="button" class="button button-primary" id="ucs-ai-apply" '.($enabled?'':'disabled').'>'.esc_html__('Apply to Post', 'used-cars-search').'</button></p>';
     echo '</div>';
@@ -77,12 +77,45 @@ function ucs_ai_render_assist_box($post) {
                 status.innerHTML = '<span style="color:#a00;">'+(d && d.data && d.data.message ? d.data.message : 'Error')+'</span>';
                 return;
             }
-            const v = d.data;
+            const v = d.data || {};
             if (v.title) $('#ucs-ai-title').value = v.title;
             if (v.content) $('#ucs-ai-content').value = v.content;
-            if (v.seo_title) $('#ucs-ai-seo-title').value = v.seo_title;
-            if (v.seo_description) $('#ucs-ai-seo-description').value = v.seo_description;
-            if (v.seo_keywords) $('#ucs-ai-seo-keywords').value = v.seo_keywords;
+
+            // Derive SEO fallbacks if missing
+            const stripTags = (html)=> (html||'').replace(/<[^>]*>/g,' ');
+            const collapse = (s)=> (s||'').replace(/\s+/g,' ').trim();
+            let seoTitle = (v.seo_title||'').trim();
+            let seoDesc  = (v.seo_description||'').trim();
+            let seoKeys  = (v.seo_keywords||'').trim();
+            if (!seoTitle) {
+                const base = (v.title||'').toString();
+                seoTitle = base ? base.substring(0,60) : '';
+            }
+            if (!seoDesc) {
+                const text = collapse(stripTags(v.content||''));
+                seoDesc = text ? text.substring(0,160) : '';
+            }
+            if (!seoKeys) {
+                const m = ctx.meta||{};
+                const parts = [];
+                if (m.year && m.make && m.model) parts.push((m.year+' '+m.make+' '+m.model+' '+(m.trim||'')).trim());
+                if (m.make && m.model) parts.push(m.make+' '+m.model);
+                if (m.make) parts.push('used '+m.make);
+                if (m.model) parts.push('used '+m.model);
+                if (m.make && m.model) parts.push(m.make+' '+m.model+' for sale');
+                seoKeys = Array.from(new Set(parts.filter(Boolean))).slice(0,6).join(', ');
+            }
+            if (seoTitle) $('#ucs-ai-seo-title').value = seoTitle;
+            if (seoDesc)  $('#ucs-ai-seo-description').value = seoDesc;
+            if (seoKeys)  $('#ucs-ai-seo-keywords').value = seoKeys;
+
+            // Mirror into the Used Cars SEO meta box immediately (if present)
+            const mt = document.getElementById('ucs_seo_title');
+            const md = document.getElementById('ucs_seo_description');
+            const mk = document.getElementById('ucs_seo_keywords');
+            if (mt && seoTitle) mt.value = seoTitle;
+            if (md && seoDesc)  md.value = seoDesc;
+            if (mk && seoKeys)  mk.value = seoKeys;
             resBox.style.display = 'block';
             status.innerHTML = '<span style="color:green;">OK</span>';
           }).catch(e=>{
@@ -138,7 +171,8 @@ function ucs_ai_ajax_generate() {
 
     $fields = [];
     if (isset($_POST['fields'])) {
-        $fields_json = isset($_POST['fields']) ? sanitize_text_field(wp_unslash($_POST['fields'])) : '[]';
+        // Do not sanitize JSON string with sanitize_text_field; it will break JSON/HTML
+        $fields_json = isset($_POST['fields']) ? wp_unslash($_POST['fields']) : '[]';
         $fields = json_decode($fields_json, true);
         if (!is_array($fields)) {
             $fields = [];
@@ -174,7 +208,8 @@ function ucs_ai_ajax_apply() {
 
     $payload = [];
     if (isset($_POST['payload'])) {
-        $payload_json = isset($_POST['payload']) ? sanitize_text_field(wp_unslash($_POST['payload'])) : '{}';
+        // Do not sanitize JSON string with sanitize_text_field; it will strip quotes/HTML. Core will sanitize fields.
+        $payload_json = isset($_POST['payload']) ? wp_unslash($_POST['payload']) : '{}';
         $payload = json_decode($payload_json, true);
         if (!is_array($payload)) {
             $payload = [];

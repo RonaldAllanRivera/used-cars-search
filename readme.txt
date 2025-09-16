@@ -76,6 +76,8 @@ Post meta and content are preserved by default.
 - Ratings Management: Fixed sorting for ID, Title, and Date by normalizing the `sort` parameter and mapping to proper `orderby` values in `WP_Query`. Added a numeric PHP fallback for ID to guarantee correct ordering.
 - UI: Set consistent 10px font size for Compare buttons across all views.
 - AI Scheduling: Enforced 24-hour delay for AI-applied content on drafts/pending using `_ucs_ai_scheduled_gmt` meta and a `wp_insert_post_data` guard. Posts remain `future` until the scheduled time.
+- AI Assist (Single Post): Moved panel to main column, enlarged textareas, improved readability.
+- AI Assist (SEO): Added server/client fallbacks so SEO Title/Description/Keywords are populated; fixed JSON handling; mirrored values into the Used Cars SEO meta box; also save to Yoast/Rank Math meta keys.
 - Security/Hardening: Whitelisted sort keys and strengthened input sanitization in the `ucs_ratings_list` AJAX handler.
 
 = 1.6.9 =

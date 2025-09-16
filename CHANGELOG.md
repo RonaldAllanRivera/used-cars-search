@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 - Ratings Management: Sorting now works reliably for ID, Title, and Date. Normalized the `sort` parameter and mapped it to proper `WP_Query` `orderby` values; added a numeric PHP fallback for ID.
 - UI: Set consistent 10px font size for Compare buttons across all views.
 - AI Scheduling: Enforce 24-hour delay for AI-applied content on draft/pending posts. Posts remain `future` until scheduled time via `_ucs_ai_scheduled_gmt` meta and `wp_insert_post_data` guard.
+- AI Assist (Single Post): Moved panel to main column, increased textarea sizes, and improved usability.
+- AI Assist (SEO): Fixed empty SEO fields by adding server/client fallbacks; JSON handling corrected to avoid stripping HTML; SEO fields are now also stored in Yoast and Rank Math meta keys.
 
 ### Security/Hardening
 - AJAX handler `ucs_ratings_list`: Normalized and whitelisted `sort` keys, strengthened input sanitization, and limited PHP-side sorting to rating/votes/comments only.
@@ -15,6 +17,7 @@ All notable changes to this project will be documented in this file.
 ### Docs
 - Updated README and WordPress `readme.txt` to reflect the Ratings Management fixes and version bump.
 - Documented 24-hour scheduling behavior and enforcement for AI-generated content.
+- Documented AI Assist (Single Post) UI improvements and SEO field integration.
 
 ## [1.6.9] - 2025-09-05
 
