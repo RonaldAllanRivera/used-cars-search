@@ -190,6 +190,7 @@ You can also find a live REST API quick reference directly inside WordPress Admi
 ### Maintenance (v1.6.10)
 * Ratings Management sorting fixed for ID, Title, and Date (normalized sort keys and proper `WP_Query` mapping; numeric fallback for ID).
 * Hardened AJAX sanitization and whitelisting for all sort inputs.
+* AI: Enforced 24‑hour scheduling for AI‑applied content on drafts/pending via a guard in `wp_insert_post_data` and a scheduling meta marker. Prevents immediate publish by other hooks.
 
 ---
 ## 💡 Tech Stack & Philosophy

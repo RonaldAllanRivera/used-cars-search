@@ -50,6 +50,26 @@ if (!function_exists('ucs_ai_http_headers')) {
     }
 }
 
+// Helper: compute future datetimes consistently (local and GMT) for scheduling
+if (!function_exists('ucs_ai_future_datetime')) {
+    /**
+     * Returns an array with 'ts_gmt', 'date_gmt', and 'date_local' for now + $hours hours.
+     * Uses GMT as the source of truth and converts to site local time.
+     */
+    function ucs_ai_future_datetime($hours = 24) {
+        $hours = intval($hours);
+        if ($hours < 1) { $hours = 24; }
+        $ts_gmt = time() + ($hours * HOUR_IN_SECONDS);
+        $date_gmt = gmdate('Y-m-d H:i:s', $ts_gmt);
+        $date_local = get_date_from_gmt($date_gmt, 'Y-m-d H:i:s');
+        return array(
+            'ts_gmt'    => $ts_gmt,
+            'date_gmt'  => $date_gmt,
+            'date_local'=> $date_local,
+        );
+    }
+}
+
 if (!function_exists('ucs_ai_chat_completion')) {
     /**
      * Calls OpenAI Chat Completions API with given messages and args
@@ -119,10 +139,14 @@ if (!function_exists('ucs_ai_apply_changes_core')) {
         if (count($post_update) > 1) {
             // If we're updating a draft/pending/auto-draft with AI content, schedule it 24h from now
             if (in_array($current_status, array('draft','pending','auto-draft'), true)) {
-                $ts_gmt = current_time('timestamp', true) + DAY_IN_SECONDS;
-                $post_update['post_status']    = 'future';
-                $post_update['post_date']      = get_date_from_gmt(gmdate('Y-m-d H:i:s', $ts_gmt), 'Y-m-d H:i:s');
-                $post_update['post_date_gmt']  = gmdate('Y-m-d H:i:s', $ts_gmt);
+                $future = ucs_ai_future_datetime(24);
+                if (!empty($future)) {
+                    $post_update['post_status']    = 'future';
+                    $post_update['post_date']      = $future['date_local'];
+                    $post_update['post_date_gmt']  = $future['date_gmt'];
+                    // Mark that this post was scheduled by AI so filters can enforce it
+                    update_post_meta($post_id, '_ucs_ai_scheduled_gmt', $future['date_gmt']);
+                }
             }
             wp_update_post($post_update);
         }
@@ -142,6 +166,33 @@ if (!function_exists('ucs_ai_apply_changes_core')) {
 
         return array('updated' => $updated);
     }
+}
+
+// Enforce: If a post carries our AI schedule meta and its scheduled time is in the future, force status=future
+if (!function_exists('ucs_ai_enforce_future_status')) {
+    add_filter('wp_insert_post_data', function($data, $postarr){
+        // Only act on posts
+        if (empty($postarr['ID'])) return $data;
+        $post_id = intval($postarr['ID']);
+        if ($post_id <= 0) return $data;
+
+        // Check our scheduling meta
+        $scheduled_gmt = get_post_meta($post_id, '_ucs_ai_scheduled_gmt', true);
+        if (!$scheduled_gmt) return $data;
+
+        // If scheduled time is still in the future, keep as future regardless of external overrides
+        $now_gmt = gmdate('Y-m-d H:i:s');
+        if ($scheduled_gmt > $now_gmt) {
+            $data['post_status'] = 'future';
+            // Ensure dates align with the scheduled time
+            $data['post_date_gmt'] = $scheduled_gmt;
+            $data['post_date'] = get_date_from_gmt($scheduled_gmt, 'Y-m-d H:i:s');
+        } else {
+            // Time passed; clean up the meta so normal publish can proceed
+            delete_post_meta($post_id, '_ucs_ai_scheduled_gmt');
+        }
+        return $data;
+    }, 10, 2);
 }
 
 // Core: Generate AI suggestions for a post id (shared by Cron)
