@@ -160,7 +160,37 @@ export function renderResults(container, data, state) {
             html += '</div>';
             container.innerHTML = html;
         } else {
-            let html = `<table class="ucs-results-table"><thead><tr><th class="ucs-sort-th" data-sort="title">TITLE <span class="ucs-sort-icon">${sortBy === 'title' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th>PRICE</th><th>MILEAGE</th><th>ENGINE</th><th>TRANS.</th><th class="ucs-sort-th" data-sort="category">CATEGORIES <span class="ucs-sort-icon">${sortBy === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th><th class="ucs-sort-th" data-sort="date">DATE <span class="ucs-sort-icon">${sortBy === 'date' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="rating">RATING <span class="ucs-sort-icon">${sortBy === 'rating' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th class="ucs-sort-th" data-sort="comments">COMMENTS <span class="ucs-sort-icon">${sortBy === 'comments' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th><th>ACTIONS</th></tr></thead><tbody>`;
+            // Get column settings
+            const enabledColumns = window.ucs_vars?.enabled_columns || {
+                title: true, price: true, mileage: true, engine: true, transmission: true,
+                categories: true, date: true, rating: true, comments: true, actions: true
+            };
+            
+            // Build table header based on enabled columns
+            let headerHTML = '<tr>';
+            if (enabledColumns.title) {
+                headerHTML += `<th class="ucs-sort-th" data-sort="title">TITLE <span class="ucs-sort-icon">${sortBy === 'title' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th>`;
+            }
+            if (enabledColumns.price) headerHTML += '<th>PRICE</th>';
+            if (enabledColumns.mileage) headerHTML += '<th>MILEAGE</th>';
+            if (enabledColumns.engine) headerHTML += '<th>ENGINE</th>';
+            if (enabledColumns.transmission) headerHTML += '<th>TRANS.</th>';
+            if (enabledColumns.categories) {
+                headerHTML += `<th class="ucs-sort-th" data-sort="category">CATEGORIES <span class="ucs-sort-icon">${sortBy === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}</span></th>`;
+            }
+            if (enabledColumns.date) {
+                headerHTML += `<th class="ucs-sort-th" data-sort="date">DATE <span class="ucs-sort-icon">${sortBy === 'date' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th>`;
+            }
+            if (enabledColumns.rating) {
+                headerHTML += `<th class="ucs-sort-th" data-sort="rating">RATING <span class="ucs-sort-icon">${sortBy === 'rating' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th>`;
+            }
+            if (enabledColumns.comments) {
+                headerHTML += `<th class="ucs-sort-th" data-sort="comments">COMMENTS <span class="ucs-sort-icon">${sortBy === 'comments' ? (sortOrder === 'desc' ? '↓' : '↑') : '↕'}</span></th>`;
+            }
+            if (enabledColumns.actions) headerHTML += '<th>ACTIONS</th>';
+            headerHTML += '</tr>';
+            
+            let html = `<table class="ucs-results-table"><thead>${headerHTML}</thead><tbody>`;
             sortedPosts.forEach(post => {
                 const { price, mileage, engine, transmission } = post.custom_fields || {};
                 const categories = post.category ? 
@@ -178,18 +208,18 @@ export function renderResults(container, data, state) {
                 const date = post.date ? new Date(post.date).toLocaleDateString() : '—';
                 html += `
                     <tr>
-                        <td data-label="Title"><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></td>                        
-                        <td data-label="Price">${price ? `$${formatNumber(price, 2)}` : '\u2014'}</td>
-                        <td data-label="Mileage">${mileage ? `${formatNumber(mileage, 0)} miles` : '\u2014'}</td>
-                        <td data-label="Engine">${engine || '—'}</td>
-                        <td data-label="Transmission">${transmission || '—'}</td>
-                        <td data-label="Categories">${categories || '—'}</td>
-                        <td data-label="Date">${date}</td>
-                        <td data-label="Rating">${rating}</td>
-                        <td data-label="Comments" class="ucs-nowrap">${post.comments > 0 ? `<a href="${post.permalink}#comments" class="ucs-comment-link" target="_blank" rel="noopener">${post.comments}</a>` : '—'}</td>
-                        <td data-label="Actions" class="ucs-nowrap">
+                        ${enabledColumns.title ? `<td data-label="Title"><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></td>` : ''}
+                        ${enabledColumns.price ? `<td data-label="Price">${price ? `$${formatNumber(price, 2)}` : '\u2014'}</td>` : ''}
+                        ${enabledColumns.mileage ? `<td data-label="Mileage">${mileage ? `${formatNumber(mileage, 0)} miles` : '\u2014'}</td>` : ''}
+                        ${enabledColumns.engine ? `<td data-label="Engine">${engine || '—'}</td>` : ''}
+                        ${enabledColumns.transmission ? `<td data-label="Transmission">${transmission || '—'}</td>` : ''}
+                        ${enabledColumns.categories ? `<td data-label="Categories">${categories || '—'}</td>` : ''}
+                        ${enabledColumns.date ? `<td data-label="Date">${date}</td>` : ''}
+                        ${enabledColumns.rating ? `<td data-label="Rating">${rating}</td>` : ''}
+                        ${enabledColumns.comments ? `<td data-label="Comments" class="ucs-nowrap">${post.comments > 0 ? `<a href="${post.permalink}#comments" class="ucs-comment-link" target="_blank" rel="noopener">${post.comments}</a>` : '—'}</td>` : ''}
+                        ${enabledColumns.actions ? `<td data-label="Actions" class="ucs-nowrap">
                             <button class="ucs-compare-btn ucs-button" data-post-id="${post.ID}" data-post-title="${post.title}">Compare</button>
-                        </td>
+                        </td>` : ''}
                     </tr>`;
             });
             html += `</tbody></table>`;
@@ -250,29 +280,49 @@ export function renderResults(container, data, state) {
         }
     } else {
         // Grid view implementation - original design
+        const enabledGridFields = window.ucs_vars?.enabled_grid_fields || {
+            year: true, make: true, model: true, trim: true, price: true, mileage: true,
+            engine: true, transmission: true, rating: true, comments: true
+        };
+        
         const gridItems = sortedPosts.map(post => {
             const { year, make, model, trim, price, mileage, engine, transmission } = post.custom_fields || {};
-            const hasAnyCarDetail = year || make || model || trim || price || mileage || engine || transmission;
-            const customFieldsHTML = hasAnyCarDetail ? `
-    <div class="ucs-custom-fields" style="margin-bottom:8px;">
-        <div><strong>YEAR:</strong> ${year || '—'}</div>
-        <div><strong>MAKE:</strong> ${make || '—'}</div>
-        <div><strong>MODEL:</strong> ${model || '—'}</div>
-        <div><strong>TRIM:</strong> ${trim || '—'}</div>
-        <div><strong>PRICE:</strong> ${price ? `$${formatNumber(price, 2)}` : '—'}</div>
-        <div><strong>MILEAGE:</strong> ${mileage ? `${formatNumber(mileage, 0)} miles` : '—'}</div>
-        <div><strong>ENGINE:</strong> ${engine || '—'}</div>
-        <div><strong>TRANSMISSION:</strong> ${transmission || '—'}</div>
-    </div>` : '';
+            
+            // Build custom fields HTML based on enabled fields
+            let customFieldsHTML = '';
+            const hasAnyEnabledField = enabledGridFields.year || enabledGridFields.make || enabledGridFields.model || 
+                                   enabledGridFields.trim || enabledGridFields.price || enabledGridFields.mileage ||
+                                   enabledGridFields.engine || enabledGridFields.transmission;
+            
+            if (hasAnyEnabledField) {
+                customFieldsHTML = '<div class="ucs-custom-fields" style="margin-bottom:8px;">';
+                if (enabledGridFields.year) customFieldsHTML += `<div><strong>YEAR:</strong> ${year || '—'}</div>`;
+                if (enabledGridFields.make) customFieldsHTML += `<div><strong>MAKE:</strong> ${make || '—'}</div>`;
+                if (enabledGridFields.model) customFieldsHTML += `<div><strong>MODEL:</strong> ${model || '—'}</div>`;
+                if (enabledGridFields.trim) customFieldsHTML += `<div><strong>TRIM:</strong> ${trim || '—'}</div>`;
+                if (enabledGridFields.price) customFieldsHTML += `<div><strong>PRICE:</strong> ${price ? `$${formatNumber(price, 2)}` : '—'}</div>`;
+                if (enabledGridFields.mileage) customFieldsHTML += `<div><strong>MILEAGE:</strong> ${mileage ? `${formatNumber(mileage, 0)} miles` : '—'}</div>`;
+                if (enabledGridFields.engine) customFieldsHTML += `<div><strong>ENGINE:</strong> ${engine || '—'}</div>`;
+                if (enabledGridFields.transmission) customFieldsHTML += `<div><strong>TRANSMISSION:</strong> ${transmission || '—'}</div>`;
+                customFieldsHTML += '</div>';
+            }
 
             let ratingStars = '';
-            if (post.rating > 0) {
+            if (enabledGridFields.rating && post.rating > 0) {
                 const filledStars = '★'.repeat(Math.round(post.rating));
                 const emptyStars = '☆'.repeat(5 - Math.round(post.rating));
                 ratingStars = `<div class="ucs-rating"><span class="ucs-rating-stars" title="${post.rating} out of 5">${filledStars}${emptyStars}</span><span class="ucs-rating-count">(${post.votes || 0})</span></div>`;
             }
             const categories = post.category ? post.category.split(',').map(cat => `<span class="ucs-category-tag">${cat.trim()}</span>`).join('') : '—';
-            return `<div class="ucs-result-item"><h3><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h3><p>${post.excerpt || 'No description available'}</p>${customFieldsHTML}<div class="ucs-result-meta"><span>${categories}</span>${ratingStars}${post.comments > 0 ? `<span class="ucs-comment-count">\ud83d\udcac ${post.comments}</span>` : ''}</div></div>`;
+            
+            // Build meta HTML based on enabled fields
+            let metaHTML = '<div class="ucs-result-meta">';
+            metaHTML += `<span>${categories}</span>`;
+            if (enabledGridFields.rating) metaHTML += ratingStars;
+            if (enabledGridFields.comments && post.comments > 0) metaHTML += `<span class="ucs-comment-count">💬 ${post.comments}</span>`;
+            metaHTML += '</div>';
+            
+            return `<div class="ucs-result-item"><h3><a href="${post.permalink}" target="_blank" rel="noopener">${post.title}</a></h3><p>${post.excerpt || 'No description available'}</p>${customFieldsHTML}${metaHTML}</div>`;
         }).join('');
         container.innerHTML = `<div class="ucs-results-grid">${gridItems}</div>`;
     }

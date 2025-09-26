@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.11] - 2025-09-26
+
+### Added
+- Column Management: Added admin settings to enable/disable specific columns in the public search table for both Grid and List views.
+- Admin UI: Added column management interface with checkbox grid for selecting which columns/fields to display.
+- Frontend Logic: Updated JavaScript rendering to dynamically show/hide columns based on admin settings.
+- Settings Integration: Column preferences are stored in WordPress options and passed to frontend via localized variables.
+
+### Improved
+- List View: Table headers and rows are now dynamically generated based on enabled columns.
+- Grid View: Field display is now dynamically generated based on enabled grid fields.
+- Performance: Only renders enabled columns/fields, reducing DOM elements and improving rendering speed.
+
 ## [1.6.10] - 2025-09-08
 
 ### Fixed

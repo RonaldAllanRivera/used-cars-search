@@ -77,10 +77,41 @@ add_action('wp_enqueue_scripts', function() {
     $options = get_option('ucs_options');
     $compare_page_id = !empty($options['compare_page_id']) ? $options['compare_page_id'] : 0;
     $compare_page_url = $compare_page_id ? get_permalink($compare_page_id) : home_url('/');
+    
+    // Get column management settings
+    $default_columns = array(
+        'title' => true,
+        'price' => true,
+        'mileage' => true,
+        'engine' => true,
+        'transmission' => true,
+        'categories' => true,
+        'date' => true,
+        'rating' => true,
+        'comments' => true,
+        'actions' => true
+    );
+    $enabled_columns = isset($options['enabled_columns']) ? $options['enabled_columns'] : $default_columns;
+    
+    $default_grid_fields = array(
+        'year' => true,
+        'make' => true,
+        'model' => true,
+        'trim' => true,
+        'price' => true,
+        'mileage' => true,
+        'engine' => true,
+        'transmission' => true,
+        'rating' => true,
+        'comments' => true
+    );
+    $enabled_grid_fields = isset($options['enabled_grid_fields']) ? $options['enabled_grid_fields'] : $default_grid_fields;
 
     wp_localize_script('ucs-main-js', 'ucs_vars', array(
         'rest_url' => trailingslashit(home_url()) . 'wp-json/',
         'compare_page_url' => $compare_page_url,
+        'enabled_columns' => $enabled_columns,
+        'enabled_grid_fields' => $enabled_grid_fields,
     ));
     wp_add_inline_script('ucs-main-js', 'window.ucs_vars = window.ucs_vars || {};
 ');

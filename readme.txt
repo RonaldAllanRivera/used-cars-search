@@ -4,7 +4,7 @@ Tags: search, autosuggest, compare, ratings, ai
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.6.10
+Stable tag: 1.6.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Fast, lightweight search and comparison plugin for used car inventories with autosuggest and ratings.
@@ -20,6 +20,7 @@ Key features:
 - CSV import (admin) for seeding content
 - Optional AI content generation and a background queue (WP‑Cron)
 - Elementor‑friendly output (shortcodes work inside widgets)
+- Column management: Admin can enable/disable specific columns in search results
 
 = Shortcodes =
 - [used_cars_search]
@@ -72,6 +73,14 @@ When the plugin is deleted, uninstall.php removes:
 Post meta and content are preserved by default.
 
 == Changelog ==
+= 1.6.11 =
+- Added Column Management: Admin can now enable/disable specific columns in the public search table for both Grid and List views.
+- Added admin interface with checkbox grid for selecting which columns/fields to display in each view.
+- Updated frontend JavaScript to dynamically render columns based on admin settings.
+- Improved performance by only rendering enabled columns/fields.
+- List View: Table headers and rows are now dynamically generated based on enabled columns.
+- Grid View: Field display is now dynamically generated based on enabled grid fields.
+
 = 1.6.10 =
 - Ratings Management: Fixed sorting for ID, Title, and Date by normalizing the `sort` parameter and mapping to proper `orderby` values in `WP_Query`. Added a numeric PHP fallback for ID to guarantee correct ordering.
 - UI: Set consistent 10px font size for Compare buttons across all views.

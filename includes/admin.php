@@ -49,6 +49,23 @@ function ucs_sanitize_options($input) {
         }
     }
     
+    // Sanitize column management settings
+    if (isset($input['enabled_columns']) && is_array($input['enabled_columns'])) {
+        $sanitized['enabled_columns'] = array();
+        $valid_columns = array('title', 'price', 'mileage', 'engine', 'transmission', 'categories', 'date', 'rating', 'comments', 'actions');
+        foreach ($valid_columns as $column) {
+            $sanitized['enabled_columns'][$column] = isset($input['enabled_columns'][$column]) && $input['enabled_columns'][$column] == '1';
+        }
+    }
+    
+    if (isset($input['enabled_grid_fields']) && is_array($input['enabled_grid_fields'])) {
+        $sanitized['enabled_grid_fields'] = array();
+        $valid_grid_fields = array('year', 'make', 'model', 'trim', 'price', 'mileage', 'engine', 'transmission', 'rating', 'comments');
+        foreach ($valid_grid_fields as $field) {
+            $sanitized['enabled_grid_fields'][$field] = isset($input['enabled_grid_fields'][$field]) && $input['enabled_grid_fields'][$field] == '1';
+        }
+    }
+    
     // Sanitize text fields
     $text_fields = array();
     foreach ($text_fields as $field) {
@@ -84,6 +101,15 @@ function ucs_settings_init() {
         'used-cars-search',
         'ucs_settings_section'
     );
+
+    // Column Management Settings
+    add_settings_field(
+        'ucs_column_management',
+        'Column Management',
+        'ucs_column_management_callback',
+        'used-cars-search',
+        'ucs_settings_section'
+    );
 }
 
 /**
@@ -115,6 +141,134 @@ function ucs_compare_page_id_callback() {
         }
         echo '</select>';
     }
+}
+
+/**
+ * Renders the column management settings.
+ *
+ * @since 1.6.11
+ */
+function ucs_column_management_callback() {
+    $options = get_option('ucs_options');
+    $default_columns = array(
+        'title' => true,
+        'price' => true,
+        'mileage' => true,
+        'engine' => true,
+        'transmission' => true,
+        'categories' => true,
+        'date' => true,
+        'rating' => true,
+        'comments' => true,
+        'actions' => true
+    );
+    $enabled_columns = isset($options['enabled_columns']) ? $options['enabled_columns'] : $default_columns;
+    
+    echo '<div class="ucs-column-management">';
+    echo '<h4>' . esc_html__('List View Columns', 'used-cars-search') . '</h4>';
+    echo '<p class="description">' . esc_html__('Select which columns to display in the list view table.', 'used-cars-search') . '</p>';
+    echo '<div class="ucs-columns-grid">';
+    
+    $list_columns = array(
+        'title' => __('Title', 'used-cars-search'),
+        'price' => __('Price', 'used-cars-search'),
+        'mileage' => __('Mileage', 'used-cars-search'),
+        'engine' => __('Engine', 'used-cars-search'),
+        'transmission' => __('Transmission', 'used-cars-search'),
+        'categories' => __('Categories', 'used-cars-search'),
+        'date' => __('Date', 'used-cars-search'),
+        'rating' => __('Rating', 'used-cars-search'),
+        'comments' => __('Comments', 'used-cars-search'),
+        'actions' => __('Actions', 'used-cars-search')
+    );
+    
+    foreach ($list_columns as $key => $label) {
+        $checked = isset($enabled_columns[$key]) && $enabled_columns[$key] ? 'checked="checked"' : '';
+        echo '<div class="ucs-column-item">';
+        echo '<label>';
+        echo '<input type="checkbox" name="ucs_options[enabled_columns][' . esc_attr($key) . ']" value="1" ' . $checked . ' /> ';
+        echo esc_html($label);
+        echo '</label>';
+        echo '</div>';
+    }
+    
+    echo '</div>';
+    
+    echo '<h4 style="margin-top: 20px;">' . esc_html__('Grid View Fields', 'used-cars-search') . '</h4>';
+    echo '<p class="description">' . esc_html__('Select which fields to display in the grid view cards.', 'used-cars-search') . '</p>';
+    echo '<div class="ucs-columns-grid">';
+    
+    $grid_fields = array(
+        'year' => __('Year', 'used-cars-search'),
+        'make' => __('Make', 'used-cars-search'),
+        'model' => __('Model', 'used-cars-search'),
+        'trim' => __('Trim', 'used-cars-search'),
+        'price' => __('Price', 'used-cars-search'),
+        'mileage' => __('Mileage', 'used-cars-search'),
+        'engine' => __('Engine', 'used-cars-search'),
+        'transmission' => __('Transmission', 'used-cars-search'),
+        'rating' => __('Rating', 'used-cars-search'),
+        'comments' => __('Comments', 'used-cars-search')
+    );
+    
+    $enabled_grid_fields = isset($options['enabled_grid_fields']) ? $options['enabled_grid_fields'] : array(
+        'year' => true,
+        'make' => true,
+        'model' => true,
+        'trim' => true,
+        'price' => true,
+        'mileage' => true,
+        'engine' => true,
+        'transmission' => true,
+        'rating' => true,
+        'comments' => true
+    );
+    
+    foreach ($grid_fields as $key => $label) {
+        $checked = isset($enabled_grid_fields[$key]) && $enabled_grid_fields[$key] ? 'checked="checked"' : '';
+        echo '<div class="ucs-column-item">';
+        echo '<label>';
+        echo '<input type="checkbox" name="ucs_options[enabled_grid_fields][' . esc_attr($key) . ']" value="1" ' . $checked . ' /> ';
+        echo esc_html($label);
+        echo '</label>';
+        echo '</div>';
+    }
+    
+    echo '</div>';
+    echo '</div>';
+    
+    // Add some CSS for better styling
+    ?>
+    <style>
+    .ucs-column-management {
+        background: #f9f9f9;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+    .ucs-columns-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .ucs-column-item {
+        padding: 5px;
+        background: white;
+        border: 1px solid #e5e5e5;
+        border-radius: 3px;
+    }
+    .ucs-column-item label {
+        display: block;
+        cursor: pointer;
+        font-weight: normal;
+    }
+    .ucs-column-item input[type="checkbox"] {
+        margin-right: 8px;
+    }
+    </style>
+    <?php
 }
 
 /**
