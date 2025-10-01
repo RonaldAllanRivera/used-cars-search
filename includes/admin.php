@@ -49,6 +49,9 @@ function ucs_sanitize_options($input) {
         }
     }
     
+    // Car Details meta box visibility (checkbox not present means false)
+    $sanitized['enable_car_details'] = isset($input['enable_car_details']) && (string)$input['enable_car_details'] === '1';
+    
     // Sanitize column management settings
     if (isset($input['enabled_columns']) && is_array($input['enabled_columns'])) {
         $sanitized['enabled_columns'] = array();
@@ -102,6 +105,15 @@ function ucs_settings_init() {
         'ucs_settings_section'
     );
 
+    // Enable/Disable Car Details Meta Box
+    add_settings_field(
+        'ucs_enable_car_details',
+        'Car Details Meta Box',
+        'ucs_enable_car_details_callback',
+        'used-cars-search',
+        'ucs_settings_section'
+    );
+
     // Column Management Settings
     add_settings_field(
         'ucs_column_management',
@@ -141,6 +153,21 @@ function ucs_compare_page_id_callback() {
         }
         echo '</select>';
     }
+}
+
+/**
+ * Renders the enable/disable checkbox for the Car Details meta box.
+ *
+ * @since 1.6.12
+ */
+function ucs_enable_car_details_callback() {
+    $options = get_option('ucs_options');
+    $enabled = isset($options['enable_car_details']) ? (bool)$options['enable_car_details'] : true; // default: enabled
+    echo '<label>';
+    echo '<input type="checkbox" name="ucs_options[enable_car_details]" value="1" ' . checked($enabled, true, false) . ' /> ';
+    echo esc_html__('Show Car Details meta box on Add/Edit Post screens', 'used-cars-search');
+    echo '</label>';
+    echo '<p class="description">' . esc_html__('Uncheck to hide the Car Details meta box on the post editor.', 'used-cars-search') . '</p>';
 }
 
 /**
@@ -693,6 +720,13 @@ add_action('wp_ajax_ucs_ratings_list', function() {
  * @since 1.0.0
  */
 function ucs_add_car_details_meta_box() {
+        // Check plugin setting to determine whether to show the meta box
+        $options = get_option('ucs_options');
+        $enabled = isset($options['enable_car_details']) ? (bool)$options['enable_car_details'] : true; // default enabled
+        if (!$enabled) {
+            return; // Do not register the meta box when disabled
+        }
+
         add_meta_box(
             'ucs_car_details_meta_box',
             __('Car Details', 'used-cars-search'),

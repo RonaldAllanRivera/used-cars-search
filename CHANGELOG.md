@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.12] - 2025-10-01
+
+### Added
+- Plugin Setting: Toggle to enable/disable the “Car Details” meta box on Add/Edit Post screens.
+- Admin UI: Checkbox under Used Cars Search → Settings to control the meta box visibility.
+
+### Changed
+- Conditional meta box registration based on the new setting (default: enabled).
+- Sanitization: `ucs_sanitize_options()` now saves `enable_car_details` as a boolean.
+
+### Docs
+- Updated WordPress `readme.txt` with 1.6.12 changelog and stable tag bump.
+
 ## [1.6.11] - 2025-09-26
 
 ### Added
