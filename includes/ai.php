@@ -41,6 +41,35 @@ if (!function_exists('ucs_ai_sanitize_text')) {
     }
 }
 
+// Simple keyword extractor from plain text for SEO keywords fallback
+if (!function_exists('ucs_ai_extract_keywords_from_text')) {
+    /**
+     * Extract up to $limit simple keywords from given text.
+     * - Lowercases
+     * - Strips punctuation
+     * - Removes short words and common stopwords
+     * - Returns comma-separated keywords
+     */
+    function ucs_ai_extract_keywords_from_text($text, $limit = 6) {
+        $text = wp_strip_all_tags((string) $text);
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9\s]/', ' ', $text);
+        $words = preg_split('/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $stop = array('the','and','for','with','this','that','from','your','you','are','our','has','have','into','about','over','why','who','is','it','of','to','a','an','in','on','at','by','or','as','be','we','they','their','its','out','new');
+        $stop_map = array_fill_keys($stop, true);
+        $freq = array();
+        foreach ($words as $w) {
+            if (strlen($w) < 3) continue;
+            if (isset($stop_map[$w])) continue;
+            $freq[$w] = isset($freq[$w]) ? $freq[$w] + 1 : 1;
+        }
+        if (empty($freq)) return '';
+        arsort($freq);
+        $keywords = array_slice(array_keys($freq), 0, max(1, intval($limit)));
+        return implode(', ', $keywords);
+    }
+}
+
 if (!function_exists('ucs_ai_http_headers')) {
     function ucs_ai_http_headers($api_key) {
         return array(
@@ -195,19 +224,27 @@ if (!function_exists('ucs_ai_apply_changes_core')) {
             $seo_keywords_in = isset($payload['seo_keywords']) ? trim($payload['seo_keywords']) : '';
             $seo_keywords_raw = sanitize_text_field($seo_keywords_in);
             if ($seo_keywords_raw === '') {
-                // Build from Year/Make/Model/Trim meta
-                $year = get_post_meta($post_id, 'ucs_year', true);
-                $make = get_post_meta($post_id, 'ucs_make', true);
-                $model = get_post_meta($post_id, 'ucs_model', true);
-                $trimv = get_post_meta($post_id, 'ucs_trim', true);
-                $kw = array();
-                if ($year && $make && $model) { $kw[] = trim($year.' '.$make.' '.$model.($trimv?(' '.$trimv):'')); }
-                if ($make && $model) { $kw[] = $make.' '.$model; }
-                if ($make) { $kw[] = 'used '.$make; }
-                if ($model) { $kw[] = 'used '.$model; }
-                if ($make && $model) { $kw[] = $make.' '.$model.' for sale'; }
-                $kw = array_values(array_unique(array_filter($kw)));
-                $seo_keywords_raw = implode(', ', array_slice($kw, 0, 6));
+                // Respect plugin setting: if car details meta box is disabled, derive from title/content
+                $opts_general = get_option('ucs_options');
+                $car_details_enabled = !isset($opts_general['enable_car_details']) || (bool)$opts_general['enable_car_details'];
+                if ($car_details_enabled) {
+                    // Build from Year/Make/Model/Trim meta
+                    $year = get_post_meta($post_id, 'ucs_year', true);
+                    $make = get_post_meta($post_id, 'ucs_make', true);
+                    $model = get_post_meta($post_id, 'ucs_model', true);
+                    $trimv = get_post_meta($post_id, 'ucs_trim', true);
+                    $kw = array();
+                    if ($year && $make && $model) { $kw[] = trim($year.' '.$make.' '.$model.($trimv?(' '.$trimv):'')); }
+                    if ($make && $model) { $kw[] = $make.' '.$model; }
+                    if ($make) { $kw[] = 'used '.$make; }
+                    if ($model) { $kw[] = 'used '.$model; }
+                    if ($make && $model) { $kw[] = $make.' '.$model.' for sale'; }
+                    $kw = array_values(array_unique(array_filter($kw)));
+                    $seo_keywords_raw = implode(', ', array_slice($kw, 0, 6));
+                } else {
+                    $base_text = ($given_title !== '' ? $given_title : $current_title) . ' ' . ($given_content !== '' ? wp_strip_all_tags($given_content) : wp_strip_all_tags($current_content));
+                    $seo_keywords_raw = ucs_ai_extract_keywords_from_text($base_text, 6);
+                }
             }
             if ($seo_keywords_raw !== '') {
                 update_post_meta($post_id, '_ucs_seo_keywords', $seo_keywords_raw);
@@ -263,14 +300,20 @@ if (!function_exists('ucs_ai_generate_for_post_core')) {
 
         $fields = is_array($fields) ? $fields : array('title','content','seo_title','seo_description','seo_keywords');
 
-        $year = get_post_meta($post_id, 'ucs_year', true);
-        $make = get_post_meta($post_id, 'ucs_make', true);
-        $model = get_post_meta($post_id, 'ucs_model', true);
-        $trim = get_post_meta($post_id, 'ucs_trim', true);
-        $price = get_post_meta($post_id, 'ucs_price', true);
-        $mileage = get_post_meta($post_id, 'ucs_mileage', true);
-        $engine = get_post_meta($post_id, 'ucs_engine', true);
-        $trans = get_post_meta($post_id, 'ucs_transmission', true);
+        // Check plugin setting for car details usage
+        $opts_general = get_option('ucs_options');
+        $car_details_enabled = !isset($opts_general['enable_car_details']) || (bool)$opts_general['enable_car_details'];
+        // Allow developers to override per environment/post
+        $car_details_enabled = apply_filters('ucs_ai_car_details_enabled', $car_details_enabled, $post_id);
+
+        $year = $car_details_enabled ? get_post_meta($post_id, 'ucs_year', true) : '';
+        $make = $car_details_enabled ? get_post_meta($post_id, 'ucs_make', true) : '';
+        $model = $car_details_enabled ? get_post_meta($post_id, 'ucs_model', true) : '';
+        $trim = $car_details_enabled ? get_post_meta($post_id, 'ucs_trim', true) : '';
+        $price = $car_details_enabled ? get_post_meta($post_id, 'ucs_price', true) : '';
+        $mileage = $car_details_enabled ? get_post_meta($post_id, 'ucs_mileage', true) : '';
+        $engine = $car_details_enabled ? get_post_meta($post_id, 'ucs_engine', true) : '';
+        $trans = $car_details_enabled ? get_post_meta($post_id, 'ucs_transmission', true) : '';
 
         $details = array(
             'year' => $year, 'make' => $make, 'model' => $model, 'trim' => $trim,
@@ -282,15 +325,21 @@ if (!function_exists('ucs_ai_generate_for_post_core')) {
         $sub_enabled = !empty($opts_prompt['subheadline_enabled']);
         $homepage_url = !empty($opts_prompt['homepage_url']) ? $opts_prompt['homepage_url'] : 'https://everythingusedcars.com/';
 
-        $system_message = $sub_enabled
-            ? 'You are a senior conversion copywriter and expert automotive copywriter. Output STRICT JSON only with keys ["title","content","seo_title","seo_description","seo_keywords"]. Do not include code fences, backticks, or any commentary outside JSON. Style: natural, persuasive, accurate, and fact-consistent with provided details. Constraints: Title 60-70 chars; SEO title 55-60 chars; SEO description 150-160 chars; Content 700-1200 words. Content must use HTML ONLY (no Markdown). Required content structure inside the "content" HTML: (1) First line: an H2 sub-headline linked to the homepage, formatted as <h2><a href="' . $homepage_url . '">{SUBHEADLINE}</a></h2>, where {SUBHEADLINE} is a dynamic, conversion-focused phrase derived from the generated "title" and the vehicle\'s primary value props. Requirements for {SUBHEADLINE}: 6–12 words; readable Title Case; no emojis; avoid boilerplate; do not duplicate the title verbatim; optionally include one benefit keyword (e.g., price, low mileage, fuel efficiency, reliability, warranty, financing). (2) Immediately after, include one introductory paragraph that frames the vehicle value (you may bold the vehicle name using <strong>Year Make Model Trim</strong>). (3) Use <h2> sections with these exact headings: "Vehicle Overview", "Why It Stands Out", "Who It Is For", "Performance & Efficiency", "Ownership & Reliability". (4) Add an <h3>"Frequently Asked Questions"</h3> section that contains a <ul> with 4–5 <li> items; each item starts with <strong>Question</strong> followed by the concise answer text in the same <li>. (5) Add an <h3>"Summary"</h3> section with a concise closing paragraph. (6) End the content with 6–12 lines of hashtags, each on its own line, starting with # (e.g., #UsedCars). Do NOT include any labels like "Keywords:", "Hashtags:", or counts like "TitleChars:" or "ContentWords:". If a field is unknown, omit it gracefully; never fabricate unavailable specs. Return only valid JSON.'
-            : 'You are a senior conversion copywriter and expert automotive copywriter. Output STRICT JSON only with keys ["title","content","seo_title","seo_description","seo_keywords"]. Do not include code fences, backticks, or any commentary outside JSON. Style: natural, persuasive, accurate, and fact-consistent with provided details. Constraints: Title 60-70 chars; SEO title 55-60 chars; SEO description 150-160 chars; Content 700-1200 words. Content must use HTML ONLY (no Markdown). Required content structure inside the "content" HTML: (1) Start with one introductory paragraph that frames the vehicle value (you may bold the vehicle name using <strong>Year Make Model Trim</strong>). (2) Use <h2> sections with these exact headings: "Vehicle Overview", "Why It Stands Out", "Who It Is For", "Performance & Efficiency", "Ownership & Reliability". (3) Add an <h3>"Frequently Asked Questions"</h3> section that contains a <ul> with 4–5 <li> items; each item starts with <strong>Question</strong> followed by the concise answer text in the same <li>. (4) Add an <h3>"Summary"</h3> section with a concise closing paragraph. (5) End the content with 6–12 lines of hashtags, each on its own line, starting with # (e.g., #UsedCars). Do NOT include any labels like "Keywords:", "Hashtags:", or counts like "TitleChars:" or "ContentWords:". If a field is unknown, omit it gracefully; never fabricate unavailable specs. Return only valid JSON.';
+        if ($car_details_enabled) {
+            $system_message = $sub_enabled
+                ? 'You are a senior conversion copywriter and expert automotive copywriter. Output STRICT JSON only with keys ["title","content","seo_title","seo_description","seo_keywords"]. Do not include code fences, backticks, or any commentary outside JSON. Style: natural, persuasive, accurate, and fact-consistent with provided details. Constraints: Title 60-70 chars; SEO title 55-60 chars; SEO description 150-160 chars; Content 700-1200 words. Content must use HTML ONLY (no Markdown). Required content structure inside the "content" HTML: (1) First line: an H2 sub-headline linked to the homepage, formatted as <h2><a href="' . $homepage_url . '">{SUBHEADLINE}</a></h2>, where {SUBHEADLINE} is a dynamic, conversion-focused phrase derived from the generated "title" and the vehicle\'s primary value props. Requirements for {SUBHEADLINE}: 6–12 words; readable Title Case; no emojis; avoid boilerplate; do not duplicate the title verbatim; optionally include one benefit keyword (e.g., price, low mileage, fuel efficiency, reliability, warranty, financing). (2) Immediately after, include one introductory paragraph that frames the vehicle value (you may bold the vehicle name using <strong>Year Make Model Trim</strong>). (3) Use <h2> sections with these exact headings: "Vehicle Overview", "Why It Stands Out", "Who It Is For", "Performance & Efficiency", "Ownership & Reliability". (4) Add an <h3>"Frequently Asked Questions"</h3> section that contains a <ul> with 4–5 <li> items; each item starts with <strong>Question</strong> followed by the concise answer text in the same <li>. (5) Add an <h3>"Summary"</h3> section with a concise closing paragraph. (6) End the content with 6–12 lines of hashtags, each on its own line, starting with # (e.g., #UsedCars). Do NOT include any labels like "Keywords:", "Hashtags:", or counts like "TitleChars:" or "ContentWords:". If a field is unknown, omit it gracefully; never fabricate unavailable specs. Return only valid JSON.'
+                : 'You are a senior conversion copywriter and expert automotive copywriter. Output STRICT JSON only with keys ["title","content","seo_title","seo_description","seo_keywords"]. Do not include code fences, backticks, or any commentary outside JSON. Style: natural, persuasive, accurate, and fact-consistent with provided details. Constraints: Title 60-70 chars; SEO title 55-60 chars; SEO description 150-160 chars; Content 700-1200 words. Content must use HTML ONLY (no Markdown). Required content structure inside the "content" HTML: (1) Start with one introductory paragraph that frames the vehicle value (you may bold the vehicle name using <strong>Year Make Model Trim</strong>). (2) Use <h2> sections with these exact headings: "Vehicle Overview", "Why It Stands Out", "Who It Is For", "Performance & Efficiency", "Ownership & Reliability". (3) Add an <h3>"Frequently Asked Questions"</h3> section that contains a <ul> with 4–5 <li> items; each item starts with <strong>Question</strong> followed by the concise answer text in the same <li>. (4) Add an <h3>"Summary"</h3> section with a concise closing paragraph. (5) End the content with 6–12 lines of hashtags, each on its own line, starting with # (e.g., #UsedCars). Do NOT include any labels like "Keywords:", "Hashtags:", or counts like "TitleChars:" or "ContentWords:". If a field is unknown, omit it gracefully; never fabricate unavailable specs. Return only valid JSON.';
+        } else {
+            $system_message = $sub_enabled
+                ? 'You are a senior conversion copywriter. Output STRICT JSON only with keys ["title","content","seo_title","seo_description","seo_keywords"]. Do not include code fences, backticks, or any commentary outside JSON. Style: natural, persuasive, accurate. Constraints: Title 60-70 chars; SEO title 55-60 chars; SEO description 150-160 chars; Content 700-1200 words. Content must use HTML ONLY (no Markdown). Required structure inside the "content" HTML: (1) First line: an H2 sub-headline linked to the homepage, formatted as <h2><a href="' . $homepage_url . '">{SUBHEADLINE}</a></h2>. (2) Immediately after, include one introductory paragraph based ONLY on the current post title and content excerpts; do not invent vehicle specifications. (3) Use <h2> sections with these exact headings: "Vehicle Overview", "Why It Stands Out", "Who It Is For", "Performance & Efficiency", "Ownership & Reliability". (4) Add an <h3>"Frequently Asked Questions"</h3> section that contains a <ul> with 4–5 <li> items; each item starts with <strong>Question</strong> followed by the concise answer text. (5) Add an <h3>"Summary"</h3> section with a concise closing paragraph. (6) End with 6–12 lines of hashtags, each on its own line, starting with #. Never fabricate unavailable specs; infer themes from title/content only. Return only valid JSON.'
+                : 'You are a senior conversion copywriter. Output STRICT JSON only with keys ["title","content","seo_title","seo_description","seo_keywords"]. Do not include code fences, backticks, or any commentary outside JSON. Style: natural, persuasive, accurate. Constraints: Title 60-70 chars; SEO title 55-60 chars; SEO description 150-160 chars; Content 700-1200 words. Content must use HTML ONLY (no Markdown). Required structure inside the "content" HTML: (1) Start with one introductory paragraph based ONLY on the current post title and content excerpts; do not invent vehicle specifications. (2) Use <h2> sections with these exact headings: "Vehicle Overview", "Why It Stands Out", "Who It Is For", "Performance & Efficiency", "Ownership & Reliability". (3) Add an <h3>"Frequently Asked Questions"</h3> section that contains a <ul> with 4–5 <li> items; each item starts with <strong>Question</strong> followed by the concise answer text. (4) Add an <h3>"Summary"</h3> section with a concise closing paragraph. (5) End with 6–12 lines of hashtags, each on its own line, starting with #. Never fabricate unavailable specs; infer themes from title/content only. Return only valid JSON.';
+        }
 
         $guidelines = array(
             'content_use_html_only_no_markdown',
             'faq_list_items_4_to_5_inline_q_and_answer',
             'hashtags_6_to_12_lines_each_prefixed_with_hash',
-            'keywords_include_year_make_model_trim_engine_transmission_price_mileage_if_available',
+            $car_details_enabled ? 'keywords_include_year_make_model_trim_engine_transmission_price_mileage_if_available' : 'keywords_infer_from_post_title_and_content',
             'avoid_fabricating_unavailable_specs'
         );
         if ($sub_enabled) {
@@ -369,14 +418,19 @@ if (!function_exists('ucs_ai_generate_for_post_core')) {
         }
         // 3) SEO Keywords from meta (Year/Make/Model/Trim)
         if (in_array('seo_keywords', $fields, true) && empty($out['seo_keywords'])) {
-            $kw = array();
-            if ($year && $make && $model) { $kw[] = trim($year.' '.$make.' '.$model.($trim?(' '.$trim):'')); }
-            if ($make && $model) { $kw[] = $make.' '.$model; }
-            if ($make) { $kw[] = 'used '.$make; }
-            if ($model) { $kw[] = 'used '.$model; }
-            if ($make && $model) { $kw[] = $make.' '.$model.' for sale'; }
-            $kw = array_values(array_unique(array_filter($kw)));
-            $out['seo_keywords'] = implode(', ', array_slice($kw, 0, 6));
+            if ($car_details_enabled) {
+                $kw = array();
+                if ($year && $make && $model) { $kw[] = trim($year.' '.$make.' '.$model.($trim?(' '.$trim):'')); }
+                if ($make && $model) { $kw[] = $make.' '.$model; }
+                if ($make) { $kw[] = 'used '.$make; }
+                if ($model) { $kw[] = 'used '.$model; }
+                if ($make && $model) { $kw[] = $make.' '.$model.' for sale'; }
+                $kw = array_values(array_unique(array_filter($kw)));
+                $out['seo_keywords'] = implode(', ', array_slice($kw, 0, 6));
+            } else {
+                $base_text = get_the_title($post_id) . ' ' . wp_strip_all_tags($out['content']);
+                $out['seo_keywords'] = ucs_ai_extract_keywords_from_text($base_text, 6);
+            }
         }
 
         return $out;

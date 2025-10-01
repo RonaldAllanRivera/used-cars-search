@@ -21,6 +21,7 @@ Key features:
 - Optional AI content generation and a background queue (WP‑Cron)
 - Elementor‑friendly output (shortcodes work inside widgets)
 - Column management: Admin can enable/disable specific columns in search results
+ - AI Assist respects the Car Details toggle: when disabled, AI uses only Post Title and Content and won’t invent specifications
 
 = Shortcodes =
 - [used_cars_search]
@@ -77,6 +78,7 @@ Post meta and content are preserved by default.
 - Added Plugin Setting to enable/disable the “Car Details” meta box on Add/Edit Post screens.
 - Conditional registration of the meta box based on the new setting (default: enabled).
 - Sanitization update: `enable_car_details` stored as boolean in `ucs_options`.
+ - AI Assist: When Car Details are disabled, generation uses only Post Title and Content; SEO keywords are derived from text. When enabled, AI may use Year/Make/Model/Trim/Price/Mileage/Engine/Transmission if present.
 
 = 1.6.11 =
 - Added Column Management: Admin can now enable/disable specific columns in the public search table for both Grid and List views.

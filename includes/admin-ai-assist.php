@@ -22,10 +22,15 @@ function ucs_ai_render_assist_box($post) {
     $meta = [];
     foreach ($fields as $f) { $meta[$f] = get_post_meta($post->ID, 'ucs_'.$f, true); }
     $opts = function_exists('ucs_ai_get_options') ? ucs_ai_get_options() : [];
+    $general_opts = get_option('ucs_options');
+    $car_details_enabled = !isset($general_opts['enable_car_details']) || (bool)$general_opts['enable_car_details'];
     $enabled = !empty($opts['enabled']);
     echo '<div style="font-size:13px;line-height:1.5">';
     if (!$enabled) {
         echo '<p>'.esc_html__('AI features are currently disabled. Enable them in Used Cars Search → AI Settings.', 'used-cars-search').'</p>';
+    }
+    if (!$car_details_enabled) {
+        echo '<p style="margin:6px 0 10px;color:#555;">'.esc_html__('Note: Car Details meta box is disabled. AI will infer details from Post Title and Content, and SEO Keywords will be derived from that text.', 'used-cars-search').'</p>';
     }
     echo '<p>'.esc_html__('Select fields to generate and click Generate. Review the suggestions and click Apply.', 'used-cars-search').'</p>';
     echo '<label><input type="checkbox" class="ucs-ai-field" value="title" checked> '.esc_html__('Post Title', 'used-cars-search').'</label><br>';
@@ -51,6 +56,7 @@ function ucs_ai_render_assist_box($post) {
         'nonce' => $nonce,
         'post_id' => $post->ID,
         'meta' => $meta,
+        'car_details_enabled' => $car_details_enabled,
     );
 ?>
 <script>
@@ -96,14 +102,29 @@ function ucs_ai_render_assist_box($post) {
                 seoDesc = text ? text.substring(0,160) : '';
             }
             if (!seoKeys) {
-                const m = ctx.meta||{};
-                const parts = [];
-                if (m.year && m.make && m.model) parts.push((m.year+' '+m.make+' '+m.model+' '+(m.trim||'')).trim());
-                if (m.make && m.model) parts.push(m.make+' '+m.model);
-                if (m.make) parts.push('used '+m.make);
-                if (m.model) parts.push('used '+m.model);
-                if (m.make && m.model) parts.push(m.make+' '+m.model+' for sale');
-                seoKeys = Array.from(new Set(parts.filter(Boolean))).slice(0,6).join(', ');
+                if (ctx.car_details_enabled) {
+                    const m = ctx.meta||{};
+                    const parts = [];
+                    if (m.year && m.make && m.model) parts.push((m.year+' '+m.make+' '+m.model+' '+(m.trim||'')).trim());
+                    if (m.make && m.model) parts.push(m.make+' '+m.model);
+                    if (m.make) parts.push('used '+m.make);
+                    if (m.model) parts.push('used '+m.model);
+                    if (m.make && m.model) parts.push(m.make+' '+m.model+' for sale');
+                    seoKeys = Array.from(new Set(parts.filter(Boolean))).slice(0,6).join(', ');
+                } else {
+                    // Derive simple keywords from title + content text
+                    const base = ((v.title||'') + ' ' + stripTags(v.content||''))
+                      .toLowerCase()
+                      .replace(/[^a-z0-9\s]/g,' ');
+                    const stop = new Set(['the','and','for','with','this','that','from','your','you','are','our','has','have','into','about','over','why','who','is','it','of','to','a','an','in','on','at','by','or','as','be','we','they','their','its','out','new']);
+                    const freq = {};
+                    base.split(/\s+/).forEach(w=>{
+                        if (!w || w.length<3 || stop.has(w)) return;
+                        freq[w] = (freq[w]||0)+1;
+                    });
+                    const top = Object.keys(freq).sort((a,b)=>freq[b]-freq[a]).slice(0,6);
+                    seoKeys = top.join(', ');
+                }
             }
             if (seoTitle) $('#ucs-ai-seo-title').value = seoTitle;
             if (seoDesc)  $('#ucs-ai-seo-description').value = seoDesc;

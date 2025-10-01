@@ -749,6 +749,13 @@ function ucs_render_car_details_meta_box($post) {
         // Security nonce
         wp_nonce_field('ucs_save_meta_box_data', 'ucs_meta_box_nonce');
 
+        // AI Assist behavior note
+        $settings_url = esc_url( admin_url('admin.php?page=ucs_admin') );
+        echo '<div class="notice notice-info" style="margin:8px 0 12px;padding:8px 12px;">';
+        echo '<p style="margin:0;"><strong>' . esc_html__('AI Assist', 'used-cars-search') . ':</strong> ' . esc_html__('When Car Details are enabled, AI may use Year, Make, Model, Trim, Price, Mileage, Engine, and Transmission to improve generated content and SEO keywords. Leaving fields empty will simply omit them.', 'used-cars-search') . '</p>';
+        echo '<p style="margin:6px 0 0;">' . sprintf( esc_html__('To disable Car Details for all posts, go to %s. When disabled, AI will rely only on the Post Title and Content and will not infer or fabricate vehicle specifications.', 'used-cars-search'), '<a href="' . $settings_url . '">' . esc_html__('Used Cars Search → Settings', 'used-cars-search') . '</a>' ) . '</p>';
+        echo '</div>';
+
         // Field data
         $fields = ['year', 'make', 'model', 'trim', 'price', 'mileage', 'engine', 'transmission'];
         $values = [];
